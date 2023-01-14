@@ -27,8 +27,8 @@ public final class Constants {
   public static class DriverStation {
     public static final int kDriverControllerPort = 0;
 
-    public static final double kDriveJoystickThreshold = 0.1;
-    public static final double kJoystickThreshold = 0.1;
+    public static final double kDriveJoystickThreshold = 0.2;
+    public static final double kJoystickThreshold = 0.2;
   }
 
   public static class Robot {
@@ -55,7 +55,7 @@ public final class Constants {
 
     // TODO measure this
     public static final double kWheelDiameter = 0.10033 * 81.0 / 84.213; /// meters, TODO measure
-    public static final double kTrackwidthMeters = 0.61595; // DONE Measure and set trackwidth
+    public static final double kTrackwidthMeters =  21.75 * 0.61595; // DONE Measure and set trackwidth
     public static final double kWheelbaseMeters = 0.61595; // DONE Measure and set wheelbase
 
     // Robot constants
