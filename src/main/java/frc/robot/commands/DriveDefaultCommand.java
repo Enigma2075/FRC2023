@@ -52,8 +52,11 @@ public class DriveDefaultCommand extends CommandBase {
     //Adjust inputs
     double throttle = Util.handleDeadband(-mThrottledSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
     double strafe = Util.handleDeadband(-mStrafeSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
-    double rot = Util.handleDeadband(mRotationSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    double rot = Util.handleDeadband(-mRotationSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
   
+
+    throttle = Math.signum(throttle) * throttle * throttle;
+    strafe = Math.signum(strafe) * strafe * strafe;
     rot = Math.signum(rot) * rot * rot;
     if (mRequestCrabModeSupplier.getAsBoolean() ) {//&&
             //(RobotState.getInstance().getMeasuredVelocity().norm() < 0.25)) {

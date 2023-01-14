@@ -11,12 +11,17 @@ import frc.robot.commands.DriveDefaultCommand;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Drive.DriveControlState;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.pathplanner.lib.server.PathPlannerServer;
+
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -38,6 +43,8 @@ public class RobotContainer {
   private final CommandXboxController mDriverController =
       new CommandXboxController(DriverStation.kDriverControllerPort);
 
+  private SendableChooser<Command> mAutoChooser;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Dirty swerve init hack step 1: WaitForNumBannerSensorsAction for cancoders to init
@@ -53,7 +60,15 @@ public class RobotContainer {
     mDrive = Drive.getInstance();
     mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x()));
 
+    PathPlannerServer.startServer(5811);
+    
     setSubsystems(mDrive);
+    
+    mAutoChooser = new SendableChooser<>();
+    mAutoChooser.setDefaultOption("Straight", Autos.straightTest(mDrive));
+    mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
+
+    SmartDashboard.putData(mAutoChooser);
 
     // Configure the trigger bindings
     configureBindings();
@@ -84,9 +99,7 @@ public class RobotContainer {
    * @return the command to run in autonomous
    */
   public Command getAutonomousCommand() {
-    return null;
-    // An example command will be run in autonomous
-    //return Autos.exampleAuto(m_exampleSubsystem);
+    return mAutoChooser.getSelected();
   }
 
   public void setSubsystems(Subsystem... allSubsystems) {
@@ -103,6 +116,13 @@ public class RobotContainer {
 
   public void stop() {
     mAllSubsystems.forEach(Subsystem::stop);
+  }
+
+  public void autonomousInit() {
+    mDrive.setControlState(DriveControlState.PATH_FOLLOWING);
+  }
+
+  public void teleopInit() {
   }
 
   public void outputTelemetry() {

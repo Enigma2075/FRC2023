@@ -183,10 +183,11 @@ public class Drive extends Subsystem {
     }
 
     public synchronized void resetWpiPose(edu.wpi.first.math.geometry.Pose2d pose) {
+        SmartDashboard.putString("pose", pose.toString());
         mOdometry.resetPosition(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions(), pose);
     }
 
-    public synchronized void setModuleStates(edu.wpi.first.math.kinematics.SwerveModuleState[] wpiSwerveModuleStates) {
+    public synchronized void setWpiModuleStates(edu.wpi.first.math.kinematics.SwerveModuleState[] wpiSwerveModuleStates) {
         SwerveModuleState[] moduleStates = new SwerveModuleState[mPeriodicIO.setpoint.mModuleStates.length];
         for(int i = 0; i < mPeriodicIO.setpoint.mModuleStates.length; i++) {
             moduleStates[i] = new SwerveModuleState(wpiSwerveModuleStates[i]);
@@ -348,6 +349,10 @@ public class Drive extends Subsystem {
         readModules();
     }
 
+    public void setControlState(DriveControlState state) {
+        mDriveControlState = state;
+    }
+
     private void updateDesiredStates() {
         if (mPeriodicIO.want_orient) return;
         // Set the des_states to account for robot traversing arc.
@@ -367,13 +372,14 @@ public class Drive extends Subsystem {
                 mOdometry.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
                 //setKinematicLimits(Constants.kFastKinematicLimits);
                 //updatePathFollower();
-                break;
+            break;
             case OPEN_LOOP:
             case VELOCITY_CONTROL:
+                updateDesiredStates();
             default:
                 break;
         }
-        //updateDesiredStates();
+        updateDesiredStates();
     }
 
     //TODO: OnStart();
@@ -417,16 +423,31 @@ public class Drive extends Subsystem {
 
     @Override
     public void outputTelemetry() {
+        edu.wpi.first.math.geometry.Pose2d pose = mOdometry.getPoseMeters();
+        SmartDashboard.putString("Wpi Odometry", String.format("X:%f, Y:%f, Rot:%f", 
+        pose.getX(), pose.getY(), pose.getRotation().getDegrees()));
+
+        SmartDashboard.putString("FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
+
         SmartDashboard.putString("Chassis Speeds", mPeriodicIO.des_chassis_speeds.toString());
-        SmartDashboard.putString("Gyro Angle Rot", getFieldRelativeGyroscopeRotation().toString());
+        SmartDashboard.putString("Gyro Rot", getFieldRelativeGyroscopeRotation().toString());
         //SmartDashboard.putString("Gyro Roll", getRoll().toString());
 
-        SmartDashboard.putNumber("Front Left Absolute Encoder Angle", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
-        SmartDashboard.putNumber("Front Right Absolute Encoder Angle", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
-        SmartDashboard.putNumber("Back Left Absolute Encoder Angle", mPeriodicIO.moduleAbsSteerAngleDeg[kBackLeftModuleIdx]);
-        SmartDashboard.putNumber("Back Right Absolute Encoder Angle", mPeriodicIO.moduleAbsSteerAngleDeg[kBackRightModuleIdx]);
+        SmartDashboard.putNumber("FL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
+        SmartDashboard.putNumber("FR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
+        SmartDashboard.putNumber("BL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackLeftModuleIdx]);
+        SmartDashboard.putNumber("BR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackRightModuleIdx]);
 
-        SmartDashboard.putString("Front Left State", mPeriodicIO.setpoint.mModuleStates[0].toString());
+        SmartDashboard.putNumber("FL Deg", mPeriodicIO.measured_states[kFrontLeftModuleIdx].angle.getDegrees());
+        SmartDashboard.putNumber("FR Deg", mPeriodicIO.measured_states[kFrontRightModuleIdx].angle.getDegrees());
+        SmartDashboard.putNumber("BL Deg", mPeriodicIO.measured_states[kBackLeftModuleIdx].angle.getDegrees());
+        SmartDashboard.putNumber("BR Deg", mPeriodicIO.measured_states[kBackRightModuleIdx].angle.getDegrees());
+
+        SmartDashboard.putString("FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
+        SmartDashboard.putString("FR State", mPeriodicIO.setpoint.mModuleStates[kFrontRightModuleIdx].toString());
+        SmartDashboard.putString("BL State", mPeriodicIO.setpoint.mModuleStates[kBackLeftModuleIdx].toString());
+        SmartDashboard.putString("BR State", mPeriodicIO.setpoint.mModuleStates[kBackRightModuleIdx].toString());
+        
         //SmartDashboard.putString("MAC", Constants.getMACAddress());
 
         //SmartDashboard.putString("Odometry", RobotStateEstimator.getInstance().getEstimatedPose().toString());
