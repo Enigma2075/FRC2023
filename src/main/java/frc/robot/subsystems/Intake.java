@@ -34,12 +34,12 @@ public class Intake extends SubsystemBase {
    *
    * @return a command
    */
-  public CommandBase RunCommad() {
+  public CommandBase IntakeCommand() {
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          topBarMotor.set(ControlMode.PercentOutput, .5);
-          bottomBarMotor.set(ControlMode.PercentOutput, .5);
+          topBarMotor.set(ControlMode.PercentOutput, .8);
+          bottomBarMotor.set(ControlMode.PercentOutput, .8);
         },
         () -> {
             topBarMotor.set(ControlMode.PercentOutput, 0);
@@ -47,7 +47,19 @@ public class Intake extends SubsystemBase {
         }
         );
   }
+  public CommandBase OuttakeCommand() {
 
+  return startEnd(
+    () -> {
+      topBarMotor.set(ControlMode.PercentOutput, -.8);
+      bottomBarMotor.set(ControlMode.PercentOutput, -.8);
+    },
+    () -> {
+        topBarMotor.set(ControlMode.PercentOutput, 0);
+        bottomBarMotor.set(ControlMode.PercentOutput, 0);
+    }
+    );
+}
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
