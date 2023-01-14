@@ -73,7 +73,7 @@ public class SwerveModuleState implements Comparable<SwerveModuleState> {
     @Override
     public String toString() {
         return String.format(
-                "SwerveModuleState(Speed: %.2f m/s, Angle: %s)", speedMetersPerSecond, angle);
+                "V: %.2f m/s, A: %s", speedMetersPerSecond, angle);
     }
 
     /**
@@ -98,7 +98,7 @@ public class SwerveModuleState implements Comparable<SwerveModuleState> {
     }
 
     public edu.wpi.first.math.kinematics.SwerveModulePosition asWpiSwerveModulePosition() {
-        return new edu.wpi.first.math.kinematics.SwerveModulePosition(speedMetersPerSecond, angle.asWpiRotation2d());
+        return new edu.wpi.first.math.kinematics.SwerveModulePosition(distanceMeters, angle.asWpiRotation2d());
     }
 }
 
