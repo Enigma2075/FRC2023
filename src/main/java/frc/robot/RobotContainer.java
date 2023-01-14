@@ -11,6 +11,7 @@ import frc.robot.commands.DriveDefaultCommand;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
+import frc.robot.subsystems.Intake;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -33,6 +35,7 @@ public class RobotContainer {
     
   private final Cancoders mCancoders;
   private final Drive mDrive;
+  private final Intake mIntake;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController mDriverController =
@@ -53,6 +56,7 @@ public class RobotContainer {
     mDrive = Drive.getInstance();
     mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x()));
 
+    mIntake = new Intake();
     setSubsystems(mDrive);
 
     // Configure the trigger bindings
@@ -76,6 +80,7 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
+    mDriverController.a().whileTrue(mIntake.RunCommad());
   }
 
   /**
