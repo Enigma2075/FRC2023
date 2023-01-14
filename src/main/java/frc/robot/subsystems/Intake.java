@@ -17,8 +17,8 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private final TalonSRX outerBarMotor = new TalonSRX(4);
-  private final TalonSRX InnerBarMotor = new TalonSRX(5);
+  private final TalonSRX topBarMotor = new TalonSRX(4);
+  private final TalonSRX bottomBarMotor = new TalonSRX(5);
   //  private final WPI_TalonFX intakePivotMotor = new WPI_TalonFX(0);
 
 
@@ -38,12 +38,12 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          outerBarMotor.set(ControlMode.PercentOutput, .5);
-          InnerBarMotor.set(ControlMode.PercentOutput, -.5);
+          topBarMotor.set(ControlMode.PercentOutput, .5);
+          bottomBarMotor.set(ControlMode.PercentOutput, .5);
         },
         () -> {
-            outerBarMotor.set(ControlMode.PercentOutput, 0);
-            InnerBarMotor.set(ControlMode.PercentOutput, 0);
+            topBarMotor.set(ControlMode.PercentOutput, 0);
+            bottomBarMotor.set(ControlMode.PercentOutput, 0);
         }
         );
   }
