@@ -21,6 +21,9 @@ public class Cancoders {
     private final CANCoder mBackLeft;
     private final CANCoder mBackRight;
 
+    private final CANCoder mShortArm;
+    private final CANCoder mLongArm;
+
     private final CanTsObserver mFrontRightObserver;
     private final CanTsObserver mFrontLeftObserver;
     private final CanTsObserver mBackLeftObserver;
