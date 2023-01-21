@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.led.TwinkleOffAnimation;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -30,6 +31,10 @@ public class ScoreArm extends SubsystemBase {
   private final double kStage1PositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kStage1Reduction;
   private final double kStage2PositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kStage2Reduction;
 
+  private Rotation2d mStage1Offset;
+  private Rotation2d mStage2Offset;
+
+
   public ScoreArm(){
     mStage2Motor = new CANSparkMax(Constants.Arm.kStage2Id, MotorType.kBrushless);
     mStage1LeftMotor = new CANSparkMax(Constants.Arm.kStage1RightId, MotorType.kBrushless);
@@ -37,12 +42,37 @@ public class ScoreArm extends SubsystemBase {
     
     mStage1Encoder = mStage1LeftMotor.getEncoder();
     mStage2Encoder = mStage2Motor.getEncoder();
+    
+    rezeroStage1Motor();
+    rezeroStage2Motor();
+  }
+  
+  
+  public Rotation2d getStage2CanCoderAngle() {
+    return Rotation2d.fromDegrees(Cancoders.getInstance().getArmStage2().getAbsolutePosition());
+}
+
+public Rotation2d getAdjustedStage2CanCoderAngle() {
+  return getStage2CanCoderAngle().rotateBy(Constants.Arm.kStage2Offset.inverse());
+}
+
+  public void rezeroStage2Motor() {
+    mStage2Offset = Rotation2d.fromRadians(mStage2Encoder.getPosition() * kStage2PositionCoefficient)
+            .rotateBy(getAdjustedStage2CanCoderAngle().inverse());
   }
 
-  
-  public void rezeroSteeringMotor() {
-    mNeoOffset = Rotation2d.fromRadians(mStage2Encoder.getPosition() * kStage2PositionCoefficient)
-            .rotateBy(getAdjustedCanCoderAngle().inverse());
+
+  public Rotation2d getStage1CanCoderAngle() {
+    return Rotation2d.fromDegrees(Cancoders.getInstance().getArmStage1().getAbsolutePosition());
+}
+
+public Rotation2d getAdjustedStage1CanCoderAngle() {
+  return getStage1CanCoderAngle().rotateBy(Constants.Arm.kStage1Offset.inverse());
+}
+
+  public void rezeroStage1Motor() {
+    mStage1Offset = Rotation2d.fromRadians(mStage1Encoder.getPosition() * kStage1PositionCoefficient)
+            .rotateBy(getAdjustedStage1CanCoderAngle().inverse());
   }
 //2 absolute cancoders
 //gear ratios? convert to degrees somehow

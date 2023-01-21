@@ -49,8 +49,10 @@ public final class Constants {
     public static final int kStage1RightId = 1;
     public static final int kStage1LeftId = 2;
     public static final CanDeviceId kStage1EncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
-
+    public static final Rotation2d kStage1Offset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
     public static final CanDeviceId kStage2EncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
+    public static final Rotation2d kStage2Offset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
+
     public static final int kStage2Id = 1;
 
   }
