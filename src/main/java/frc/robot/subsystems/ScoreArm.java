@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.sensors.CANCoder;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkMaxPIDController;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
@@ -31,6 +32,8 @@ public class ScoreArm extends SubsystemBase {
   private final double kStage1PositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kStage1Reduction;
   private final double kStage2PositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kStage2Reduction;
 
+  private final SparkMaxPIDController mStage1PidController;
+
   private Rotation2d mStage1Offset;
   private Rotation2d mStage2Offset;
 
@@ -43,6 +46,10 @@ public class ScoreArm extends SubsystemBase {
     mStage1Encoder = mStage1LeftMotor.getEncoder();
     mStage2Encoder = mStage2Motor.getEncoder();
     
+    mStage1PidController = mStage1LeftMotor.getPIDController();
+
+    //mStage1PidController.setReference
+
     rezeroStage1Motor();
     rezeroStage2Motor();
   }
