@@ -21,13 +21,16 @@ public class Cancoders {
     private final CANCoder mBackLeft;
     private final CANCoder mBackRight;
 
-    private final CANCoder mShortArm;
-    private final CANCoder mLongArm;
+    private final CANCoder mArmStage1;
+    private final CANCoder mArmStage2;
 
     private final CanTsObserver mFrontRightObserver;
     private final CanTsObserver mFrontLeftObserver;
     private final CanTsObserver mBackLeftObserver;
     private final CanTsObserver mBackRightObserver;
+
+    private final CanTsObserver mArmStage1Observer;
+    private final CanTsObserver mArmStage2Observer;
 
     private static final double kBootUpErrorAllowanceTime = 10.0;
 
@@ -103,10 +106,16 @@ public class Cancoders {
 
         mBackRight = build(Constants.Drive.kBackRightEncoderId);
         mBackRightObserver = new CanTsObserver(mBackRight);
+
+        mArmStage2 = build(Constants.Arm.kStage2EncoderId);
+        mArmStage2Observer = new CanTsObserver(mArmStage2);
+
+        mArmStage1 = build(Constants.Arm.kStage1EncoderId);
+        mArmStage1Observer = new CanTsObserver(mArmStage1);
     }
 
     public boolean allHaveBeenInitialized() {
-        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate();
+        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate() && mArmStage1Observer.hasUpdate() &&mArmStage2Observer.hasUpdate();
     }
 
     public CANCoder getFrontLeft() {
@@ -123,5 +132,13 @@ public class Cancoders {
 
     public CANCoder getBackRight() {
         return mBackRight;
+    }
+
+    public CANCoder getArmStage1() {
+        return mArmStage1;
+    }
+
+    public CANCoder getArmStage2() {
+        return mArmStage2;
     }
 }

@@ -45,6 +45,15 @@ public final class Constants {
     public static final String kCANivoreBusName = "canivore";
   }
 
+  public static class Arm{
+    public static final int kStage1RightId = 1;
+    public static final int kStage1LeftId = 2;
+    public static final CanDeviceId kStage1EncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
+
+    public static final CanDeviceId kStage2EncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
+    public static final int kStage2Id = 1;
+
+  }
   public static class Drive {
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
@@ -69,6 +78,9 @@ public final class Constants {
     //L2 Configuration
     public static final double kDriveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0); //TODO: need real values
     public static final double kSteerReduction = (14.0 / 50.0) * (10.0 / 60.0); //TODO: need real values
+
+    public static final double kStage1Reduction = 2075;
+    public static final double kStage2Reduction = 2075;
 
     
     // Measure the drivetrain's maximum velocity or calculate the theoretical.
