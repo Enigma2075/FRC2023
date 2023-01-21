@@ -11,22 +11,29 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.revrobotics.CANSparkMax;
 
+import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
+import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Intake extends SubsystemBase {
-  private final TalonSRX topBarMotor = new TalonSRX(4);
-  private final TalonSRX bottomBarMotor = new TalonSRX(5);
-  //  private final WPI_TalonFX intakePivotMotor = new WPI_TalonFX(0);
+  private final CANSparkMax topBarMotor;
+  private final CANSparkMax bottomBarMotor;
+
+
+  //  private final WPI_TalonFX intakePivotMotor = new newWPI_TalonFX(0);
 
 
 
 
   /** Creates a new ExampleSubsystem. */
   public Intake() {
-   
+    topBarMotor = new CANSparkMax(4, MotorType.kBrushless);
+    bottomBarMotor = new CANSparkMax(5, MotorType.kBrushless);
+
   }
 
   /**
