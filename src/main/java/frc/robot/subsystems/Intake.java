@@ -38,8 +38,8 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          topBarMotor.set(ControlMode.PercentOutput, .8);
-          bottomBarMotor.set(ControlMode.PercentOutput, .8);
+          topBarMotor.set(ControlMode.PercentOutput, .5);
+          bottomBarMotor.set(ControlMode.PercentOutput, -.5);
         },
         () -> {
             topBarMotor.set(ControlMode.PercentOutput, 0);
@@ -51,8 +51,8 @@ public class Intake extends SubsystemBase {
 
   return startEnd(
     () -> {
-      topBarMotor.set(ControlMode.PercentOutput, -.8);
-      bottomBarMotor.set(ControlMode.PercentOutput, -.8);
+      topBarMotor.set(ControlMode.PercentOutput, -.5);
+      bottomBarMotor.set(ControlMode.PercentOutput, .5);
     },
     () -> {
         topBarMotor.set(ControlMode.PercentOutput, 0);

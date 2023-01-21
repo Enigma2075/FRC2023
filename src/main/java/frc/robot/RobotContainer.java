@@ -71,6 +71,7 @@ public class RobotContainer {
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
+    mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
 
     SmartDashboard.putData(mAutoChooser);
 

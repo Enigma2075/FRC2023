@@ -379,7 +379,7 @@ public class Drive extends Subsystem {
             default:
                 break;
         }
-        updateDesiredStates();
+        //updateDesiredStates();
     }
 
     //TODO: OnStart();

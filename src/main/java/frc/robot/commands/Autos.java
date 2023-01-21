@@ -30,6 +30,12 @@ public final class Autos {
     return setupAuto("Spline Test", eventMap, drive);
   }
   
+  public static Command strafeTest(Drive drive) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+
+    return setupAuto("Strafe Test", eventMap, drive);
+  }
+  
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(4, 4));
     

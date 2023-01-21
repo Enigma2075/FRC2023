@@ -55,8 +55,8 @@ public final class Constants {
 
     // TODO measure this
     public static final double kWheelDiameter = 0.10033 * 81.0 / 84.213; /// meters, TODO measure
-    public static final double kTrackwidthMeters =  21.75 * 0.61595; // DONE Measure and set trackwidth
-    public static final double kWheelbaseMeters = 0.61595; // DONE Measure and set wheelbase
+    public static final double kTrackwidthMeters =  0.55245; // DONE Measure and set trackwidth
+    public static final double kWheelbaseMeters = 0.55245; // DONE Measure and set wheelbase
 
     // Robot constants
     //public static final double kMaxDriveAcceleration = 1867 * 0.8;   // m/s^2 tuned 2/18 practice bot
