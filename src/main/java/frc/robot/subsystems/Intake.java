@@ -12,8 +12,8 @@ import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
-import edu.wpi.first.wpilibj.drive.RobotDriveBase.MotorType;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -33,7 +33,6 @@ public class Intake extends SubsystemBase {
   public Intake() {
     topBarMotor = new CANSparkMax(4, MotorType.kBrushless);
     bottomBarMotor = new CANSparkMax(5, MotorType.kBrushless);
-
   }
 
   /**
@@ -45,12 +44,12 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          topBarMotor.set(ControlMode.PercentOutput, .5);
-          bottomBarMotor.set(ControlMode.PercentOutput, -.5);
+          topBarMotor.set(.8);
+          bottomBarMotor.set(-.8);
         },
         () -> {
-            topBarMotor.set(ControlMode.PercentOutput, 0);
-            bottomBarMotor.set(ControlMode.PercentOutput, 0);
+            topBarMotor.set(0);
+            bottomBarMotor.set(0);
         }
         );
   }
@@ -58,12 +57,12 @@ public class Intake extends SubsystemBase {
 
   return startEnd(
     () -> {
-      topBarMotor.set(ControlMode.PercentOutput, -.5);
-      bottomBarMotor.set(ControlMode.PercentOutput, .5);
+      topBarMotor.set(-.8);
+      bottomBarMotor.set(.8);
     },
     () -> {
-        topBarMotor.set(ControlMode.PercentOutput, 0);
-        bottomBarMotor.set(ControlMode.PercentOutput, 0);
+        topBarMotor.set(0);
+        bottomBarMotor.set(0);
     }
     );
 }
