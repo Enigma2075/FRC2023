@@ -6,8 +6,10 @@ package frc.robot;
 
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
+import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.ExampleSubsystem;
@@ -41,10 +43,13 @@ public class RobotContainer {
   private final Cancoders mCancoders;
   private final Drive mDrive;
   private final Intake mIntake;
+  private final Arm mArm;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController mDriverController =
       new CommandXboxController(DriverStation.kDriverControllerPort);
+  private final CommandXboxController mOperatorController = 
+      new CommandXboxController(DriverStation.kOperatorControllerPort);
 
   private SendableChooser<Command> mAutoChooser;
 
@@ -66,7 +71,10 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    setSubsystems(mDrive);
+    mArm = new Arm();
+    mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
+
+    setSubsystems(mDrive, mArm);
     
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Straight", Autos.straightTest(mDrive));

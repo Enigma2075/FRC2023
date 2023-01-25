@@ -21,16 +21,16 @@ public class Cancoders {
     private final CANCoder mBackLeft;
     private final CANCoder mBackRight;
 
-    private final CANCoder mArmStage1;
-    private final CANCoder mArmStage2;
+    //private final CANCoder mArmShoulder;
+    //private final CANCoder mArmElbow;
 
     private final CanTsObserver mFrontRightObserver;
     private final CanTsObserver mFrontLeftObserver;
     private final CanTsObserver mBackLeftObserver;
     private final CanTsObserver mBackRightObserver;
 
-    private final CanTsObserver mArmStage1Observer;
-    private final CanTsObserver mArmStage2Observer;
+    //private final CanTsObserver mArmShoulderObserver;
+    //private final CanTsObserver mArmElbowObserver;
 
     private static final double kBootUpErrorAllowanceTime = 10.0;
 
@@ -107,15 +107,16 @@ public class Cancoders {
         mBackRight = build(Constants.Drive.kBackRightEncoderId);
         mBackRightObserver = new CanTsObserver(mBackRight);
 
-        mArmStage2 = build(Constants.Arm.kStage2EncoderId);
-        mArmStage2Observer = new CanTsObserver(mArmStage2);
+//        mArmElbow = build(Constants.Arm.kElbowEncoderId);
+//        mArmElbowObserver = new CanTsObserver(mArmElbow);
 
-        mArmStage1 = build(Constants.Arm.kStage1EncoderId);
-        mArmStage1Observer = new CanTsObserver(mArmStage1);
+//        mArmShoulder = build(Constants.Arm.kShoulderEncoderId);
+//        mArmShoulderObserver = new CanTsObserver(mArmShoulder);
     }
 
     public boolean allHaveBeenInitialized() {
-        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate() && mArmStage1Observer.hasUpdate() &&mArmStage2Observer.hasUpdate();
+//        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate() && mArmShoulderObserver.hasUpdate() &&mArmElbowObserver.hasUpdate();
+        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate(); // && mArmShoulderObserver.hasUpdate() &&mArmElbowObserver.hasUpdate();
     }
 
     public CANCoder getFrontLeft() {
@@ -134,11 +135,11 @@ public class Cancoders {
         return mBackRight;
     }
 
-    public CANCoder getArmStage1() {
-        return mArmStage1;
-    }
+    // public CANCoder getArmShoulder() {
+    //     return mArmShoulder;
+    // }
 
-    public CANCoder getArmStage2() {
-        return mArmStage2;
-    }
+    // public CANCoder getArmElbow() {
+    //     return mArmElbow;
+    // }
 }
