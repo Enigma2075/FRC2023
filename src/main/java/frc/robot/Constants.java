@@ -50,13 +50,31 @@ public final class Constants {
     public static final int kShoulderRightId = 1;
     public static final int kShoulderLeftId = 2;
     public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
-    public static final Rotation2d kStage1Offset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(101.65) : Rotation2d.fromDegrees(283.62);
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kStage2Offset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
 
     public static final int kElbowId = 3;
 
+    public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 7.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
+    public static final double kElbowReduction = 2075;
+
+    public static final float kShoulderForwardLimitDeg = 35;// 35
+    public static final float kShoulderReverseLimitDeg = -65;
+
+    public static final double kShoulderMaxRPM = 5500.0 * .80;
+    public static final double kShoulderFF = 0;
+    public static final double kShoulderP = 0.0003;
+    public static final double kShoulderI = 0;
+    public static final double kShoulderD = 0;
+    public static final double kShoulderIz = 0;
+
+    public static final double kShoulderMaxVel = kShoulderMaxRPM;
+    public static final double kShoulderMinVel = 0;
+    public static final double kShoulderMaxAcc = 8000;
+    public static final double kShoulderAllowedErr = 0;
   }
+
   public static class Drive {
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
@@ -81,10 +99,6 @@ public final class Constants {
     //L2 Configuration
     public static final double kDriveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0); //TODO: need real values
     public static final double kSteerReduction = (14.0 / 50.0) * (10.0 / 60.0); //TODO: need real values
-
-    public static final double kShoulderReduction = 2075;
-    public static final double kElbowReduction = 2075;
-
     
     // Measure the drivetrain's maximum velocity or calculate the theoretical.
     //  The formula for calculating the theoretical maximum velocity is:

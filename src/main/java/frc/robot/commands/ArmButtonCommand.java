@@ -18,34 +18,34 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
 
 /** An example command that uses an example subsystem. */
-public class ArmManualCommand extends CommandBase {
+public class ArmButtonCommand extends CommandBase {
   private final Arm mArm;
-  private final DoubleSupplier mShoulderSupplier;
-  private final DoubleSupplier mElbowSupplier;
+  private final double mAngle;
   
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ArmManualCommand(Arm arm, DoubleSupplier shoulderSupplier, DoubleSupplier elbowSupplier) {
+  public ArmButtonCommand(Arm arm, double angle) {
     mArm = arm;
-    mShoulderSupplier = shoulderSupplier;
-    mElbowSupplier = elbowSupplier;
-  
+    mAngle = angle;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    System.out.println("TEST");
+    mArm.setShoulderAngle(mAngle);
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double elbow = Util.handleDeadband(-mElbowSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
-    double shoulder = Util.handleDeadband(-mShoulderSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    //double elbow = Util.handleDeadband(-mElbowSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    //double shoulder = Util.handleDeadband(-mShoulderSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     
     //mArm.setShoulderVelocity(shoulder);
     //mArm.setElbowVelocity(elbow);

@@ -7,7 +7,9 @@ package frc.robot.subsystems;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
+import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -21,42 +23,59 @@ public class Arm extends Subsystem {
   private final CANSparkMax mShoulderRightMotor;
   private final CANSparkMax mShoulderLeftMotor;
   private final RelativeEncoder mShoulderEncoder;
-  
+
   private final CANSparkMax mElbowMotor;
   private final RelativeEncoder mElbowEncoder;
 
-  private final double kShoulderPositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kShoulderReduction;
-  private final double kElbowPositionCoefficient = 2.0 * Math.PI / 42.0 * Constants.Drive.kElbowReduction;
+  private final double kShoulderPositionCoefficient = 2.0 * Math.PI / 1.0 * Constants.Arm.kShoulderReduction;
+  private final double kElbowPositionCoefficient = 2.0 * Math.PI / 1.0 * Constants.Arm.kElbowReduction;
 
   private final SparkMaxPIDController mShoulderPidController;
 
   private Rotation2d mShoulderOffset;
   private Rotation2d mElbowOffset;
 
-  public static class PeriodicIO {
-    double elbowAbs;
-    double shoulderAbs;
+  private float mShoulderForwardLimit;
+  private float mShoulderReverseLimit;
 
-    double elbowPos;
-    double shoulderRightPos;
-    double shoulderLeftPos;
+  public static class PeriodicIO {
+    // Shoulder
+    double shoulderRightRot;
+    double shoulderLeftRot;
+
+    double shoulderAbs;
+    double shoulderDeg;
+
+    double shoulderVel;
+    double shoulderTarget;
+    double shoulderAppliedOutput;
+
+    // Elbow
+    double elbowAbs;    
+    double elbowRot;
   }
 
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
-  public Arm(){
+  public Arm() {
     mShoulderLeftMotor = new CANSparkMax(Constants.Arm.kShoulderLeftId, MotorType.kBrushless);
     mShoulderRightMotor = new CANSparkMax(Constants.Arm.kShoulderRightId, MotorType.kBrushless);
-    
+
     mElbowMotor = new CANSparkMax(Constants.Arm.kElbowId, MotorType.kBrushless);
 
-    mElbowMotor.setIdleMode(IdleMode.kBrake);
-    
-    //277.7
+    mShoulderLeftMotor.restoreFactoryDefaults();
+    mShoulderRightMotor.restoreFactoryDefaults();
+    mElbowMotor.restoreFactoryDefaults();
+
+    mElbowMotor.setIdleMode(IdleMode.kCoast);
+
+    // 277.7
     //
 
     mShoulderLeftMotor.setIdleMode(IdleMode.kBrake);
     mShoulderRightMotor.setIdleMode(IdleMode.kBrake);
+
+    mShoulderLeftMotor.setInverted(true);
 
     mElbowMotor.setOpenLoopRampRate(0);
 
@@ -67,43 +86,80 @@ public class Arm extends Subsystem {
     mShoulderRightMotor.follow(mShoulderLeftMotor, true);
 
     mShoulderEncoder = mShoulderLeftMotor.getEncoder();
+    // mShoulderEncoder.setInverted(true);
+    // mElbowEncoder.
     mElbowEncoder = mElbowMotor.getEncoder();
+
+    mShoulderPidController = mShoulderLeftMotor.getPIDController();
+    mShoulderPidController.setFF(Constants.Arm.kShoulderFF, 0);
+    mShoulderPidController.setP(Constants.Arm.kShoulderP, 0);
+    mShoulderPidController.setI(Constants.Arm.kShoulderI, 0);
+    mShoulderPidController.setD(Constants.Arm.kShoulderD, 0);
+    mShoulderPidController.setIZone(Constants.Arm.kShoulderIz, 0);
     
-    //mShoulderPidController = mShoulderLeftMotor.getPIDController();
-    mShoulderPidController = null;
-    //mStage1PidController.setReference
+    mShoulderPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
+    mShoulderPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
+    mShoulderPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
+    mShoulderPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
 
-//    rezeroMotors();
+    // mStage1PidController.setReference
+
+    rezeroMotors();
+
+    mShoulderForwardLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderForwardLimitDeg);
+    mShoulderReverseLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderReverseLimitDeg);
+
+    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kForward, mShoulderForwardLimit);
+    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kReverse, mShoulderReverseLimit);
+    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
+    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
   }
-  
-  // public Rotation2d getShoulderCanCoderAngle() {
-  //   return Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
-  // }
 
-  // public Rotation2d getAdjustedShoulderCanCoderAngle() {
-  //   return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kStage1Offset.inverse());
-  // }
+  public Rotation2d getShoulderAngle() {
+    return Rotation2d.fromRadians(getUnclampedShoulderAngleRadians());
+  }
+
+  public double getUnclampedShoulderAngleRadians() {
+    return (mShoulderEncoder.getPosition() * kShoulderPositionCoefficient) - mShoulderOffset.getRadians();
+  }
+
+  public Rotation2d getShoulderCanCoderAngle() {
+    return Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
+  }
+
+  public Rotation2d getAdjustedShoulderCanCoderAngle() {
+    return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
+  }
 
   // public Rotation2d getElbowCanCoderAngle() {
-  //   return Rotation2d.fromDegrees(Cancoders.getInstance().getArmElbow().getAbsolutePosition());
+  // return
+  // Rotation2d.fromDegrees(Cancoders.getInstance().getArmElbow().getAbsolutePosition());
   // }
 
   // public Rotation2d getAdjustedElbowCanCoderAngle() {
-  //   return getElbowCanCoderAngle().rotateBy(Constants.Arm.kStage2Offset.inverse());
+  // return
+  // getElbowCanCoderAngle().rotateBy(Constants.Arm.kStage2Offset.inverse());
   // }
 
-  // public void rezeroMotors() {
-  //   mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() * kElbowPositionCoefficient)
-  //           .rotateBy(getAdjustedElbowCanCoderAngle().inverse());
+  public double calcShoulderPosFromAngle(double angle) {
+    return ((Math.toRadians(angle) + mShoulderOffset.getRadians()) / kShoulderPositionCoefficient);
+  }
 
-  //   mShoulderOffset = Rotation2d.fromRadians(mShoulderEncoder.getPosition() * kShoulderPositionCoefficient)
-  //           .rotateBy(getAdjustedShoulderCanCoderAngle().inverse());
-  // }
+  public void rezeroMotors() {
+    // mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() *
+    // kElbowPositionCoefficient)
+    // .rotateBy(getAdjustedElbowCanCoderAngle().inverse());
 
-  //2 absolute cancoders
-  //gear ratios? convert to degrees somehow
-  //so basically, virtual 4 bar, need to find out how things move/relationship between? linear equation, long is x short is y? 
-  //if one goes one way, other goes other way, if x is +, y is - and vice versa. with gear ratio+encoder, find angles, use triangles?
+    mShoulderOffset = Rotation2d.fromRadians(mShoulderEncoder.getPosition() * kShoulderPositionCoefficient)
+        .rotateBy(getAdjustedShoulderCanCoderAngle().inverse());
+  }
+
+  // 2 absolute cancoders
+  // gear ratios? convert to degrees somehow
+  // so basically, virtual 4 bar, need to find out how things move/relationship
+  // between? linear equation, long is x short is y?
+  // if one goes one way, other goes other way, if x is +, y is - and vice versa.
+  // with gear ratio+encoder, find angles, use triangles?
 
   /**
    * Example command factory method.
@@ -119,48 +175,55 @@ public class Arm extends Subsystem {
         });
   }
 
-
-  /* 
-private static ScoreArm mInstance = null;
-
-private final SwerveModule[] mModules;
-
-public static final int kLongArmIdx = 7;
-public static final int kShortArmIdx = 8;
-
-public static ScoreArm getInstance() {
-  if (mInstance == null) {
-      mInstance = new ScoreArm();
-  }
-  return mInstance;
-}
-
-private final ScoreArm[] mModules;
-
-  private ScoreArm() {
-    mModules = new ArmPart[2];
-
-    mModules[kLongArmIdx] = new ArmPart(
-        Constants.Drive.kFrontLeftDriveId,
-        Cancoders.getInstance().getFrontLeft()
-        );
-
-    mModules[kShortArmIdx] = new ArmPart(
-        Constants.Drive.kFrontRightDriveId,
-        Cancoders.getInstance().getFrontRight()
-        );
-  }
-*/
+  /*
+   * private static ScoreArm mInstance = null;
+   * 
+   * private final SwerveModule[] mModules;
+   * 
+   * public static final int kLongArmIdx = 7;
+   * public static final int kShortArmIdx = 8;
+   * 
+   * public static ScoreArm getInstance() {
+   * if (mInstance == null) {
+   * mInstance = new ScoreArm();
+   * }
+   * return mInstance;
+   * }
+   * 
+   * private final ScoreArm[] mModules;
+   * 
+   * private ScoreArm() {
+   * mModules = new ArmPart[2];
+   * 
+   * mModules[kLongArmIdx] = new ArmPart(
+   * Constants.Drive.kFrontLeftDriveId,
+   * Cancoders.getInstance().getFrontLeft()
+   * );
+   * 
+   * mModules[kShortArmIdx] = new ArmPart(
+   * Constants.Drive.kFrontRightDriveId,
+   * Cancoders.getInstance().getFrontRight()
+   * );
+   * }
+   */
   public void setElbowVelocity(double vel) {
     mElbowMotor.set(vel);
   }
 
   public void setShoulderVelocity(double vel) {
-    mShoulderLeftMotor.set(vel);
+    mPeriodicIO.shoulderTarget = vel * Constants.Arm.kShoulderMaxRPM;
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
+    //mShoulderLeftMotor.set(vel);
+  }
+
+  public void setShoulderAngle(double angle) {
+    mPeriodicIO.shoulderTarget = calcShoulderPosFromAngle(angle);
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion);
   }
 
   /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
+   * An example method querying a boolean state of the subsystem (for example, a
+   * digital sensor).
    *
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
@@ -171,10 +234,18 @@ private final ScoreArm[] mModules;
 
   @Override
   public synchronized void readPeriodicInputs() {
-    mPeriodicIO.shoulderRightPos = mShoulderRightMotor.getEncoder().getPosition();
-    mPeriodicIO.shoulderLeftPos = mShoulderLeftMotor.getEncoder().getPosition();
+    // Shoulder
+    mPeriodicIO.shoulderRightRot = mShoulderRightMotor.getEncoder().getPosition();
+    mPeriodicIO.shoulderLeftRot = mShoulderEncoder.getPosition();
 
-    mPeriodicIO.elbowPos = mElbowMotor.getEncoder().getPosition();
+    mPeriodicIO.shoulderDeg = getShoulderAngle().getDegrees();
+    mPeriodicIO.shoulderAbs = Cancoders.getInstance().getArmShoulder().getAbsolutePosition();
+
+    mPeriodicIO.shoulderVel = mShoulderEncoder.getVelocity();
+    mPeriodicIO.shoulderAppliedOutput = mShoulderLeftMotor.getAppliedOutput();
+
+    // Elbow
+    mPeriodicIO.elbowRot = mElbowMotor.getEncoder().getPosition();
   }
 
   @Override
@@ -203,11 +274,19 @@ private final ScoreArm[] mModules;
 
   @Override
   public void outputTelemetry() {
-    //SmartDashboard.putNumber("S Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
-    //SmartDashboard.putNumber("E Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
+    SmartDashboard.putNumber("S F-Lim", mShoulderForwardLimit);
+    SmartDashboard.putNumber("S R-Lim", mShoulderReverseLimit);
     
-    SmartDashboard.putNumber("S-R Deg", mPeriodicIO.shoulderRightPos);
-    SmartDashboard.putNumber("S-L Deg", mPeriodicIO.shoulderLeftPos);
-    SmartDashboard.putNumber("E Deg", mPeriodicIO.elbowPos);
+    SmartDashboard.putNumber("S AV", mPeriodicIO.shoulderAppliedOutput);
+    SmartDashboard.putNumber("S Vel", mPeriodicIO.shoulderVel);
+    SmartDashboard.putNumber("S Vel-T", mPeriodicIO.shoulderTarget);
+    SmartDashboard.putNumber("S Abs Deg", mPeriodicIO.shoulderAbs);
+    // SmartDashboard.putNumber("E Abs Deg",
+    // mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
+
+    SmartDashboard.putNumber("S Deg", mPeriodicIO.shoulderDeg);
+    SmartDashboard.putNumber("S-R Rot", mPeriodicIO.shoulderRightRot);
+    SmartDashboard.putNumber("S-L Rot", mPeriodicIO.shoulderLeftRot);
+    SmartDashboard.putNumber("E Rot", mPeriodicIO.elbowRot);
   }
 }

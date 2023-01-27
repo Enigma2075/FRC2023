@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
+import frc.robot.commands.ArmButtonCommand;
 import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
@@ -72,7 +73,7 @@ public class RobotContainer {
     
     mIntake = new Intake();
     mArm = new Arm();
-    mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
+    //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
     setSubsystems(mDrive, mArm);
     
@@ -103,8 +104,11 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
-    mDriverController.a().whileTrue(mIntake.IntakeCommand());
-    mDriverController.b().whileTrue(mIntake.OuttakeCommand());
+    //mDriverController.a().whileTrue(mIntake.IntakeCommand());
+    //mDriverController.b().whileTrue(mIntake.OuttakeCommand());
+    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, 20));
+    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -20));
+
   }
 
   /**

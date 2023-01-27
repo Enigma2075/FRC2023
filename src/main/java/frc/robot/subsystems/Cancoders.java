@@ -21,7 +21,7 @@ public class Cancoders {
     private final CANCoder mBackLeft;
     private final CANCoder mBackRight;
 
-    //private final CANCoder mArmShoulder;
+    private final CANCoder mArmShoulder;
     //private final CANCoder mArmElbow;
 
     private final CanTsObserver mFrontRightObserver;
@@ -29,7 +29,7 @@ public class Cancoders {
     private final CanTsObserver mBackLeftObserver;
     private final CanTsObserver mBackRightObserver;
 
-    //private final CanTsObserver mArmShoulderObserver;
+    private final CanTsObserver mArmShoulderObserver;
     //private final CanTsObserver mArmElbowObserver;
 
     private static final double kBootUpErrorAllowanceTime = 10.0;
@@ -67,13 +67,17 @@ public class Cancoders {
         return sInstance;
     }
 
-    private CANCoder build(CanDeviceId canDeviceId) {
+    private CANCoder build(CanDeviceId canDeviceId) { 
+        return build(canDeviceId, false); // Default to Counter-clockwise
+    }
+    
+    private CANCoder build(CanDeviceId canDeviceId, boolean sensorDirection) {
         CANCoder thisCancoder = new CANCoder(canDeviceId.getDeviceNumber(), canDeviceId.getBus());
         CANCoderConfiguration canCoderConfig = new CANCoderConfiguration();
         canCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
         canCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
         canCoderConfig.magnetOffsetDegrees = 0.0;
-        canCoderConfig.sensorDirection = false; // Counter-clockwise
+        canCoderConfig.sensorDirection = sensorDirection; // false = Counter-clockwise
 
         double startTime = Timer.getFPGATimestamp();
         boolean timedOut = false;
@@ -110,13 +114,13 @@ public class Cancoders {
 //        mArmElbow = build(Constants.Arm.kElbowEncoderId);
 //        mArmElbowObserver = new CanTsObserver(mArmElbow);
 
-//        mArmShoulder = build(Constants.Arm.kShoulderEncoderId);
-//        mArmShoulderObserver = new CanTsObserver(mArmShoulder);
+       mArmShoulder = build(Constants.Arm.kShoulderEncoderId, true);
+       mArmShoulderObserver = new CanTsObserver(mArmShoulder);
     }
 
     public boolean allHaveBeenInitialized() {
 //        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate() && mArmShoulderObserver.hasUpdate() &&mArmElbowObserver.hasUpdate();
-        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate(); // && mArmShoulderObserver.hasUpdate() &&mArmElbowObserver.hasUpdate();
+        return mFrontLeftObserver.hasUpdate() && mFrontRightObserver.hasUpdate() && mBackLeftObserver.hasUpdate() && mBackRightObserver.hasUpdate() && mArmShoulderObserver.hasUpdate(); // &&mArmElbowObserver.hasUpdate();
     }
 
     public CANCoder getFrontLeft() {
@@ -135,9 +139,9 @@ public class Cancoders {
         return mBackRight;
     }
 
-    // public CANCoder getArmShoulder() {
-    //     return mArmShoulder;
-    // }
+    public CANCoder getArmShoulder() {
+        return mArmShoulder;
+    }
 
     // public CANCoder getArmElbow() {
     //     return mArmElbow;
