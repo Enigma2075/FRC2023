@@ -106,9 +106,9 @@ public class RobotContainer {
     //m_driverController.b().whileTrue(m_exampleSubsystem.exampleMethodCommand());
     //mDriverController.a().whileTrue(mIntake.IntakeCommand());
     //mDriverController.b().whileTrue(mIntake.OuttakeCommand());
-    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, 20));
-    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -20));
-
+    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, 30));
+    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -40));
+    mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0));
   }
 
   /**
