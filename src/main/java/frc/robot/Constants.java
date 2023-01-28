@@ -25,8 +25,8 @@ import frc.lib.geometry.Translation2d;
  */
 public final class Constants {
   public static class DriverStation {
-    public static final int kDriverControllerPort = 1;
-    public static final int kOperatorControllerPort = 0;
+    public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
 
     public static final double kDriveJoystickThreshold = 0.2;
     public static final double kJoystickThreshold = 0.2;
@@ -58,9 +58,13 @@ public final class Constants {
     public static final float kShoulderForwardLimitDeg = 35;// 35
     public static final float kShoulderReverseLimitDeg = -65;
 
+    public static final double kShoulderMaxCos = Math.cos(Math.toRadians(90.0 - Math.abs(Constants.Arm.kShoulderReverseLimitDeg)));
+
+    public static final double kShoulderMaxArbFF = .02;
+
     public static final double kShoulderMaxRPM = 5500.0 * .90;
     public static final double kShoulderFF = 0;
-    public static final double kShoulderP = 0.0003;
+    public static final double kShoulderP = 0.00001;
     public static final double kShoulderI = 0;
     public static final double kShoulderD = 0;
     public static final double kShoulderIz = 0;
@@ -75,7 +79,9 @@ public final class Constants {
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
 
-    public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) ;
+    public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (1.0 / 2.0);
+
+    public static final double kElbowMaxArbFF = .0;
 
     public static final double kElbowMaxRPM = 5500.0 * .90;
     public static final double kElbowFF = 0;

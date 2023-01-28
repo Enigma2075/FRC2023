@@ -163,6 +163,12 @@ public class Arm extends Subsystem {
   //    getElbowCanCoderAngle().rotateBy(Constants.Arm.kStage2Offset.inverse());
   //}
 
+  public double calcShoulderArbFF() {
+    double cos = Math.cos(Math.toRadians(90.0 - Math.abs(mPeriodicIO.shoulderDeg)));
+    double scaleCos = cos / Constants.Arm.kShoulderMaxCos;
+    return scaleCos * Constants.Arm.kShoulderMaxArbFF * Math.signum(mPeriodicIO.shoulderDeg) * -1;
+  }
+
   public double calcShoulderPosFromAngle(double angle) {
     return ((Math.toRadians(angle) + mShoulderOffset.getRadians()) / kShoulderPositionCoefficient);
   }
@@ -208,12 +214,12 @@ public class Arm extends Subsystem {
 
   public void setShoulderVelocity(double vel) {
     mPeriodicIO.shoulderTarget = vel * Constants.Arm.kShoulderMaxRPM;
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity, 0, calcShoulderArbFF());
   }
 
   public void setShoulderAngle(double angle) {
     mPeriodicIO.shoulderTarget = calcShoulderPosFromAngle(angle);
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion);
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion, 0, calcShoulderArbFF());
   }
 
   /**
