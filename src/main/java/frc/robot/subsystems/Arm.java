@@ -31,6 +31,7 @@ public class Arm extends Subsystem {
   private final double kElbowPositionCoefficient = 2.0 * Math.PI / 1.0 * Constants.Arm.kElbowReduction;
 
   private final SparkMaxPIDController mShoulderPidController;
+  private final SparkMaxPIDController mElbowPidController;
 
   private Rotation2d mShoulderOffset;
   private Rotation2d mElbowOffset;
@@ -38,8 +39,9 @@ public class Arm extends Subsystem {
   private float mShoulderForwardLimit;
   private float mShoulderReverseLimit;
 
-  private float mElbowForwardLimit;
-  private float mElbowReverseLimit;
+  // TODO: need to figure out if we need/want these.
+  //private float mElbowForwardLimit;
+  //private float mElbowReverseLimit;
 
   private boolean mShoulderDebug = false;
   private boolean mElbowDebug = true;
@@ -69,38 +71,25 @@ public class Arm extends Subsystem {
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   public Arm() {
+    // Configure Shoulder motors
     mShoulderLeftMotor = new CANSparkMax(Constants.Arm.kShoulderLeftId, MotorType.kBrushless);
     mShoulderRightMotor = new CANSparkMax(Constants.Arm.kShoulderRightId, MotorType.kBrushless);
 
-    mElbowMotor = new CANSparkMax(Constants.Arm.kElbowId, MotorType.kBrushless);
-
     mShoulderLeftMotor.restoreFactoryDefaults();
     mShoulderRightMotor.restoreFactoryDefaults();
-    mElbowMotor.restoreFactoryDefaults();
-
-    mElbowMotor.setIdleMode(IdleMode.kCoast);
-
-    // 277.7
-    //
 
     mShoulderLeftMotor.setIdleMode(IdleMode.kBrake);
     mShoulderRightMotor.setIdleMode(IdleMode.kBrake);
 
     mShoulderLeftMotor.setInverted(true);
 
-    mElbowMotor.setOpenLoopRampRate(0);
-
     mShoulderLeftMotor.setOpenLoopRampRate(0);
     mShoulderRightMotor.setOpenLoopRampRate(0);
 
-    // Configure Shoulder motors
     mShoulderRightMotor.follow(mShoulderLeftMotor, true);
 
     mShoulderEncoder = mShoulderLeftMotor.getEncoder();
-    // mShoulderEncoder.setInverted(true);
-    // mElbowEncoder.
-    mElbowEncoder = mElbowMotor.getEncoder();
-
+    
     mShoulderPidController = mShoulderLeftMotor.getPIDController();
     mShoulderPidController.setFF(Constants.Arm.kShoulderFF, 0);
     mShoulderPidController.setP(Constants.Arm.kShoulderP, 0);
@@ -113,10 +102,32 @@ public class Arm extends Subsystem {
     mShoulderPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
     mShoulderPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
 
-    // mStage1PidController.setReference
+    // Configure Elbow motor
+    mElbowMotor = new CANSparkMax(Constants.Arm.kElbowId, MotorType.kBrushless);
+    mElbowMotor.restoreFactoryDefaults();
 
+    mElbowMotor.setIdleMode(IdleMode.kCoast);
+
+    mElbowMotor.setOpenLoopRampRate(0);
+
+    mElbowEncoder = mElbowMotor.getEncoder();
+
+    mElbowPidController = mShoulderLeftMotor.getPIDController();
+    // mElbowPidController.setFF(Constants.Arm.kShoulderFF, 0);
+    // mElbowPidController.setP(Constants.Arm.kShoulderP, 0);
+    // mElbowPidController.setI(Constants.Arm.kShoulderI, 0);
+    // mElbowPidController.setD(Constants.Arm.kShoulderD, 0);
+    // mElbowPidController.setIZone(Constants.Arm.kShoulderIz, 0);
+    
+    // mElbowPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
+    // mElbowPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
+    // mElbowPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
+    // mElbowPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
+
+    // Zero the motors
     rezeroMotors();
 
+    // We configure the should limits after it is zero so we have accurate values.
     mShoulderForwardLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderForwardLimitDeg);
     mShoulderReverseLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderReverseLimitDeg);
 
@@ -184,12 +195,13 @@ public class Arm extends Subsystem {
 
   public void setElbowVelocity(double vel) {
     mElbowMotor.set(vel);
+    //mPeriodicIO.elbowTarget = vel * Constants.Arm.kElbowMaxRPM;
+    mElbowPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
   }
 
   public void setShoulderVelocity(double vel) {
     mPeriodicIO.shoulderTarget = vel * Constants.Arm.kShoulderMaxRPM;
     mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
-    //mShoulderLeftMotor.set(vel);
   }
 
   public void setShoulderAngle(double angle) {

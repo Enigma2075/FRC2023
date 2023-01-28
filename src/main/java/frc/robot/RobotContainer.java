@@ -73,7 +73,7 @@ public class RobotContainer {
     
     mIntake = new Intake();
     mArm = new Arm();
-    //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
+    mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
     setSubsystems(mDrive, mArm);
     
