@@ -47,22 +47,18 @@ public final class Constants {
   }
 
   public static class Arm{
+    // Shoulder contants
     public static final int kShoulderRightId = 1;
     public static final int kShoulderLeftId = 2;
     public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
     public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(101.65) : Rotation2d.fromDegrees(283.62);
-    public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
-
-    public static final int kElbowId = 3;
 
     public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 7.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
-    public static final double kElbowReduction = 2075;
 
     public static final float kShoulderForwardLimitDeg = 35;// 35
     public static final float kShoulderReverseLimitDeg = -65;
 
-    public static final double kShoulderMaxRPM = 5500.0 * .80;
+    public static final double kShoulderMaxRPM = 5500.0 * .90;
     public static final double kShoulderFF = 0;
     public static final double kShoulderP = 0.0003;
     public static final double kShoulderI = 0;
@@ -73,6 +69,25 @@ public final class Constants {
     public static final double kShoulderMinVel = 0;
     public static final double kShoulderMaxAcc = 6000;
     public static final double kShoulderAllowedErr = 0;
+
+    // Elbow Constants
+    public static final int kElbowId = 3;
+    public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
+
+    public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) ;
+
+    public static final double kElbowMaxRPM = 5500.0 * .90;
+    public static final double kElbowFF = 0;
+    public static final double kElbowP = 0.00001;
+    public static final double kElbowI = 0;
+    public static final double kElbowD = 0;
+    public static final double kElbowIz = 0;
+
+    public static final double kElbowMaxVel = kShoulderMaxRPM;
+    public static final double kElbowMinVel = 0;
+    public static final double kElbowMaxAcc = 6000;
+    public static final double kElbowAllowedErr = 0;
   }
 
   public static class Drive {

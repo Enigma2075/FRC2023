@@ -47,8 +47,8 @@ public class ArmManualCommand extends CommandBase {
     double elbow = Util.handleDeadband(-mElbowSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     double shoulder = Util.handleDeadband(-mShoulderSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     
-    //mArm.setShoulderVelocity(shoulder);
-    mArm.setElbowVelocity(elbow);
+    //mArm.setShoulderOutput(shoulder);
+    mArm.setElbowOutput(elbow);
   }
 
   // Called once the command ends or is interrupted.
