@@ -113,16 +113,16 @@ public class Arm extends Subsystem {
     mElbowEncoder = mElbowMotor.getEncoder();
 
     mElbowPidController = mShoulderLeftMotor.getPIDController();
-    // mElbowPidController.setFF(Constants.Arm.kShoulderFF, 0);
-    // mElbowPidController.setP(Constants.Arm.kShoulderP, 0);
-    // mElbowPidController.setI(Constants.Arm.kShoulderI, 0);
-    // mElbowPidController.setD(Constants.Arm.kShoulderD, 0);
-    // mElbowPidController.setIZone(Constants.Arm.kShoulderIz, 0);
+    mElbowPidController.setFF(Constants.Arm.kElbowFF, 0);
+    mElbowPidController.setP(Constants.Arm.kElbowP, 0);
+    mElbowPidController.setI(Constants.Arm.kElbowI, 0);
+    mElbowPidController.setD(Constants.Arm.kElbowD, 0);
+    mElbowPidController.setIZone(Constants.Arm.kElbowIz, 0);
     
-    // mElbowPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
-    // mElbowPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
-    // mElbowPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
-    // mElbowPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
+    mElbowPidController.setSmartMotionMaxVelocity(Constants.Arm.kElbowMaxVel, 0);
+    mElbowPidController.setSmartMotionMaxAccel(Constants.Arm.kElbowMaxAcc, 0);
+    mElbowPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kElbowAllowedErr, 0);
+    mElbowPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kElbowMinVel, 0);
 
     // Zero the motors
     rezeroMotors();
@@ -193,10 +193,17 @@ public class Arm extends Subsystem {
         });
   }
 
+  public void setElbowOutput(double output) {
+    mElbowMotor.set(output);
+  }
+
   public void setElbowVelocity(double vel) {
-    mElbowMotor.set(vel);
-    //mPeriodicIO.elbowTarget = vel * Constants.Arm.kElbowMaxRPM;
+    mPeriodicIO.elbowTarget = vel * Constants.Arm.kElbowMaxRPM;
     mElbowPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
+  }
+
+  public void setShoulderOutput(double output) {
+    mShoulderLeftMotor.set(output);
   }
 
   public void setShoulderVelocity(double vel) {
