@@ -37,8 +37,8 @@ public class ArmButtonCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    System.out.println("TEST");
-    mArm.setShoulderAngle(mAngle);
+    mArm.setShoulderOutput(mAngle);
+    //mArm.setShoulderAngle(mAngle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -53,7 +53,9 @@ public class ArmButtonCommand extends CommandBase {
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    mArm.setShoulderOutput(0);
+  }
 
   // Returns true when the command should end.
   @Override

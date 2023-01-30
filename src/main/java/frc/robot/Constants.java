@@ -25,8 +25,8 @@ import frc.lib.geometry.Translation2d;
  */
 public final class Constants {
   public static class DriverStation {
-    public static final int kDriverControllerPort = 0;
-    public static final int kOperatorControllerPort = 1;
+    public static final int kDriverControllerPort = 1;
+    public static final int kOperatorControllerPort = 0;
 
     public static final double kDriveJoystickThreshold = 0.2;
     public static final double kJoystickThreshold = 0.2;
