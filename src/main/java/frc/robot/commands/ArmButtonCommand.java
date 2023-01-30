@@ -37,13 +37,15 @@ public class ArmButtonCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    mArm.setShoulderOutput(mAngle);
     //mArm.setShoulderAngle(mAngle);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double output = mArm.calcShoulderArbFF();
+    mArm.setShoulderOutput(output);
+  
     //double elbow = Util.handleDeadband(-mElbowSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     //double shoulder = Util.handleDeadband(-mShoulderSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     
