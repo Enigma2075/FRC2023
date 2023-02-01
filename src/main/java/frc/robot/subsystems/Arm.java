@@ -43,8 +43,8 @@ public class Arm extends Subsystem {
   //private float mElbowForwardLimit;
   //private float mElbowReverseLimit;
 
-  private boolean mShoulderDebug = false;
-  private boolean mElbowDebug = true;
+  private boolean mShoulderDebug = true;
+  private boolean mElbowDebug = false;
 
   public static class PeriodicIO {
     // Shoulder

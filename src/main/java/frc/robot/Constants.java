@@ -60,7 +60,7 @@ public final class Constants {
 
     public static final double kShoulderMaxCos = Math.cos(Math.toRadians(90.0 - Math.abs(Constants.Arm.kShoulderReverseLimitDeg)));
 
-    public static final double kShoulderMaxArbFF = .02;
+    public static final double kShoulderMaxArbFF = .16;
 
     public static final double kShoulderMaxRPM = 5500.0 * .90;
     public static final double kShoulderFF = 0;
@@ -81,7 +81,7 @@ public final class Constants {
 
     public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (1.0 / 2.0);
 
-    public static final double kElbowMaxArbFF = .0;
+    public static final double kElbowMaxArbFF = 0;
 
     public static final double kElbowMaxRPM = 5500.0 * .90;
     public static final double kElbowFF = 0;
