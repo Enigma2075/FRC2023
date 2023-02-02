@@ -11,6 +11,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -97,6 +98,8 @@ public class Arm extends Subsystem {
     mShoulderPidController.setD(Constants.Arm.kShoulderD, 0);
     mShoulderPidController.setIZone(Constants.Arm.kShoulderIz, 0);
     
+    mShoulderPidController.setOutputRange(-1, 1);
+
     mShoulderPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
     mShoulderPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
     mShoulderPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
@@ -214,12 +217,12 @@ public class Arm extends Subsystem {
 
   public void setShoulderVelocity(double vel) {
     mPeriodicIO.shoulderTarget = vel * Constants.Arm.kShoulderMaxRPM;
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity, 0, calcShoulderArbFF());
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity, 0/* , calcShoulderArbFF(), ArbFFUnits.kPercentOut*/);
   }
 
   public void setShoulderAngle(double angle) {
     mPeriodicIO.shoulderTarget = calcShoulderPosFromAngle(angle);
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion, 0, calcShoulderArbFF());
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion, 0, calcShoulderArbFF(), ArbFFUnits.kPercentOut);
   }
 
   /**
