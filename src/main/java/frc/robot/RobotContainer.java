@@ -107,7 +107,7 @@ public class RobotContainer {
     //mDriverController.a().whileTrue(mIntake.IntakeCommand());
     //mDriverController.b().whileTrue(mIntake.OuttakeCommand());
     
-    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, mArm.calcShoulderArbFF())); //angle 0.16 works?
+    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm,mArm.calcShoulderArbFF() )); //angle 0.16 works?
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, mArm.calcElbowArbFF()));
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -40));
     //mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0));
