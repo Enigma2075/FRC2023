@@ -44,7 +44,7 @@ public class ArmButtonCommand extends CommandBase {
   @Override
   public void execute() {
     double output = mArm.calcShoulderArbFF();
-    mArm.setShoulderOutput(mAngle);
+    mArm.setShoulderOutput(output);
   
     //double elbow = Util.handleDeadband(-mElbowSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     //double shoulder = Util.handleDeadband(-mShoulderSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);

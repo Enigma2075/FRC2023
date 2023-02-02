@@ -78,8 +78,8 @@ public class Arm extends Subsystem {
     mShoulderLeftMotor.restoreFactoryDefaults();
     mShoulderRightMotor.restoreFactoryDefaults();
 
-    mShoulderLeftMotor.setIdleMode(IdleMode.kBrake);
-    mShoulderRightMotor.setIdleMode(IdleMode.kBrake);
+    mShoulderLeftMotor.setIdleMode(IdleMode.kCoast);
+    mShoulderRightMotor.setIdleMode(IdleMode.kCoast);
 
     mShoulderLeftMotor.setInverted(true);
 
@@ -295,6 +295,7 @@ public class Arm extends Subsystem {
       SmartDashboard.putNumber("S Vel-T", mPeriodicIO.shoulderTarget);
       SmartDashboard.putNumber("S Abs Deg", mPeriodicIO.shoulderAbs);
       
+      SmartDashboard.putNumber("S Vel-Err", mPeriodicIO.shoulderTarget - mPeriodicIO.shoulderVel);
 
       SmartDashboard.putNumber("S Deg", mPeriodicIO.shoulderDeg);
       SmartDashboard.putNumber("S-R Rot", mPeriodicIO.shoulderRightRot);
