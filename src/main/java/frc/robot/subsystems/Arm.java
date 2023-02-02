@@ -115,7 +115,7 @@ public class Arm extends Subsystem {
 
     mElbowEncoder = mElbowMotor.getEncoder();
 
-    mElbowPidController = mShoulderLeftMotor.getPIDController();
+    mElbowPidController = mElbowMotor.getPIDController();
     mElbowPidController.setFF(Constants.Arm.kElbowFF, 0);
     mElbowPidController.setP(Constants.Arm.kElbowP, 0);
     mElbowPidController.setI(Constants.Arm.kElbowI, 0);
@@ -217,7 +217,7 @@ public class Arm extends Subsystem {
 
   public void setShoulderVelocity(double vel) {
     mPeriodicIO.shoulderTarget = vel * Constants.Arm.kShoulderMaxRPM;
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity, 0/* , calcShoulderArbFF(), ArbFFUnits.kPercentOut*/);
+    mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity, 0, calcShoulderArbFF(), ArbFFUnits.kPercentOut);
   }
 
   public void setShoulderAngle(double angle) {

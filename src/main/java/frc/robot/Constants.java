@@ -64,13 +64,13 @@ public final class Constants {
 
     public static final double kShoulderMaxRPM = 5500.0 * .90;
     public static final double kShoulderFF = 0;
-    public static final double kShoulderP = 0.2;
+    public static final double kShoulderP = 0.00005;
     public static final double kShoulderI = 0;
     public static final double kShoulderD = 0;
     public static final double kShoulderIz = 0;
 
 
-    
+
     public static final double kShoulderMaxVel = kShoulderMaxRPM;
     public static final double kShoulderMinVel = 0;
     public static final double kShoulderMaxAcc = 6000;
