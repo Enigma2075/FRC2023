@@ -111,6 +111,8 @@ public class RobotContainer {
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, mArm.calcElbowArbFF()));
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -40));
     //mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0));
+
+    //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, .1));
   }
 
   /**
