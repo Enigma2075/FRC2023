@@ -57,7 +57,6 @@ public final class Constants {
 
     public static final float kShoulderForwardLimitDeg = 35;// 35
     public static final float kShoulderReverseLimitDeg = -65;
-
     public static final double kShoulderMaxCos = Math.cos(Math.toRadians(90.0 - Math.abs(Constants.Arm.kShoulderReverseLimitDeg)));
 
     public static final double kShoulderMaxArbFF = .016;

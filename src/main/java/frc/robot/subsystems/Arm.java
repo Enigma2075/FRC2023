@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -24,6 +25,8 @@ public class Arm extends Subsystem {
   private final CANSparkMax mShoulderRightMotor;
   private final CANSparkMax mShoulderLeftMotor;
   private final RelativeEncoder mShoulderEncoder;
+
+  private final CANSparkMax mGrabberMotor;
 
   private final CANSparkMax mElbowMotor;
   private final RelativeEncoder mElbowEncoder;
@@ -128,6 +131,8 @@ public class Arm extends Subsystem {
     mElbowPidController.setSmartMotionMaxAccel(Constants.Arm.kElbowMaxAcc, 0);
     mElbowPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kElbowAllowedErr, 0);
     mElbowPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kElbowMinVel, 0);
+
+    mGrabberMotor = new CANSparkMax(9, MotorType.kBrushless);
 
     // Zero the motors
     rezeroMotors();
@@ -287,7 +292,11 @@ public class Arm extends Subsystem {
       mPeriodicIO.elbowAppliedOutput = mElbowMotor.getAppliedOutput();
     }
   }
-
+/* 
+  public CommandBase Grabber() {
+    mGrabberMotor.set(ControlMode.PercentOutput, .8);
+  }
+*/
   @Override
   public void periodic() {
 
@@ -337,8 +346,10 @@ public class Arm extends Subsystem {
       SmartDashboard.putNumber("E AV", mPeriodicIO.elbowAppliedOutput);
       SmartDashboard.putNumber("E Vel", mPeriodicIO.elbowVel);
       SmartDashboard.putNumber("E Vel-T", mPeriodicIO.elbowTarget);
-      SmartDashboard.putNumber("E Abs Deg", mPeriodicIO.elbowDeg);
-    
+      SmartDashboard.putNumber("E Abs Deg", mPeriodicIO.elbowAbs);
+      
+      SmartDashboard.putNumber("E Vel-Err", mPeriodicIO.elbowTarget - mPeriodicIO.elbowVel);
+
       SmartDashboard.putNumber("E Deg", mPeriodicIO.elbowDeg);
       SmartDashboard.putNumber("E Rot", mPeriodicIO.elbowRot);
     
