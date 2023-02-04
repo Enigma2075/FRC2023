@@ -73,7 +73,7 @@ public class RobotContainer {
     
     mIntake = new Intake();
     mArm = new Arm();
-   mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
+    mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
     setSubsystems(mDrive, mArm);
     
@@ -107,10 +107,10 @@ public class RobotContainer {
     //mDriverController.a().whileTrue(mIntake.IntakeCommand());
     //mDriverController.b().whileTrue(mIntake.OuttakeCommand());
     
-    mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, mArm.calcShoulderArbFF())); //angle 0.16 works?
+    //mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, mArm.calcShoulderArbFF())); //angle 0.16 works?
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, mArm.calcElbowArbFF()));
-    //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -40));
-    //mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0));
+    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
+    mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0, 0));
   }
 
   /**

@@ -44,8 +44,8 @@ public class Arm extends Subsystem {
   //private float mElbowForwardLimit;
   //private float mElbowReverseLimit;
 
-  private boolean mShoulderDebug = true;
-  private boolean mElbowDebug = false;
+  private boolean mShoulderDebug = false;
+  private boolean mElbowDebug = true;
 
   public static class PeriodicIO {
     // Shoulder
@@ -79,8 +79,8 @@ public class Arm extends Subsystem {
     mShoulderLeftMotor.restoreFactoryDefaults();
     mShoulderRightMotor.restoreFactoryDefaults();
 
-    mShoulderLeftMotor.setIdleMode(IdleMode.kCoast);
-    mShoulderRightMotor.setIdleMode(IdleMode.kCoast);
+    mShoulderLeftMotor.setIdleMode(IdleMode.kBrake);
+    mShoulderRightMotor.setIdleMode(IdleMode.kBrake);
 
     mShoulderLeftMotor.setInverted(true);
 
@@ -109,7 +109,9 @@ public class Arm extends Subsystem {
     mElbowMotor = new CANSparkMax(Constants.Arm.kElbowId, MotorType.kBrushless);
     mElbowMotor.restoreFactoryDefaults();
 
-    mElbowMotor.setIdleMode(IdleMode.kCoast);
+    mElbowMotor.setInverted(true);
+
+    mElbowMotor.setIdleMode(IdleMode.kBrake);
 
     mElbowMotor.setOpenLoopRampRate(0);
 
@@ -156,6 +158,14 @@ public class Arm extends Subsystem {
     return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
   }
 
+  public Rotation2d getElbowAngle() {
+    return Rotation2d.fromRadians(getUnclampedElbowAngleRadians());
+  }
+
+  public double getUnclampedElbowAngleRadians() {
+    return (mElbowEncoder.getPosition() * kElbowPositionCoefficient) - mElbowOffset.getRadians();
+  }
+
   //public Rotation2d getElbowCanCoderAngle() {
   //  return
   //    Rotation2d.fromDegrees(Cancoders.getInstance().getArmElbow().getAbsolutePosition());
@@ -176,13 +186,23 @@ public class Arm extends Subsystem {
     return ((Math.toRadians(angle) + mShoulderOffset.getRadians()) / kShoulderPositionCoefficient);
   }
 
+  public double calcElbowArbFF() {
+    double angle = mPeriodicIO.elbowDeg + (mPeriodicIO.shoulderDeg * - 1);
+    double cos = Math.cos(Math.toRadians(90 - Math.abs(angle)));
+    return cos * Constants.Arm.kElbowMaxArbFF * Math.signum(angle);
+  }
+
+  public double calcElbowPosFromAngle(double angle) {
+    return ((Math.toRadians(angle) + mElbowOffset.getRadians()) / kElbowPositionCoefficient);
+  }
+
   public void rezeroMotors() {
     // TODO: update this to work with a can coder so we are always starting at the right spot.
     // With this code we will ALWAYS have to have the Elbow inline with the Shoulder when the robot starts (restarting robot code should reset this)
     //mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() * kElbowPositionCoefficient)
     // .rotateBy(getAdjustedElbowCanCoderAngle().inverse());
     mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() * kElbowPositionCoefficient)
-     .rotateBy(Rotation2d.fromRadians(mElbowEncoder.getPosition() * kElbowPositionCoefficient).inverse());
+     ;
 
     mShoulderOffset = Rotation2d.fromRadians(mShoulderEncoder.getPosition() * kShoulderPositionCoefficient)
         .rotateBy(getAdjustedShoulderCanCoderAngle().inverse());
@@ -208,7 +228,12 @@ public class Arm extends Subsystem {
 
   public void setElbowVelocity(double vel) {
     mPeriodicIO.elbowTarget = vel * Constants.Arm.kElbowMaxRPM;
-    mElbowPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kVelocity);
+    mElbowPidController.setReference(mPeriodicIO.elbowTarget, ControlType.kVelocity, 0, calcElbowArbFF(), ArbFFUnits.kPercentOut);
+  }
+
+  public void setElbowAngle(double angle) {
+    mPeriodicIO.elbowTarget = calcElbowPosFromAngle(angle);
+    mElbowPidController.setReference(mPeriodicIO.elbowTarget, ControlType.kSmartMotion, 0, calcShoulderArbFF(), ArbFFUnits.kPercentOut);
   }
 
   public void setShoulderOutput(double output) {
@@ -240,11 +265,11 @@ public class Arm extends Subsystem {
   public synchronized void readPeriodicInputs() {
     // Shoulder
     mPeriodicIO.shoulderLeftRot = mShoulderEncoder.getPosition();
- 
+    mPeriodicIO.shoulderDeg = getShoulderAngle().getDegrees();
+      
     if(mShoulderDebug) {
       mPeriodicIO.shoulderRightRot = mShoulderRightMotor.getEncoder().getPosition();
       
-      mPeriodicIO.shoulderDeg = getShoulderAngle().getDegrees();
       mPeriodicIO.shoulderAbs = Cancoders.getInstance().getArmShoulder().getAbsolutePosition();
 
       mPeriodicIO.shoulderVel = mShoulderEncoder.getVelocity();
@@ -253,9 +278,9 @@ public class Arm extends Subsystem {
 
     // Elbow
     mPeriodicIO.elbowRot = mElbowEncoder.getPosition();
-
+    mPeriodicIO.elbowDeg = getElbowAngle().getDegrees();
+      
     if(mElbowDebug)  {
-      mPeriodicIO.elbowDeg = getShoulderAngle().getDegrees();
       //mPeriodicIO.elbowAbs = Cancoders.getInstance().getArmShoulder().getAbsolutePosition();
 
       mPeriodicIO.elbowVel = mElbowEncoder.getVelocity();
@@ -312,11 +337,12 @@ public class Arm extends Subsystem {
       SmartDashboard.putNumber("E AV", mPeriodicIO.elbowAppliedOutput);
       SmartDashboard.putNumber("E Vel", mPeriodicIO.elbowVel);
       SmartDashboard.putNumber("E Vel-T", mPeriodicIO.elbowTarget);
-      SmartDashboard.putNumber("E Abs Deg", mPeriodicIO.elbowAbs);
-      
-
+      SmartDashboard.putNumber("E Abs Deg", mPeriodicIO.elbowDeg);
+    
       SmartDashboard.putNumber("E Deg", mPeriodicIO.elbowDeg);
       SmartDashboard.putNumber("E Rot", mPeriodicIO.elbowRot);
+    
+      SmartDashboard.putNumber("E Rel Deg", mPeriodicIO.elbowDeg + (mPeriodicIO.shoulderDeg * -1 ));
     }
   }
 }
