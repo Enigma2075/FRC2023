@@ -1,6 +1,9 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
@@ -11,23 +14,71 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
+import com.ctre.phoenix.sensors.CANCoderConfiguration;
 
 import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
-public class Intake extends SubsystemBase {
-  private final TalonSRX topBarMotor = new TalonSRX(4);
-  private final TalonSRX bottomBarMotor = new TalonSRX(5);
-  //  private final WPI_TalonFX intakePivotMotor = new WPI_TalonFX(0);
-
-
-
+public class Intake extends SubsystemBase {//swhere you make it
+  private final TalonSRX intakeBarMotor;
+  private final TalonSRX pivotMotor;
+  //encoder
+  //position coefficient
+  //pid controller
+  //offset?
+  //forward and reverse limits
+  //debug
+  public Object pivotUp;
 
   /** Creates a new ExampleSubsystem. */
-  public Intake() {
-   
+  public Intake() {//where you set it
+    intakeBarMotor = new TalonSRX(4);
+    pivotMotor = new TalonSRX(5);
+
+    intakeBarMotor.configFactoryDefault();
+    pivotMotor.configFactoryDefault();
+
+    intakeBarMotor.setNeutralMode(NeutralMode.Coast);
+    pivotMotor.setNeutralMode(NeutralMode.Brake);
+
+    /*
+    mShoulderLeftMotor.setInverted(true);
+
+    mShoulderLeftMotor.setOpenLoopRampRate(0);
+    mShoulderRightMotor.setOpenLoopRampRate(0);
+
+    mShoulderEncoder = mShoulderLeftMotor.getEncoder();
+    
+    mShoulderPidController = mShoulderLeftMotor.getPIDController();
+    mShoulderPidController.setFF(Constants.Arm.kShoulderFF, 0);
+    mShoulderPidController.setP(Constants.Arm.kShoulderP, 0);
+    mShoulderPidController.setI(Constants.Arm.kShoulderI, 0);
+    mShoulderPidController.setD(Constants.Arm.kShoulderD, 0);
+    mShoulderPidController.setIZone(Constants.Arm.kShoulderIz, 0);
+    
+    mShoulderPidController.setOutputRange(-1, 1);
+
+    mShoulderPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
+    mShoulderPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
+    mShoulderPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
+    mShoulderPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
+
+    // Zero the motors
+    rezeroMotors();
+
+    // We configure the should limits after it is zero so we have accurate values.
+    mShoulderForwardLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderForwardLimitDeg);
+    mShoulderReverseLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderReverseLimitDeg);
+
+    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kForward, mShoulderForwardLimit);
+    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kReverse, mShoulderReverseLimit);
+    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
+    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+    */
   }
+
 
   /**
    * Example command factory method.
@@ -38,12 +89,10 @@ public class Intake extends SubsystemBase {
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          topBarMotor.set(ControlMode.PercentOutput, .8);
-          bottomBarMotor.set(ControlMode.PercentOutput, .8);
+          intakeBarMotor.set(ControlMode.PercentOutput, .8);
         },
         () -> {
-            topBarMotor.set(ControlMode.PercentOutput, 0);
-            bottomBarMotor.set(ControlMode.PercentOutput, 0);
+            intakeBarMotor.set(ControlMode.PercentOutput, 0);
         }
         );
   }
@@ -51,15 +100,27 @@ public class Intake extends SubsystemBase {
 
   return startEnd(
     () -> {
-      topBarMotor.set(ControlMode.PercentOutput, -.8);
-      bottomBarMotor.set(ControlMode.PercentOutput, -.8);
+      intakeBarMotor.set(ControlMode.PercentOutput, -.8);
     },
     () -> {
-        topBarMotor.set(ControlMode.PercentOutput, 0);
-        bottomBarMotor.set(ControlMode.PercentOutput, 0);
+        intakeBarMotor.set(ControlMode.PercentOutput, 0);
     }
     );
-}
+  }
+
+  public CommandBase testPivot(DoubleSupplier outputSupplier) {
+    return runEnd(
+    () -> {
+      setOutput(outputSupplier.getAsDouble());
+    }, 
+    () -> {
+      setOutput(0);
+    }
+    );
+  }
+  public void setOutput(double output) {
+    pivotMotor.set(ControlMode.PercentOutput, output);
+  }
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -81,21 +142,3 @@ public class Intake extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 }
-
-
-
-
-
-
-
-
-
-//public class Intake {
-    //need one talon for the inner bar
-    //need one talon for outer bar
-    //need one for pivoting? later
-    //need button to make both spin ot pull in
-    //need to hold it?
-    //need button to spit it out
-    //need to give them can ids or whatever to connect them
-//}
