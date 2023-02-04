@@ -34,8 +34,8 @@ public class Intake extends SubsystemBase {//swhere you make it
 
   /** Creates a new ExampleSubsystem. */
   public Intake() {//where you set it
-    intakeBarMotor = new TalonSRX(4);
-    pivotMotor = new TalonSRX(5);
+    intakeBarMotor = new TalonSRX(9);
+    pivotMotor = new TalonSRX(10);
 
     intakeBarMotor.configFactoryDefault();
     pivotMotor.configFactoryDefault();
