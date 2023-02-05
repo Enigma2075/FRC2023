@@ -89,10 +89,41 @@ public final class Constants {
     public static final double kElbowD = 0;
     public static final double kElbowIz = 0;
 
-    public static final double kElbowMaxVel = kShoulderMaxRPM;
+    public static final double kElbowMaxVel = kElbowMaxRPM;
     public static final double kElbowMinVel = 0;
     public static final double kElbowMaxAcc = 6000;
     public static final double kElbowAllowedErr = 0;
+
+    // Hand Constants
+    public static final int kHandId = 4;
+  }
+
+  public static class Intake{
+    // Shoulder contants
+    public static final int kIntakeId = 1;
+
+    public static final int kPivotId = 2;
+    public static final CanDeviceId kPivotEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
+    public static final Rotation2d kPivotOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(101.65) : Rotation2d.fromDegrees(283.62);
+
+    public static final double kPivotReduction = (26.0 / 50.0); //277.7;
+
+    public static final float kPivotForwardLimitDeg = 35;// 35
+    public static final float kPivotReverseLimitDeg = -65;
+
+    public static final double kPivotMaxArbFF = .02;
+
+    public static final double kPivotMaxRPM = 5500.0 * .95;
+    public static final double kPivotFF = .90 / 5300.0;
+    public static final double kPivotP = 0.00005;
+    public static final double kPivotI = 0;
+    public static final double kPivotD = 0;
+    public static final double kPivotIz = 0;
+
+    public static final double kPivotMaxVel = kPivotMaxRPM;
+    public static final double kPivotMinVel = 0;
+    public static final double kPivotMaxAcc = 9000;
+    public static final double kPivotAllowedErr = 0;
   }
 
   public static class Drive {

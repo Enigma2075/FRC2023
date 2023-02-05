@@ -26,7 +26,7 @@ public class Arm extends Subsystem {
   private final CANSparkMax mShoulderLeftMotor;
   private final RelativeEncoder mShoulderEncoder;
 
-  private final CANSparkMax mGrabberMotor;
+  private final CANSparkMax mHandMotor;
 
   private final CANSparkMax mElbowMotor;
   private final RelativeEncoder mElbowEncoder;
@@ -42,6 +42,9 @@ public class Arm extends Subsystem {
 
   private float mShoulderForwardLimit;
   private float mShoulderReverseLimit;
+  
+  private float mElbowForwardLimit;
+  private float mElbowReverseLimit;
 
   // TODO: need to figure out if we need/want these.
   //private float mElbowForwardLimit;
@@ -132,7 +135,13 @@ public class Arm extends Subsystem {
     mElbowPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kElbowAllowedErr, 0);
     mElbowPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kElbowMinVel, 0);
 
-    mGrabberMotor = new CANSparkMax(9, MotorType.kBrushless);
+    // Configure Hand motor
+    mHandMotor = new CANSparkMax(Constants.Arm.kHandId, MotorType.kBrushless);
+    mHandMotor.restoreFactoryDefaults();
+
+    mHandMotor.setInverted(true);
+
+    mHandMotor.setIdleMode(IdleMode.kBrake);
 
     // Zero the motors
     rezeroMotors();
@@ -145,6 +154,14 @@ public class Arm extends Subsystem {
     mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kReverse, mShoulderReverseLimit);
     mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
     mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+
+    mElbowForwardLimit = (float)calcElbowPosFromAngle(150);
+    mElbowReverseLimit = (float)calcElbowPosFromAngle(0);
+
+    mElbowMotor.setSoftLimit(SoftLimitDirection.kForward, mElbowForwardLimit);
+    mElbowMotor.setSoftLimit(SoftLimitDirection.kReverse, mElbowReverseLimit);
+    mElbowMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
+    mElbowMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
   }
 
   public Rotation2d getShoulderAngle() {
@@ -227,6 +244,18 @@ public class Arm extends Subsystem {
         });
   }
 
+  public CommandBase handCommand() {
+    return startEnd(
+      () -> {
+        mHandMotor.set(-.8);
+      },
+      () -> {
+          mHandMotor.set(0);
+      }
+      );
+    }
+  
+
   public void setElbowOutput(double output) {
     mElbowMotor.set(output);
   }
@@ -253,6 +282,10 @@ public class Arm extends Subsystem {
   public void setShoulderAngle(double angle) {
     mPeriodicIO.shoulderTarget = calcShoulderPosFromAngle(angle);
     mShoulderPidController.setReference(mPeriodicIO.shoulderTarget, ControlType.kSmartMotion, 0, calcShoulderArbFF(), ArbFFUnits.kPercentOut);
+  }
+
+  public void setHandOutput(double output) {
+    mHandMotor.set(output);
   }
 
   /**

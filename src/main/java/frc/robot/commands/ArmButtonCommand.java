@@ -62,8 +62,8 @@ public class ArmButtonCommand extends CommandBase {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    mArm.setElbowOutput(0);
-    mArm.setShoulderOutput(0);
+    //mArm.setElbowOutput(0);
+    //mArm.setShoulderOutput(0);
   }
 
   // Returns true when the command should end.

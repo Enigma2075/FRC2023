@@ -3,6 +3,9 @@ package frc.robot.subsystems;
 import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.FeedbackDevice;
+import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 // Copyright (c) FIRST and other WPILib contributors.
@@ -11,74 +14,56 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 
 //package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
-import com.ctre.phoenix.sensors.CANCoderConfiguration;
 
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.geometry.Rotation2d;
 import frc.robot.Constants;
 
 public class Intake extends SubsystemBase {//swhere you make it
-  private final TalonSRX intakeBarMotor;
+  private final TalonSRX intakeMotor;
   private final TalonSRX pivotMotor;
-  //encoder
-  //position coefficient
-  //pid controller
-  //offset?
-  //forward and reverse limits
-  //debug
-  public Object pivotUp;
 
+  private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
+  
   /** Creates a new ExampleSubsystem. */
-  public Intake() {//where you set it
-    intakeBarMotor = new TalonSRX(9);
+  public Intake() {
+    // Pivot Motor
     pivotMotor = new TalonSRX(10);
 
-    intakeBarMotor.configFactoryDefault();
     pivotMotor.configFactoryDefault();
 
-    intakeBarMotor.setNeutralMode(NeutralMode.Coast);
     pivotMotor.setNeutralMode(NeutralMode.Brake);
 
-    /*
-    mShoulderLeftMotor.setInverted(true);
+    pivotMotor.setInverted(InvertType.InvertMotorOutput);
 
-    mShoulderLeftMotor.setOpenLoopRampRate(0);
-    mShoulderRightMotor.setOpenLoopRampRate(0);
-
-    mShoulderEncoder = mShoulderLeftMotor.getEncoder();
+    pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
+    pivotMotor.setSensorPhase(true);
+    pivotMotor.setSelectedSensorPosition(0);
     
-    mShoulderPidController = mShoulderLeftMotor.getPIDController();
-    mShoulderPidController.setFF(Constants.Arm.kShoulderFF, 0);
-    mShoulderPidController.setP(Constants.Arm.kShoulderP, 0);
-    mShoulderPidController.setI(Constants.Arm.kShoulderI, 0);
-    mShoulderPidController.setD(Constants.Arm.kShoulderD, 0);
-    mShoulderPidController.setIZone(Constants.Arm.kShoulderIz, 0);
-    
-    mShoulderPidController.setOutputRange(-1, 1);
+    pivotMotor.configMotionAcceleration(2000, 10);
+		pivotMotor.configMotionCruiseVelocity(2000, 10);
 
-    mShoulderPidController.setSmartMotionMaxVelocity(Constants.Arm.kShoulderMaxVel, 0);
-    mShoulderPidController.setSmartMotionMaxAccel(Constants.Arm.kShoulderMaxAcc, 0);
-    mShoulderPidController.setSmartMotionAllowedClosedLoopError(Constants.Arm.kShoulderAllowedErr, 0);
-    mShoulderPidController.setSmartMotionMinOutputVelocity(Constants.Arm.kShoulderMinVel, 0);
+    pivotMotor.config_kP(0, Constants.Intake.kPivotP, 10);
+		pivotMotor.config_kI(0, Constants.Intake.kPivotI, 10);
+		pivotMotor.config_kD(0, Constants.Intake.kPivotD, 10);
+		pivotMotor.config_kF(0, Constants.Intake.kPivotFF, 10);
+		pivotMotor.config_IntegralZone(0, Constants.Intake.kPivotIz, 10);
+		pivotMotor.configClosedLoopPeakOutput(0, 1, 10);
+		
+    pivotMotor.configClosedLoopPeriod(0, 1, 10);
+		
+    // Intake Motor
+    intakeMotor = new TalonSRX(9);
 
-    // Zero the motors
-    rezeroMotors();
+    intakeMotor.configFactoryDefault();
 
-    // We configure the should limits after it is zero so we have accurate values.
-    mShoulderForwardLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderForwardLimitDeg);
-    mShoulderReverseLimit = (float)calcShoulderPosFromAngle(Constants.Arm.kShoulderReverseLimitDeg);
+    intakeMotor.setNeutralMode(NeutralMode.Coast);
 
-    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kForward, mShoulderForwardLimit);
-    mShoulderLeftMotor.setSoftLimit(SoftLimitDirection.kReverse, mShoulderReverseLimit);
-    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
-    mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
-    */
+    intakeMotor.setInverted(InvertType.InvertMotorOutput);
   }
-
 
   /**
    * Example command factory method.
@@ -89,10 +74,10 @@ public class Intake extends SubsystemBase {//swhere you make it
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          intakeBarMotor.set(ControlMode.PercentOutput, .8);
+          intakeMotor.set(ControlMode.PercentOutput, .8);
         },
         () -> {
-            intakeBarMotor.set(ControlMode.PercentOutput, 0);
+            intakeMotor.set(ControlMode.PercentOutput, 0);
         }
         );
   }
@@ -100,10 +85,10 @@ public class Intake extends SubsystemBase {//swhere you make it
 
   return startEnd(
     () -> {
-      intakeBarMotor.set(ControlMode.PercentOutput, -.8);
+      intakeMotor.set(ControlMode.PercentOutput, -.3);
     },
     () -> {
-        intakeBarMotor.set(ControlMode.PercentOutput, 0);
+        intakeMotor.set(ControlMode.PercentOutput, 0);
     }
     );
   }
@@ -111,16 +96,29 @@ public class Intake extends SubsystemBase {//swhere you make it
   public CommandBase testPivot(DoubleSupplier outputSupplier) {
     return runEnd(
     () -> {
-      setOutput(outputSupplier.getAsDouble());
+      setPivotOutput(outputSupplier.getAsDouble());
+      //setPivotOutput(-.2);
     }, 
     () -> {
-      setOutput(0);
+      setPivotOutput(0);
     }
     );
   }
-  public void setOutput(double output) {
+
+  public double calcPivotArbFF() {
+    double angle = getPivotAngle().getDegrees();
+    double cos = Math.cos(Math.toRadians(90 - Math.abs(angle)));
+    return cos * Constants.Intake.kPivotMaxArbFF * Math.signum(angle);
+  }
+
+  public void setPivotOutput(double output) {
     pivotMotor.set(ControlMode.PercentOutput, output);
   }
+  
+  public void setPivotVelocity(double vel) {
+    pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotMaxRPM, DemandType.ArbitraryFeedForward, 3);
+  }
+  
   /**
    * An example method querying a boolean state of the subsystem (for example, a digital sensor).
    *
@@ -130,9 +128,27 @@ public class Intake extends SubsystemBase {//swhere you make it
     // Query some boolean state, such as a digital sensor.
     return false;
   }
+  
+  public Rotation2d getPivotAngle() {
+    return Rotation2d.fromRadians(getUnclampedPivotAngleRadians());
+  }
+
+  public double getUnclampedPivotAngleRadians() {
+    return (pivotMotor.getSelectedSensorPosition() * kPivotPositionCoefficient);
+  }
+
+  // public Rotation2d getPivotCanCoderAngle() {
+  //   return Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
+  // }
+
+  // public Rotation2d getAdjustedShoulderCanCoderAngle() {
+  //   return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
+  // }
+
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("IP Deg", getPivotAngle().getDegrees());
 
     // This method will be called once per scheduler run
   }

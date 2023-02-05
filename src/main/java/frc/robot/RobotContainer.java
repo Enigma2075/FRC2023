@@ -75,7 +75,7 @@ public class RobotContainer {
     mIntake.setDefaultCommand(mIntake.testPivot(mOperatorController::getLeftTriggerAxis));
     
     mArm = new Arm();
-    mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
+    //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
     setSubsystems(mDrive, mArm);
     
@@ -106,12 +106,14 @@ public class RobotContainer {
     // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
     // cancelling on release.
     //m_driverController.b().whileTrue(m_exampleSubsystemm.exampleMethodCommand());
-    //mDriverController.a().whileTrue(mIntake.IntakeCommand());
-    //mDriverController.b().whileTrue(mIntake.OuttakeCommand());
     
-    //mOperatorController.a().whileTrue(new ArmButtonCommand(mArm, mArm.calcShoulderArbFF())); //angle 0.16 works?
-    //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, mArm.calcElbowArbFF()));
-    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
+    //mOperatorController.a().whileTrue(mIntake.IntakeCommand());
+    
+    mOperatorController.y().whileTrue(mIntake.IntakeCommand());
+    
+    mOperatorController.a().whileTrue(mArm.handCommand());
+    //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
+    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, 0, 50));
     mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0, 0));
   }
 
