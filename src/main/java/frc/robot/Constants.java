@@ -26,6 +26,7 @@ import frc.lib.geometry.Translation2d;
 public final class Constants {
   public static class DriverStation {
     public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
 
     public static final double kDriveJoystickThreshold = 0.2;
     public static final double kJoystickThreshold = 0.2;
@@ -45,6 +46,86 @@ public final class Constants {
     public static final String kCANivoreBusName = "canivore";
   }
 
+  public static class Arm{
+    // Shoulder contants
+    public static final int kShoulderRightId = 1;
+    public static final int kShoulderLeftId = 2;
+    public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
+    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(101.65) : Rotation2d.fromDegrees(283.62);
+
+    public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 7.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
+
+    public static final float kShoulderForwardLimitDeg = 35;// 35
+    public static final float kShoulderReverseLimitDeg = -65;
+    public static final double kShoulderMaxCos = Math.cos(Math.toRadians(90.0 - Math.abs(Constants.Arm.kShoulderReverseLimitDeg)));
+
+    public static final double kShoulderMaxArbFF = .016;
+
+    public static final double kShoulderMaxRPM = 5500.0 * .95;
+    public static final double kShoulderFF = .90 / 5300.0;
+    public static final double kShoulderP = 0.00005;
+    public static final double kShoulderI = 0;
+    public static final double kShoulderD = 0;
+    public static final double kShoulderIz = 0;
+
+    public static final double kShoulderMaxVel = kShoulderMaxRPM;
+    public static final double kShoulderMinVel = 0;
+    public static final double kShoulderMaxAcc = 9000;
+    public static final double kShoulderAllowedErr = 0;
+
+    // Elbow Constants
+    public static final int kElbowId = 3;
+    public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-50.86) : Rotation2d.fromDegrees(283.62);
+
+    public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (1.0 / 2.0);
+
+    public static final double kElbowMaxArbFF = 0.030;
+
+    public static final double kElbowMaxRPM = 5500.0 * .95;
+    public static final double kElbowFF = .9 / 5300.0;
+    public static final double kElbowP = 0.00001;
+    public static final double kElbowI = 0;
+    public static final double kElbowD = 0;
+    public static final double kElbowIz = 0;
+
+    public static final double kElbowMaxVel = kElbowMaxRPM;
+    public static final double kElbowMinVel = 0;
+    public static final double kElbowMaxAcc = 6000;
+    public static final double kElbowAllowedErr = 0;
+
+    // Hand Constants
+    public static final int kHandId = 4;
+  }
+
+  public static class Intake{
+    // Shoulder contants
+    public static final int kIntakeId = 1;
+
+    public static final int kPivotId = 2;
+    public static final CanDeviceId kPivotEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
+    public static final Rotation2d kPivotOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(101.65) : Rotation2d.fromDegrees(283.62);
+
+    public static final double kPivotReduction = (26.0 / 50.0); //277.7;
+
+    public static final float kPivotForwardLimitDeg = 35;// 35
+    public static final float kPivotReverseLimitDeg = -65;
+
+    public static final double kPivotMaxArbFF = .02;
+
+    public static final double kPivotCruiseVel = 700;
+    public static final double kPivotFF = (.9 * 1023.0) / 600.0;
+    public static final double kPivotP = 0.000000;
+    public static final double kPivotI = 0;
+    public static final double kPivotD = 0;
+    public static final double kPivotIz = 0;
+
+    //public static final double kPivotMaxVel = kPivotCruiseVel;
+    //public static final double kPivotMinVel = 0;
+    public static final double kPivotAcc = 700;
+    //public static final double kPivotAllowedErr = 0;
+  }
+
   public static class Drive {
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
@@ -55,8 +136,8 @@ public final class Constants {
 
     // TODO measure this
     public static final double kWheelDiameter = 0.10033 * 81.0 / 84.213; /// meters, TODO measure
-    public static final double kTrackwidthMeters =  0.55245; // DONE Measure and set trackwidth
-    public static final double kWheelbaseMeters = 0.55245; // DONE Measure and set wheelbase
+    public static final double kTrackwidthMeters =  21.75 * 0.0254; // DONE Measure and set trackwidth
+    public static final double kWheelbaseMeters = 0.61595; // DONE Measure and set wheelbase
 
     // Robot constants
     //public static final double kMaxDriveAcceleration = 1867 * 0.8;   // m/s^2 tuned 2/18 practice bot
@@ -69,7 +150,6 @@ public final class Constants {
     //L2 Configuration
     public static final double kDriveReduction = (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0); //TODO: need real values
     public static final double kSteerReduction = (14.0 / 50.0) * (10.0 / 60.0); //TODO: need real values
-
     
     // Measure the drivetrain's maximum velocity or calculate the theoretical.
     //  The formula for calculating the theoretical maximum velocity is:
