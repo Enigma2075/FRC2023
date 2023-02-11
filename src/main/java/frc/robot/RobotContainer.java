@@ -80,7 +80,8 @@ public class RobotContainer {
     setSubsystems(mDrive, mArm);
     
     mAutoChooser = new SendableChooser<>();
-    mAutoChooser.setDefaultOption("Straight", Autos.straightTest(mDrive));
+    mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive));
+    mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
 

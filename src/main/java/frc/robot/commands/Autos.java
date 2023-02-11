@@ -35,7 +35,13 @@ public final class Autos {
 
     return setupAuto("Strafe Test", eventMap, drive);
   }
-  
+
+  public static Command rightSide(Drive drive) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+
+    return setupAuto("Right Side", eventMap, drive);
+  }
+
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(4, 4));
     
