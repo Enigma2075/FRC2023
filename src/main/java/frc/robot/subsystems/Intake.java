@@ -18,16 +18,12 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+//import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.geometry.Rotation2d;
+import frc.lib.other.Subsystem;
 import frc.robot.Constants;
 
-public class Intake extends SubsystemBase {// swhere you make it
-  private final TalonSRX intakeMotor;
-  private final TalonSRX pivotMotor;
-
-  private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
-
+public class Intake extends Subsystem {// swhere you make it
   public enum PivotPosition {
     DOWN(-10),
     UP(-130);
@@ -50,6 +46,27 @@ public class Intake extends SubsystemBase {// swhere you make it
       this.mOutput = output;
     }
   }
+
+  private final TalonSRX intakeMotor;
+  private final TalonSRX pivotMotor;
+
+  private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
+
+  private IntakeMode currentIntake = IntakeMode.STOP;
+  private PivotPosition currentPivot = PivotPosition.UP;
+
+  private boolean mDebug = true;
+
+  public static class PeriodicIO {
+    // Pivot
+    PivotPosition pivotPosition = PivotPosition.UP;
+    Rotation2d pivotAngle;
+
+    // Intake
+    IntakeMode intakeMode = IntakeMode.STOP;
+  }
+
+  private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   /** Creates a new ExampleSubsystem. */
   public Intake() {
@@ -89,11 +106,19 @@ public class Intake extends SubsystemBase {// swhere you make it
   }
 
   public void setPivot(PivotPosition position) {
-    setPivotAngle(position.mAngle);
+    currentPivot = position;
   }
 
   public void setIntake(IntakeMode mode) {
-    intakeMotor.set(ControlMode.PercentOutput, mode.mOutput);
+    currentIntake = mode;
+  }
+
+  public void updateIntake() {
+    intakeMotor.set(ControlMode.PercentOutput, currentIntake.mOutput);
+  }
+
+  public void updatePivot() {
+    setPivotAngle(mPeriodicIO.pivotPosition.mAngle);
   }
 
   public CommandBase autoCommand(PivotPosition pivot, IntakeMode intake) {
@@ -105,44 +130,17 @@ public class Intake extends SubsystemBase {// swhere you make it
     );
   }
 
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public CommandBase IntakeCommand() {
-    // Inline construction of command goes here.
-    return startEnd(
-        () -> {
-          intakeMotor.set(ControlMode.PercentOutput, .9);
-        },
-        () -> {
-          intakeMotor.set(ControlMode.PercentOutput, 0);
-        });
-  }
-
-  public CommandBase OuttakeCommand() {
-
-    return startEnd(
-        () -> {
-          intakeMotor.set(ControlMode.PercentOutput, -.3);
-        },
-        () -> {
-          intakeMotor.set(ControlMode.PercentOutput, 0);
-        });
-  }
-
-  public CommandBase testPivot(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
+  public CommandBase defaultCommand(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
     return runEnd(
         () -> {
           if (intakeSupplier.getAsDouble() > .8) {
-            setPivotAngle(-10);
-            intakeMotor.set(ControlMode.PercentOutput, .9);
+            setPivot(PivotPosition.DOWN);
+            setIntake(IntakeMode.IN);
           } else if (outakeSupplier.getAsDouble() > .8) {
-            intakeMotor.set(ControlMode.PercentOutput, -.9);
+            setIntake(IntakeMode.IN);
           } else {
-            setPivotAngle(-130);
-            intakeMotor.set(ControlMode.PercentOutput, 0);
+            setPivot(PivotPosition.UP);
+            setIntake(IntakeMode.STOP);
           }
           // setPivotOutput(outputSupplier.getAsDouble());
           // setPivotOutput(-.90);
@@ -176,17 +174,6 @@ public class Intake extends SubsystemBase {// swhere you make it
         calcPivotArbFF());
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a
-   * digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
-  }
-
   public Rotation2d getPivotAngle() {
     return Rotation2d.fromRadians(getUnclampedPivotAngleRadians());
   }
@@ -207,13 +194,43 @@ public class Intake extends SubsystemBase {// swhere you make it
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("IP Deg", getPivotAngle().getDegrees());
-
     // This method will be called once per scheduler run
+  }
+
+  @Override
+  public synchronized void readPeriodicInputs() {
+    mPeriodicIO.pivotAngle = getPivotAngle();
+  }
+
+  @Override
+  public synchronized void writePeriodicOutputs() {
+    updateIntake();
+    updatePivot();
   }
 
   @Override
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
+  }
+
+  @Override
+  public void stop() {
+    setIntake(IntakeMode.STOP);
+    updateIntake();
+
+    pivotMotor.set(ControlMode.PercentOutput, 0);
+  }
+
+  @Override
+  public boolean checkSystem() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void outputTelemetry() {
+    if(mDebug) {
+      SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
+    }
   }
 }

@@ -72,12 +72,12 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    mIntake.setDefaultCommand(mIntake.testPivot(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
+    mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
     
     mArm = new Arm();
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
-    setSubsystems(mDrive, mArm);
+    setSubsystems(mDrive, mArm, mIntake);
     
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive));
