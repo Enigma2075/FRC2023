@@ -22,12 +22,35 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.geometry.Rotation2d;
 import frc.robot.Constants;
 
-public class Intake extends SubsystemBase {//swhere you make it
+public class Intake extends SubsystemBase {// swhere you make it
   private final TalonSRX intakeMotor;
   private final TalonSRX pivotMotor;
 
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
-  
+
+  public enum PivotPosition {
+    DOWN(-10),
+    UP(-130);
+    
+    public final double mAngle;
+
+    private PivotPosition(double angle) {
+      this.mAngle = angle;
+    }
+  }
+
+  public enum IntakeMode {
+    IN(.9),
+    OUT(-.9),
+    STOP(0);
+    
+    public final double mOutput;
+
+    private IntakeMode(double output) {
+      this.mOutput = output;
+    }
+  }
+
   /** Creates a new ExampleSubsystem. */
   public Intake() {
     // Pivot Motor
@@ -42,19 +65,19 @@ public class Intake extends SubsystemBase {//swhere you make it
     pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     pivotMotor.setSensorPhase(true);
     pivotMotor.setSelectedSensorPosition(Math.toRadians(-130) / kPivotPositionCoefficient);
-    
+
     pivotMotor.configMotionAcceleration(Constants.Intake.kPivotAcc, 10);
-		pivotMotor.configMotionCruiseVelocity(Constants.Intake.kPivotCruiseVel, 10);
+    pivotMotor.configMotionCruiseVelocity(Constants.Intake.kPivotCruiseVel, 10);
 
     pivotMotor.config_kP(0, Constants.Intake.kPivotP, 10);
-		pivotMotor.config_kI(0, Constants.Intake.kPivotI, 10);
-		pivotMotor.config_kD(0, Constants.Intake.kPivotD, 10);
-		pivotMotor.config_kF(0, Constants.Intake.kPivotFF, 10);
-		pivotMotor.config_IntegralZone(0, Constants.Intake.kPivotIz, 10);
-		pivotMotor.configClosedLoopPeakOutput(0, 1, 10);
-		
+    pivotMotor.config_kI(0, Constants.Intake.kPivotI, 10);
+    pivotMotor.config_kD(0, Constants.Intake.kPivotD, 10);
+    pivotMotor.config_kF(0, Constants.Intake.kPivotFF, 10);
+    pivotMotor.config_IntegralZone(0, Constants.Intake.kPivotIz, 10);
+    pivotMotor.configClosedLoopPeakOutput(0, 1, 10);
+
     pivotMotor.configClosedLoopPeriod(0, 1, 10);
-		
+
     // Intake Motor
     intakeMotor = new TalonSRX(9);
 
@@ -63,6 +86,23 @@ public class Intake extends SubsystemBase {//swhere you make it
     intakeMotor.setNeutralMode(NeutralMode.Coast);
 
     intakeMotor.setInverted(InvertType.InvertMotorOutput);
+  }
+
+  public void setPivot(PivotPosition position) {
+    setPivotAngle(position.mAngle);
+  }
+
+  public void setIntake(IntakeMode mode) {
+    intakeMotor.set(ControlMode.PercentOutput, mode.mOutput);
+  }
+
+  public CommandBase autoCommand(PivotPosition pivot, IntakeMode intake) {
+    return runOnce(
+      () -> {
+        setPivot(pivot);
+        setIntake(intake);
+      }
+    );
   }
 
   /**
@@ -77,42 +117,38 @@ public class Intake extends SubsystemBase {//swhere you make it
           intakeMotor.set(ControlMode.PercentOutput, .9);
         },
         () -> {
-            intakeMotor.set(ControlMode.PercentOutput, 0);
-        }
-        );
+          intakeMotor.set(ControlMode.PercentOutput, 0);
+        });
   }
+
   public CommandBase OuttakeCommand() {
 
-  return startEnd(
-    () -> {
-      intakeMotor.set(ControlMode.PercentOutput, -.3);
-    },
-    () -> {
-        intakeMotor.set(ControlMode.PercentOutput, 0);
-    }
-    );
+    return startEnd(
+        () -> {
+          intakeMotor.set(ControlMode.PercentOutput, -.3);
+        },
+        () -> {
+          intakeMotor.set(ControlMode.PercentOutput, 0);
+        });
   }
 
   public CommandBase testPivot(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
     return runEnd(
-    () -> {
-      if(intakeSupplier.getAsDouble() > .8) {
-        setPivotAngle(-10);
-        intakeMotor.set(ControlMode.PercentOutput, .9);
-      }
-      else if(outakeSupplier.getAsDouble() > .8) {
-        intakeMotor.set(ControlMode.PercentOutput, -.9);
-      }
-      else {
-        setPivotAngle(-130);
-        intakeMotor.set(ControlMode.PercentOutput, 0);
-      }
-      //setPivotOutput(outputSupplier.getAsDouble());
-      //setPivotOutput(-.90);
-    }, 
-    () -> {
-    }
-    );
+        () -> {
+          if (intakeSupplier.getAsDouble() > .8) {
+            setPivotAngle(-10);
+            intakeMotor.set(ControlMode.PercentOutput, .9);
+          } else if (outakeSupplier.getAsDouble() > .8) {
+            intakeMotor.set(ControlMode.PercentOutput, -.9);
+          } else {
+            setPivotAngle(-130);
+            intakeMotor.set(ControlMode.PercentOutput, 0);
+          }
+          // setPivotOutput(outputSupplier.getAsDouble());
+          // setPivotOutput(-.90);
+        },
+        () -> {
+        });
   }
 
   public double calcPivotArbFF() {
@@ -129,17 +165,20 @@ public class Intake extends SubsystemBase {//swhere you make it
   public void setPivotOutput(double output) {
     pivotMotor.set(ControlMode.PercentOutput, output);
   }
-  
+
   public void setPivotVelocity(double vel) {
-    pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotCruiseVel, DemandType.ArbitraryFeedForward, calcPivotArbFF());
+    pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotCruiseVel, DemandType.ArbitraryFeedForward,
+        calcPivotArbFF());
   }
 
   public void setPivotAngle(double angle) {
-    pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(angle), DemandType.ArbitraryFeedForward, calcPivotArbFF());
+    pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(angle), DemandType.ArbitraryFeedForward,
+        calcPivotArbFF());
   }
-  
+
   /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
+   * An example method querying a boolean state of the subsystem (for example, a
+   * digital sensor).
    *
    * @return value of some boolean subsystem state, such as a digital sensor.
    */
@@ -147,7 +186,7 @@ public class Intake extends SubsystemBase {//swhere you make it
     // Query some boolean state, such as a digital sensor.
     return false;
   }
-  
+
   public Rotation2d getPivotAngle() {
     return Rotation2d.fromRadians(getUnclampedPivotAngleRadians());
   }
@@ -157,13 +196,14 @@ public class Intake extends SubsystemBase {//swhere you make it
   }
 
   // public Rotation2d getPivotCanCoderAngle() {
-  //   return Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
+  // return
+  // Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
   // }
 
   // public Rotation2d getAdjustedShoulderCanCoderAngle() {
-  //   return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
+  // return
+  // getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
   // }
-
 
   @Override
   public void periodic() {
