@@ -41,10 +41,10 @@ public class Intake extends SubsystemBase {//swhere you make it
 
     pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     pivotMotor.setSensorPhase(true);
-    pivotMotor.setSelectedSensorPosition(0);
+    pivotMotor.setSelectedSensorPosition(Math.toRadians(-130) / kPivotPositionCoefficient);
     
-    pivotMotor.configMotionAcceleration(2000, 10);
-		pivotMotor.configMotionCruiseVelocity(2000, 10);
+    pivotMotor.configMotionAcceleration(Constants.Intake.kPivotAcc, 10);
+		pivotMotor.configMotionCruiseVelocity(Constants.Intake.kPivotCruiseVel, 10);
 
     pivotMotor.config_kP(0, Constants.Intake.kPivotP, 10);
 		pivotMotor.config_kI(0, Constants.Intake.kPivotI, 10);
@@ -74,7 +74,7 @@ public class Intake extends SubsystemBase {//swhere you make it
     // Inline construction of command goes here.
     return startEnd(
         () -> {
-          intakeMotor.set(ControlMode.PercentOutput, .8);
+          intakeMotor.set(ControlMode.PercentOutput, .9);
         },
         () -> {
             intakeMotor.set(ControlMode.PercentOutput, 0);
@@ -93,22 +93,37 @@ public class Intake extends SubsystemBase {//swhere you make it
     );
   }
 
-  public CommandBase testPivot(DoubleSupplier outputSupplier) {
+  public CommandBase testPivot(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
     return runEnd(
     () -> {
-      setPivotOutput(outputSupplier.getAsDouble());
-      //setPivotOutput(-.2);
+      if(intakeSupplier.getAsDouble() > .8) {
+        setPivotAngle(-10);
+        intakeMotor.set(ControlMode.PercentOutput, .9);
+      }
+      else if(outakeSupplier.getAsDouble() > .8) {
+        intakeMotor.set(ControlMode.PercentOutput, -.9);
+      }
+      else {
+        setPivotAngle(-130);
+        intakeMotor.set(ControlMode.PercentOutput, 0);
+      }
+      //setPivotOutput(outputSupplier.getAsDouble());
+      //setPivotOutput(-.90);
     }, 
     () -> {
-      setPivotOutput(0);
     }
     );
   }
 
   public double calcPivotArbFF() {
     double angle = getPivotAngle().getDegrees();
-    double cos = Math.cos(Math.toRadians(90 - Math.abs(angle)));
-    return cos * Constants.Intake.kPivotMaxArbFF * Math.signum(angle);
+    double sign = angle > -90 ? -1 : 1;
+    double cos = Math.cos(Math.toRadians(Math.abs(angle)));
+    return cos * Constants.Intake.kPivotMaxArbFF * sign;
+  }
+
+  public double calcPivotPosFromAngle(double angle) {
+    return ((Math.toRadians(angle)) / kPivotPositionCoefficient);
   }
 
   public void setPivotOutput(double output) {
@@ -116,7 +131,11 @@ public class Intake extends SubsystemBase {//swhere you make it
   }
   
   public void setPivotVelocity(double vel) {
-    pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotMaxRPM, DemandType.ArbitraryFeedForward, 3);
+    pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotCruiseVel, DemandType.ArbitraryFeedForward, calcPivotArbFF());
+  }
+
+  public void setPivotAngle(double angle) {
+    pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(angle), DemandType.ArbitraryFeedForward, calcPivotArbFF());
   }
   
   /**

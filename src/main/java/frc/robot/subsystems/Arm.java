@@ -156,7 +156,7 @@ public class Arm extends Subsystem {
     mShoulderLeftMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     mElbowForwardLimit = (float)calcElbowPosFromAngle(150);
-    mElbowReverseLimit = (float)calcElbowPosFromAngle(0);
+    mElbowReverseLimit = (float)calcElbowPosFromAngle(-150);
 
     mElbowMotor.setSoftLimit(SoftLimitDirection.kForward, mElbowForwardLimit);
     mElbowMotor.setSoftLimit(SoftLimitDirection.kReverse, mElbowReverseLimit);

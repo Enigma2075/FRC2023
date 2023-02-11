@@ -72,7 +72,7 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    mIntake.setDefaultCommand(mIntake.testPivot(mOperatorController::getLeftTriggerAxis));
+    mIntake.setDefaultCommand(mIntake.testPivot(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
     
     mArm = new Arm();
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
@@ -109,11 +109,15 @@ public class RobotContainer {
     
     //mOperatorController.a().whileTrue(mIntake.IntakeCommand());
     
-    mOperatorController.y().whileTrue(mIntake.IntakeCommand());
+    //mDriverController.y().whileTrue(mIntake.IntakeCommand());
     
-    mOperatorController.a().whileTrue(mArm.handCommand());
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
-    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, 0, 50));
+    
+  
+    mOperatorController.y().whileTrue(new ArmButtonCommand(mArm, 0, -80));
+    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -135));
+    mOperatorController.a().whileTrue(mArm.handCommand());
+    
     mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0, 0));
   }
 

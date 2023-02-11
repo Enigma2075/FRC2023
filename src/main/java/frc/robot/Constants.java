@@ -25,8 +25,8 @@ import frc.lib.geometry.Translation2d;
  */
 public final class Constants {
   public static class DriverStation {
-    public static final int kDriverControllerPort = 1;
-    public static final int kOperatorControllerPort = 0;
+    public static final int kDriverControllerPort = 0;
+    public static final int kOperatorControllerPort = 1;
 
     public static final double kDriveJoystickThreshold = 0.2;
     public static final double kJoystickThreshold = 0.2;
@@ -76,7 +76,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.86) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-50.86) : Rotation2d.fromDegrees(283.62);
 
     public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (1.0 / 2.0);
 
@@ -113,17 +113,17 @@ public final class Constants {
 
     public static final double kPivotMaxArbFF = .02;
 
-    public static final double kPivotMaxRPM = 5500.0 * .95;
-    public static final double kPivotFF = .90 / 5300.0;
-    public static final double kPivotP = 0.00005;
+    public static final double kPivotCruiseVel = 700;
+    public static final double kPivotFF = (.9 * 1023.0) / 600.0;
+    public static final double kPivotP = 0.000000;
     public static final double kPivotI = 0;
     public static final double kPivotD = 0;
     public static final double kPivotIz = 0;
 
-    public static final double kPivotMaxVel = kPivotMaxRPM;
-    public static final double kPivotMinVel = 0;
-    public static final double kPivotMaxAcc = 9000;
-    public static final double kPivotAllowedErr = 0;
+    //public static final double kPivotMaxVel = kPivotCruiseVel;
+    //public static final double kPivotMinVel = 0;
+    public static final double kPivotAcc = 700;
+    //public static final double kPivotAllowedErr = 0;
   }
 
   public static class Drive {
@@ -136,7 +136,7 @@ public final class Constants {
 
     // TODO measure this
     public static final double kWheelDiameter = 0.10033 * 81.0 / 84.213; /// meters, TODO measure
-    public static final double kTrackwidthMeters =  21.75 * 0.61595; // DONE Measure and set trackwidth
+    public static final double kTrackwidthMeters =  21.75 * 0.0254; // DONE Measure and set trackwidth
     public static final double kWheelbaseMeters = 0.61595; // DONE Measure and set wheelbase
 
     // Robot constants
