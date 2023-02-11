@@ -43,7 +43,13 @@ public final class Autos {
   }
 
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
-    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, new PathConstraints(4, 4));
+    List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, 
+    new PathConstraints(4, 4), //start to bump
+    new PathConstraints(1, 4), //cross bump 1
+    new PathConstraints(4, 4), //to cone and back
+    new PathConstraints(1, 4), //cros bump 2
+    new PathConstraints(4, 4)  //back to start/end
+    );
     
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(
       drive::getWpiPose, 
