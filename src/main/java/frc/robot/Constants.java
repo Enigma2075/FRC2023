@@ -46,7 +46,19 @@ public final class Constants {
     public static final String kCANivoreBusName = "canivore";
   }
 
-  public static class Arm{
+  public static class Arm {
+    public enum Mode {
+      PERCENT_OUTPUT,
+      VELOCITY,
+      MOTION_MAGIC
+    }
+
+    public static final Mode kShoulderMode = Mode.MOTION_MAGIC;
+    public static final Mode kElbowMode = Mode.MOTION_MAGIC;
+
+    public static final boolean kShoulderDebug = true;
+    public static final boolean kElbowDebug = true;
+
     // Shoulder contants
     public static final int kShoulderRightId = 1;
     public static final int kShoulderLeftId = 2;
@@ -99,6 +111,8 @@ public final class Constants {
   }
 
   public static class Intake{
+    public static final boolean kDebug = false;
+
     // Shoulder contants
     public static final int kIntakeId = 1;
 
@@ -127,6 +141,7 @@ public final class Constants {
   }
 
   public static class Drive {
+    public static final boolean kDebug = false;
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
     // If you want to just use voltage set this to false
