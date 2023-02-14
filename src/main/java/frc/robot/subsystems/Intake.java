@@ -52,11 +52,6 @@ public class Intake extends Subsystem {// swhere you make it
 
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
 
-  private IntakeMode currentIntake = IntakeMode.STOP;
-  private PivotPosition currentPivot = PivotPosition.UP;
-
-  private boolean mDebug = true;
-
   public static class PeriodicIO {
     // Pivot
     PivotPosition pivotPosition = PivotPosition.UP;
@@ -106,15 +101,15 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public void setPivot(PivotPosition position) {
-    currentPivot = position;
+    mPeriodicIO.pivotPosition = position;
   }
 
   public void setIntake(IntakeMode mode) {
-    currentIntake = mode;
+    mPeriodicIO.intakeMode = mode;
   }
 
   public void updateIntake() {
-    intakeMotor.set(ControlMode.PercentOutput, currentIntake.mOutput);
+    intakeMotor.set(ControlMode.PercentOutput, mPeriodicIO.intakeMode.mOutput);
   }
 
   public void updatePivot() {
@@ -150,7 +145,7 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public double calcPivotArbFF() {
-    double angle = getPivotAngle().getDegrees();
+    double angle = mPeriodicIO.pivotAngle.getDegrees();
     double sign = angle > -90 ? -1 : 1;
     double cos = Math.cos(Math.toRadians(Math.abs(angle)));
     return cos * Constants.Intake.kPivotMaxArbFF * sign;
@@ -229,7 +224,7 @@ public class Intake extends Subsystem {// swhere you make it
 
   @Override
   public void outputTelemetry() {
-    if(mDebug) {
+    if(Constants.Intake.kDebug) {
       SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
     }
   }

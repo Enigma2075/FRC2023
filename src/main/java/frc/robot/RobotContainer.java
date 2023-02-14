@@ -6,16 +6,15 @@ package frc.robot;
 
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
-import frc.robot.commands.ArmButtonCommand;
 import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
-import frc.robot.subsystems.ExampleSubsystem;
 import frc.robot.subsystems.Drive.DriveControlState;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Arm.ArmPosition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,7 +26,6 @@ import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -80,7 +78,7 @@ public class RobotContainer {
     setSubsystems(mDrive, mArm, mIntake);
     
     mAutoChooser = new SendableChooser<>();
-    mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive));
+    mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
@@ -116,11 +114,11 @@ public class RobotContainer {
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
     
   
-    mOperatorController.y().whileTrue(new ArmButtonCommand(mArm, 0, -80));
-    mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -135));
+    mOperatorController.y().whileTrue(mArm.armCommand(ArmPosition.MEDIUM));
+    mOperatorController.b().whileTrue(mArm.armCommand(ArmPosition.HIGH));
     mOperatorController.a().whileTrue(mArm.handCommand());
     
-    mOperatorController.x().whileTrue(new ArmButtonCommand(mArm, 0, 0));
+    mOperatorController.x().whileTrue(mArm.armCommand(ArmPosition.DEFAULT));
   }
 
   /**

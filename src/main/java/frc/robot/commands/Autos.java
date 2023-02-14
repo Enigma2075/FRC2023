@@ -4,7 +4,12 @@
 
 package frc.robot.commands;
 
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.Arm.ArmPosition;
+import frc.robot.subsystems.Intake.IntakeMode;
+import frc.robot.subsystems.Intake.PivotPosition;
 
 import java.util.HashMap;
 import java.util.List;
@@ -16,8 +21,12 @@ import com.pathplanner.lib.auto.PIDConstants;
 import com.pathplanner.lib.auto.SwerveAutoBuilder;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public final class Autos {
+  private static final PathConstraints kDefaultConstraints = new PathConstraints(4, 4);
+  private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
+
   public static Command straightTest(Drive drive) {
     HashMap<String, Command> eventMap = new HashMap<>();
 
@@ -36,19 +45,30 @@ public final class Autos {
     return setupAuto("Strafe Test", eventMap, drive);
   }
 
-  public static Command rightSide(Drive drive) {
+  public static Command rightSide(Drive drive, Intake intake, Arm arm) {
     HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.IN), arm.armCommand(ArmPosition.HAND_OFF)));
+    eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
+    eventMap.put("Middle", arm.armCommand(ArmPosition.MEDIUM, true));
+    eventMap.put("Score", arm.scoreCommand());
+    eventMap.put("High", arm.armCommand(ArmPosition.HIGH));
 
-    return setupAuto("Right Side", eventMap, drive);
+    return setupAuto("Right Side", eventMap, drive,
+      kDefaultConstraints, //start to bump
+      kSlowConstraints, //cross bump 1
+      kDefaultConstraints, //to cone and back
+      kSlowConstraints, //cros bump 2
+      kDefaultConstraints  //back to start/end
+    );
   }
 
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
+    return setupAuto(pathName, eventMap, drive, kDefaultConstraints);
+  }
+  
+  private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive, PathConstraints constraint, PathConstraints... constraints) {
     List<PathPlannerTrajectory> pathGroup = PathPlanner.loadPathGroup(pathName, 
-    new PathConstraints(4, 4), //start to bump
-    new PathConstraints(1, 4), //cross bump 1
-    new PathConstraints(4, 4), //to cone and back
-    new PathConstraints(1, 4), //cros bump 2
-    new PathConstraints(4, 4)  //back to start/end
+      constraint, constraints
     );
     
     SwerveAutoBuilder autoBuilder = new SwerveAutoBuilder(

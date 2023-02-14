@@ -16,10 +16,13 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
+        "names": [
+          "Middle",
+          "Score"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "after",
+        "waitTime": 0.5
       }
     },
     {
@@ -173,5 +176,24 @@
   "maxVelocity": null,
   "maxAcceleration": 4.0,
   "isReversed": null,
-  "markers": []
+  "markers": [
+    {
+      "position": 1.2,
+      "names": [
+        "Intake"
+      ]
+    },
+    {
+      "position": 3.120000000000124,
+      "names": [
+        "HandOff"
+      ]
+    },
+    {
+      "position": 3.9709090909092586,
+      "names": [
+        "High"
+      ]
+    }
+  ]
 }
