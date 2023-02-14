@@ -15,6 +15,9 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 //package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -47,7 +50,7 @@ public class Intake extends Subsystem {// swhere you make it
     }
   }
 
-  private final TalonSRX intakeMotor;
+  private final CANSparkMax intakeMotor;
   private final TalonSRX pivotMotor;
 
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
@@ -56,6 +59,7 @@ public class Intake extends Subsystem {// swhere you make it
     // Pivot
     PivotPosition pivotPosition = PivotPosition.UP;
     Rotation2d pivotAngle;
+
 
     // Intake
     IntakeMode intakeMode = IntakeMode.STOP;
@@ -74,9 +78,12 @@ public class Intake extends Subsystem {// swhere you make it
 
     pivotMotor.setInverted(InvertType.InvertMotorOutput);
 
+    pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, 10);
+    
     pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     pivotMotor.setSensorPhase(true);
-    pivotMotor.setSelectedSensorPosition(Math.toRadians(-130) / kPivotPositionCoefficient);
+    
+    pivotMotor.setSelectedSensorPosition((Math.toRadians(-130 - Constants.Intake.kPivotOffset.getDegrees()) / kPivotPositionCoefficient));
 
     pivotMotor.configMotionAcceleration(Constants.Intake.kPivotAcc, 10);
     pivotMotor.configMotionCruiseVelocity(Constants.Intake.kPivotCruiseVel, 10);
@@ -91,13 +98,13 @@ public class Intake extends Subsystem {// swhere you make it
     pivotMotor.configClosedLoopPeriod(0, 1, 10);
 
     // Intake Motor
-    intakeMotor = new TalonSRX(9);
+    intakeMotor = new CANSparkMax(Constants.Intake.kIntakeId, MotorType.kBrushless);
 
-    intakeMotor.configFactoryDefault();
+    intakeMotor.restoreFactoryDefaults();
 
-    intakeMotor.setNeutralMode(NeutralMode.Coast);
+    intakeMotor.setIdleMode(IdleMode.kCoast);
 
-    intakeMotor.setInverted(InvertType.InvertMotorOutput);
+    intakeMotor.setInverted(false);
   }
 
   public void setPivot(PivotPosition position) {
@@ -109,7 +116,7 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public void updateIntake() {
-    intakeMotor.set(ControlMode.PercentOutput, mPeriodicIO.intakeMode.mOutput);
+    intakeMotor.set(mPeriodicIO.intakeMode.mOutput);
   }
 
   public void updatePivot() {
@@ -226,6 +233,7 @@ public class Intake extends Subsystem {// swhere you make it
   public void outputTelemetry() {
     if(Constants.Intake.kDebug) {
       SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
+      SmartDashboard.putNumber("IP Abs", pivotMotor.getSelectedSensorPosition(1) * kPivotPositionCoefficient);
     }
   }
 }

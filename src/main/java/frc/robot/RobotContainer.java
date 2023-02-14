@@ -70,12 +70,12 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
+    //mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
     
     mArm = new Arm();
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
-    setSubsystems(mDrive, mArm, mIntake);
+    setSubsystems(mDrive);//, mArm, mIntake);
     
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
@@ -114,11 +114,11 @@ public class RobotContainer {
     //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
     
   
-    mOperatorController.y().whileTrue(mArm.armCommand(ArmPosition.MEDIUM));
-    mOperatorController.b().whileTrue(mArm.armCommand(ArmPosition.HIGH));
-    mOperatorController.a().whileTrue(mArm.handCommand());
+    //mOperatorController.y().whileTrue(mArm.armCommand(ArmPosition.MEDIUM));
+    //mOperatorController.b().whileTrue(mArm.armCommand(ArmPosition.HIGH));
+    //mOperatorController.a().whileTrue(mArm.handCommand());
     
-    mOperatorController.x().whileTrue(mArm.armCommand(ArmPosition.DEFAULT));
+    //mOperatorController.x().whileTrue(mArm.armCommand(ArmPosition.DEFAULT));
   }
 
   /**

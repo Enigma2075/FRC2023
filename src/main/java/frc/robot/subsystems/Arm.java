@@ -15,7 +15,6 @@ import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.geometry.Rotation2d;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants;
@@ -27,7 +26,7 @@ public class Arm extends Subsystem {
     HIGH(-30, -135),
     MEDIUM(5, -80),
     HAND_OFF(0, 50);
-    
+
     public final double mShoulderAngle;
     public final double mElbowAngle;
 
@@ -133,7 +132,7 @@ public class Arm extends Subsystem {
     mElbowMotor = new CANSparkMax(Constants.Arm.kElbowId, MotorType.kBrushless);
     mElbowMotor.restoreFactoryDefaults();
 
-    mElbowMotor.setInverted(true);
+    mElbowMotor.setInverted(false);
 
     mElbowMotor.setIdleMode(IdleMode.kBrake);
 
@@ -206,15 +205,13 @@ public class Arm extends Subsystem {
     return (mElbowEncoder.getPosition() * kElbowPositionCoefficient) - mElbowOffset.getRadians();
   }
 
-  // public Rotation2d getElbowCanCoderAngle() {
-  // return
-  // Rotation2d.fromDegrees(Cancoders.getInstance().getArmElbow().getAbsolutePosition());
-  // }
+  public Rotation2d getElbowCanCoderAngle() {
+    return Rotation2d.fromDegrees(Cancoders.getInstance().getArmElbow().getAbsolutePosition());
+  }
 
-  // public Rotation2d getAdjustedElbowCanCoderAngle() {
-  // return
-  // getElbowCanCoderAngle().rotateBy(Constants.Arm.kStage2Offset.inverse());
-  // }
+  public Rotation2d getAdjustedElbowCanCoderAngle() {
+    return getElbowCanCoderAngle().rotateBy(Constants.Arm.kElbowOffset.inverse());
+  }
 
   public double calcShoulderArbFF() {
     double cos = Math.cos(Math.toRadians(90.0 - Math.abs(mPeriodicIO.shoulderDeg)));
@@ -237,14 +234,14 @@ public class Arm extends Subsystem {
   }
 
   public void rezeroMotors() {
-    // TODO: update this to work with a can coder so we are always starting at the
-    // right spot.
+    mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() *
+        kElbowPositionCoefficient)
+        .rotateBy(getAdjustedElbowCanCoderAngle().inverse());
+
     // With this code we will ALWAYS have to have the Elbow inline with the Shoulder
     // when the robot starts (restarting robot code should reset this)
     // mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() *
-    // kElbowPositionCoefficient)
-    // .rotateBy(getAdjustedElbowCanCoderAngle().inverse());
-    mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() * kElbowPositionCoefficient);
+    // kElbowPositionCoefficient);
 
     mShoulderOffset = Rotation2d.fromRadians(mShoulderEncoder.getPosition() * kShoulderPositionCoefficient)
         .rotateBy(getAdjustedShoulderCanCoderAngle().inverse());
@@ -271,19 +268,16 @@ public class Arm extends Subsystem {
   }
 
   public CommandBase armCommand(ArmPosition position, boolean wait) {
-    if(wait) {
+    if (wait) {
       return run(
-      () -> {
-        setPosition(position);
-      }
-    ).until(this::atPosition);
-    }
-    else {
+          () -> {
+            setPosition(position);
+          }).until(this::atPosition);
+    } else {
       return runOnce(
-      () -> {
-        setPosition(position);
-      }
-    );
+          () -> {
+            setPosition(position);
+          });
     }
   }
 
@@ -369,8 +363,7 @@ public class Arm extends Subsystem {
     mPeriodicIO.elbowDeg = getElbowAngle().getDegrees();
 
     if (Constants.Arm.kElbowDebug) {
-      // mPeriodicIO.elbowAbs =
-      // Cancoders.getInstance().getArmShoulder().getAbsolutePosition();
+      mPeriodicIO.elbowAbs = Cancoders.getInstance().getArmElbow().getAbsolutePosition();
 
       mPeriodicIO.elbowVel = mElbowEncoder.getVelocity();
       mPeriodicIO.elbowAppliedOutput = mElbowMotor.getAppliedOutput();
