@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4, 4);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
+  private static final PathConstraints kFastConstraints = new PathConstraints(3.81, 8);
 
   public static Command straightTest(Drive drive) {
     HashMap<String, Command> eventMap = new HashMap<>();
@@ -62,6 +63,18 @@ public final class Autos {
     );
   }
 
+  public static Command leftSide(Drive drive, Intake intake, Arm arm) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.IN), arm.armCommand(ArmPosition.HAND_OFF)));
+    eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
+    eventMap.put("Middle", arm.armCommand(ArmPosition.MEDIUM, true));
+    eventMap.put("Score", arm.scoreCommand());
+    eventMap.put("High", arm.armCommand(ArmPosition.HIGH));
+
+    return setupAuto("Right Side", eventMap, drive,
+      kFastConstraints
+    );
+  }
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
     return setupAuto(pathName, eventMap, drive, kDefaultConstraints);
   }
