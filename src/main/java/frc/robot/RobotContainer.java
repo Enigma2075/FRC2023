@@ -7,12 +7,14 @@ package frc.robot;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
 import frc.robot.commands.ArmManualCommand;
+import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Drive.DriveControlState;
+import frc.robot.subsystems.Intake.Mode;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Arm.ArmPosition;
 
@@ -70,12 +72,13 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    //mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
+    mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
+    //mIntake.setDefaultCommand(mIntake.testPivotCommand(mOperatorController::getRightX));
     
     mArm = new Arm();
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
-    setSubsystems(mDrive);//, mArm, mIntake);
+    setSubsystems(mDrive, mIntake, mArm);
     
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
@@ -111,15 +114,22 @@ public class RobotContainer {
     
     //mDriverController.y().whileTrue(mIntake.IntakeCommand());
     
-    //mOperatorController.b().whileTrue(new ArmButtonCommand(mArm, -30, -115));
-    
+    //mOperatorController.b().whileTrue(mIntake.testPivotFFCommand());
   
-    //mOperatorController.y().whileTrue(mArm.armCommand(ArmPosition.MEDIUM));
-    //mOperatorController.b().whileTrue(mArm.armCommand(ArmPosition.HIGH));
-    //mOperatorController.a().whileTrue(mArm.handCommand());
+    //mDriverController.rightBumper().whileTrue(mIntake.intakeCommand().alongWith(mArm.armCommand(ArmPosition.INTAKE_CONE)).handleInterrupt(() -> {mArm.setPosition(ArmPosition.GRAB_CONE);}));
+    mDriverController.rightBumper().whileTrue(mIntake.intakeCommand(Mode.CUBE));
+    mDriverController.leftBumper().whileTrue(mIntake.outtakeCommand(Mode.CUBE));
+
+    mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
+    mDriverController.b().whileTrue(mArm.scoreCommand());
+
+    mOperatorController.b().whileTrue(new ArmMoveCommand(mArm, ArmPosition.MEDIUM));
+    mOperatorController.y().whileTrue(new ArmMoveCommand(mArm, ArmPosition.HIGH2));
+    mOperatorController.a().whileTrue(mArm.handCommand());
     
-    //mOperatorController.x().whileTrue(mArm.armCommand(ArmPosition.DEFAULT));
+    mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
   }
+
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

@@ -114,7 +114,7 @@ public class Cancoders {
         mArmElbow = build(Constants.Arm.kElbowEncoderId);
         mArmElbowObserver = new CanTsObserver(mArmElbow);
 
-       mArmShoulder = build(Constants.Arm.kShoulderEncoderId, true);
+       mArmShoulder = build(Constants.Arm.kShoulderEncoderId, false);
        mArmShoulderObserver = new CanTsObserver(mArmShoulder);
     }
 
