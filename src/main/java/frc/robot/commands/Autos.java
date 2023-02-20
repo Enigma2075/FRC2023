@@ -48,11 +48,11 @@ public final class Autos {
 
   public static Command rightSide(Drive drive, Intake intake, Arm arm) {
     HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.IN), arm.armCommand(ArmPosition.HAND_OFF)));
+    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.CONE_IN), new ArmMoveCommand(arm, ArmPosition.HAND_OFF)));
     eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
-    eventMap.put("Middle", arm.armCommand(ArmPosition.MEDIUM, true));
+    eventMap.put("Middle", new ArmMoveCommand(arm, true, ArmPosition.MEDIUM));
     eventMap.put("Score", arm.scoreCommand());
-    eventMap.put("High", arm.armCommand(ArmPosition.HIGH));
+    eventMap.put("High", new ArmMoveCommand(arm, ArmPosition.HIGH1, ArmPosition.HIGH2));
 
     return setupAuto("Right Side", eventMap, drive,
       kDefaultConstraints, //start to bump

@@ -4,9 +4,11 @@ import java.util.function.DoubleSupplier;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
+import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StickyFaults;
 
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
@@ -15,6 +17,10 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 //package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.revrobotics.CANSparkMax;
+import com.revrobotics.CANSparkMax.IdleMode;
+import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.ColorSensorV3.RawColor;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
@@ -24,10 +30,17 @@ import frc.lib.other.Subsystem;
 import frc.robot.Constants;
 
 public class Intake extends Subsystem {// swhere you make it
+  public enum Mode {
+    CONE,
+    CUBE
+  }
+  
   public enum PivotPosition {
-    DOWN(-10),
-    UP(-130);
-    
+    HANDOFF_CONE(-61.5),
+    DOWN(-0),
+    HANDOFF(-80),
+    UP(-117);
+
     public final double mAngle;
 
     private PivotPosition(double angle) {
@@ -36,10 +49,13 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public enum IntakeMode {
-    IN(.9),
-    OUT(-.9),
+    CONE_IN(.9),
+    CONE_OUT(-.9),
+    CUBE_IN(-.9),
+    CUBE_OUT(.9),
+    CUBE_HOLD(-.02),
     STOP(0);
-    
+
     public final double mOutput;
 
     private IntakeMode(double output) {
@@ -47,14 +63,21 @@ public class Intake extends Subsystem {// swhere you make it
     }
   }
 
-  private final TalonSRX intakeMotor;
+  private final CANSparkMax intakeMotor;
   private final TalonSRX pivotMotor;
 
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
 
+  private double mPivotOffset;
+
+  private static boolean mPivotReset = false;
+
   public static class PeriodicIO {
+    Mode mode = Mode.CONE;
+
     // Pivot
     PivotPosition pivotPosition = PivotPosition.UP;
+    double pivotTarget;
     Rotation2d pivotAngle;
 
     // Intake
@@ -66,17 +89,28 @@ public class Intake extends Subsystem {// swhere you make it
   /** Creates a new ExampleSubsystem. */
   public Intake() {
     // Pivot Motor
-    pivotMotor = new TalonSRX(10);
+    pivotMotor = new TalonSRX(Constants.Intake.kPivotId);
 
     pivotMotor.configFactoryDefault();
 
     pivotMotor.setNeutralMode(NeutralMode.Brake);
 
-    pivotMotor.setInverted(InvertType.InvertMotorOutput);
+    pivotMotor.setInverted(InvertType.None);
 
+    pivotMotor.configFeedbackNotContinuous(true, 10);
+
+    pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, 10);
     pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     pivotMotor.setSensorPhase(true);
-    pivotMotor.setSelectedSensorPosition(Math.toRadians(-130) / kPivotPositionCoefficient);
+
+    double pivotAbsPos = pivotMotor.getSelectedSensorPosition(1);
+    // We want the encoder counts for all the way up to be 118 deg
+    // mPivotOffset = pivotAbsPos > Constants.Intake.kPivotOffset + 100
+    // ? (4096 - pivotAbsPos + Constants.Intake.kPivotOffset)
+    // : (Constants.Intake.kPivotOffset - pivotAbsPos);
+    // mPivotOffset = (Math.toRadians(118) / kPivotPositionCoefficient) -
+    // mPivotOffset;
+    pivotMotor.setSelectedSensorPosition(0);
 
     pivotMotor.configMotionAcceleration(Constants.Intake.kPivotAcc, 10);
     pivotMotor.configMotionCruiseVelocity(Constants.Intake.kPivotCruiseVel, 10);
@@ -90,17 +124,24 @@ public class Intake extends Subsystem {// swhere you make it
 
     pivotMotor.configClosedLoopPeriod(0, 1, 10);
 
+    pivotMotor.configPeakCurrentLimit(40, 10);
+    pivotMotor.configPeakCurrentDuration(50, 10);
+    pivotMotor.configContinuousCurrentLimit(0, 10);
+    pivotMotor.enableCurrentLimit(true);
+
+    pivotMotor.configNeutralDeadband(0);
+
     // Intake Motor
-    intakeMotor = new TalonSRX(9);
+    intakeMotor = new CANSparkMax(Constants.Intake.kIntakeId, MotorType.kBrushless);
 
-    intakeMotor.configFactoryDefault();
+    intakeMotor.restoreFactoryDefaults();
 
-    intakeMotor.setNeutralMode(NeutralMode.Coast);
+    intakeMotor.setIdleMode(IdleMode.kCoast);
 
-    intakeMotor.setInverted(InvertType.InvertMotorOutput);
+    intakeMotor.setInverted(true);
   }
 
-  public void setPivot(PivotPosition position) {
+  public void setPivotPosition(PivotPosition position) {
     mPeriodicIO.pivotPosition = position;
   }
 
@@ -109,46 +150,147 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public void updateIntake() {
-    intakeMotor.set(ControlMode.PercentOutput, mPeriodicIO.intakeMode.mOutput);
+    intakeMotor.set(mPeriodicIO.intakeMode.mOutput);
   }
 
   public void updatePivot() {
-    setPivotAngle(mPeriodicIO.pivotPosition.mAngle);
+    if (mPivotReset) {
+      switch (Constants.Intake.kPivotMode) {
+        case MOTION_MAGIC:
+          writePivotAngle(mPeriodicIO.pivotPosition.mAngle);
+          break;
+        case PERCENT_OUTPUT:
+          writePivotOutput(mPeriodicIO.pivotTarget);
+          break;
+        case VELOCITY:
+          writePivotVelocity(mPeriodicIO.pivotTarget);
+          break;
+      }
+    } else {
+      if (Math.abs(pivotMotor.getStatorCurrent()) > 40) {
+        writePivotOutput(0);
+        mPivotReset = true;
+        double startingPosition = (Math.toRadians(-118 - 16) / kPivotPositionCoefficient);
+        pivotMotor.setSelectedSensorPosition(startingPosition);
+      } else {
+        writePivotOutput(-1);
+      }
+    }
   }
 
   public CommandBase autoCommand(PivotPosition pivot, IntakeMode intake) {
     return runOnce(
-      () -> {
-        setPivot(pivot);
-        setIntake(intake);
-      }
-    );
+        () -> {
+          setPivotPosition(pivot);
+          setIntake(intake);
+        });
+  }
+
+  public CommandBase intakeCommand(Mode mode) {
+    return runEnd(
+        () -> {
+          mPeriodicIO.mode = mode;
+
+          setPivotPosition(PivotPosition.DOWN);
+          switch(mPeriodicIO.mode) {
+            case CUBE:
+              setIntake(IntakeMode.CUBE_IN);
+            break;
+            case CONE:
+              setIntake(IntakeMode.CONE_IN);
+            break;
+          }
+        },
+        () -> {
+          switch(mPeriodicIO.mode) {
+            case CUBE:
+              setIntake(IntakeMode.CUBE_HOLD);
+            break;
+            case CONE:
+              setIntake(IntakeMode.STOP);
+            break;
+          }
+        });
+  }
+
+  public CommandBase outtakeCommand(Mode mode) {
+    return runEnd(
+        () -> {
+          mPeriodicIO.mode = mode;
+          switch(mPeriodicIO.mode) {
+            case CUBE:
+              setIntake(IntakeMode.CUBE_OUT);
+            break;
+            case CONE:
+              setIntake(IntakeMode.CONE_OUT);
+            break;
+          }
+        },
+        () -> {
+          setIntake(IntakeMode.STOP);
+        });
   }
 
   public CommandBase defaultCommand(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
     return runEnd(
         () -> {
+          // if (outakeSupplier.getAsDouble() > .8) {
+          // setPivotOutput(1);
+          // } else if (intakeSupplier.getAsDouble() > .8) {
+          // setPivotOutput(-1);
+          // } else {
+          // setPivotOutput(0);
+          // }
+
           if (intakeSupplier.getAsDouble() > .8) {
-            setPivot(PivotPosition.DOWN);
-            setIntake(IntakeMode.IN);
+            mPeriodicIO.mode = Mode.CONE;
+            setPivotPosition(PivotPosition.DOWN);
+            setIntake(IntakeMode.CONE_IN);
           } else if (outakeSupplier.getAsDouble() > .8) {
-            setIntake(IntakeMode.IN);
+            mPeriodicIO.mode = Mode.CONE;
+            setIntake(IntakeMode.CONE_IN);
           } else {
-            setPivot(PivotPosition.UP);
-            setIntake(IntakeMode.STOP);
+            switch(mPeriodicIO.mode) {
+              case CONE:
+                setPivotPosition(PivotPosition.HANDOFF_CONE);
+                setIntake(IntakeMode.STOP);
+                break;
+              case CUBE:
+                setPivotPosition(PivotPosition.UP);
+                setIntake(IntakeMode.CUBE_HOLD);
+                break;
+            }
           }
-          // setPivotOutput(outputSupplier.getAsDouble());
-          // setPivotOutput(-.90);
         },
         () -> {
         });
   }
 
+  public CommandBase testPivotCommand(DoubleSupplier output) {
+    return runEnd(
+        () -> {
+          setPivotOutput(output.getAsDouble());
+        },
+        () -> {
+          setPivotOutput(0);
+        });
+  }
+
+  public CommandBase testPivotFFCommand() {
+    return runEnd(
+        () -> {
+          // setPivotOutput(Constants.Intake.kPivotMaxArbFF * -1);
+          setPivotOutput(calcPivotArbFF());
+        },
+        () -> {
+          setPivotOutput(0);
+        });
+  }
+
   public double calcPivotArbFF() {
     double angle = mPeriodicIO.pivotAngle.getDegrees();
-    double sign = angle > -90 ? -1 : 1;
     double cos = Math.cos(Math.toRadians(Math.abs(angle)));
-    return cos * Constants.Intake.kPivotMaxArbFF * sign;
+    return cos * Constants.Intake.kPivotMaxArbFF * -1.0;
   }
 
   public double calcPivotPosFromAngle(double angle) {
@@ -156,15 +298,23 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public void setPivotOutput(double output) {
+    mPeriodicIO.pivotTarget = output;
+  }
+
+  public void setPivotVelocity(double velocity) {
+    mPeriodicIO.pivotTarget = velocity;
+  }
+
+  private void writePivotOutput(double output) {
     pivotMotor.set(ControlMode.PercentOutput, output);
   }
 
-  public void setPivotVelocity(double vel) {
+  private void writePivotVelocity(double vel) {
     pivotMotor.set(ControlMode.Velocity, vel * Constants.Intake.kPivotCruiseVel, DemandType.ArbitraryFeedForward,
         calcPivotArbFF());
   }
 
-  public void setPivotAngle(double angle) {
+  private void writePivotAngle(double angle) {
     pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(angle), DemandType.ArbitraryFeedForward,
         calcPivotArbFF());
   }
@@ -174,7 +324,7 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public double getUnclampedPivotAngleRadians() {
-    return (pivotMotor.getSelectedSensorPosition() * kPivotPositionCoefficient);
+    return ((pivotMotor.getSelectedSensorPosition()) * kPivotPositionCoefficient);
   }
 
   // public Rotation2d getPivotCanCoderAngle() {
@@ -224,8 +374,16 @@ public class Intake extends Subsystem {// swhere you make it
 
   @Override
   public void outputTelemetry() {
-    if(Constants.Intake.kDebug) {
+    if (Constants.Intake.kDebug) {
+      SmartDashboard.putNumber("IP Target", mPeriodicIO.pivotTarget);
       SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
+      double raw = pivotMotor.getSelectedSensorPosition(1);
+      SmartDashboard.putNumber("IP Abs Raw", raw);
+      SmartDashboard.putNumber("IP Arb FF", calcPivotArbFF());
+
+      SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
+      SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
+      SmartDashboard.putNumber("IP Amps", pivotMotor.getStatorCurrent());
     }
   }
 }
