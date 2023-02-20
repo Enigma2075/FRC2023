@@ -1,0 +1,101 @@
+{
+  "waypoints": [
+    {
+      "anchorPoint": {
+        "x": 1.9007064547652628,
+        "y": 4.940117840292742
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 3.810427934693245,
+        "y": 4.894376008438179
+      },
+      "holonomicAngle": 0.0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "High",
+          "Score"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.497760556148787,
+        "y": 4.551312269528961
+      },
+      "prevControl": {
+        "x": 4.290717169166149,
+        "y": 4.574183185456242
+      },
+      "nextControl": {
+        "x": 4.290717169166149,
+        "y": 4.574183185456242
+      },
+      "holonomicAngle": 0.0,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.9007064547652628,
+        "y": 4.951553298256383
+      },
+      "prevControl": {
+        "x": 3.821863392656885,
+        "y": 4.8715050925108985
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Score"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    }
+  ],
+  "maxVelocity": 3.81,
+  "maxAcceleration": 8.0,
+  "isReversed": null,
+  "markers": [
+    {
+      "position": 0.9,
+      "names": [
+        "Intake"
+      ]
+    },
+    {
+      "position": 1.05,
+      "names": [
+        "Handoff"
+      ]
+    },
+    {
+      "position": 1.5,
+      "names": [
+        "Medium"
+      ]
+    }
+  ]
+}
