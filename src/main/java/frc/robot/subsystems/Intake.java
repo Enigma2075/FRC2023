@@ -2,6 +2,8 @@ package frc.robot.subsystems;
 
 import java.util.function.DoubleSupplier;
 
+import org.opencv.core.Point;
+
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.Faults;
@@ -37,8 +39,9 @@ public class Intake extends Subsystem {// swhere you make it
   
   public enum PivotPosition {
     HANDOFF_CONE(-61.5),
+    HANDOFF_CUBE(-0),
     DOWN(-0),
-    HANDOFF(-80),
+    HANDOFF(-85),
     UP(-117);
 
     public final double mAngle;
@@ -53,7 +56,7 @@ public class Intake extends Subsystem {// swhere you make it
     CONE_OUT(-.9),
     CUBE_IN(-.9),
     CUBE_OUT(.9),
-    CUBE_HOLD(-.02),
+    HOLD(-.02),
     STOP(0);
 
     public final double mOutput;
@@ -69,6 +72,8 @@ public class Intake extends Subsystem {// swhere you make it
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
 
   private double mPivotOffset;
+
+  private Arm mArm;
 
   private static boolean mPivotReset = false;
 
@@ -141,8 +146,13 @@ public class Intake extends Subsystem {// swhere you make it
     intakeMotor.setInverted(true);
   }
 
+  public void setArm(Arm arm) {
+    mArm = arm;
+  }
+
   public void setPivotPosition(PivotPosition position) {
     mPeriodicIO.pivotPosition = position;
+    mPeriodicIO.pivotTarget = position.mAngle;
   }
 
   public void setIntake(IntakeMode mode) {
@@ -204,12 +214,13 @@ public class Intake extends Subsystem {// swhere you make it
         () -> {
           switch(mPeriodicIO.mode) {
             case CUBE:
-              setIntake(IntakeMode.CUBE_HOLD);
+              setIntake(IntakeMode.HOLD);
             break;
             case CONE:
-              setIntake(IntakeMode.STOP);
+              setIntake(IntakeMode.HOLD);
             break;
           }
+          //setPivotPosition(PivotPosition.UP);
         });
   }
 
@@ -231,40 +242,40 @@ public class Intake extends Subsystem {// swhere you make it
         });
   }
 
-  public CommandBase defaultCommand(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
-    return runEnd(
-        () -> {
-          // if (outakeSupplier.getAsDouble() > .8) {
-          // setPivotOutput(1);
-          // } else if (intakeSupplier.getAsDouble() > .8) {
-          // setPivotOutput(-1);
-          // } else {
-          // setPivotOutput(0);
-          // }
+  // public CommandBase defaultCommand(DoubleSupplier intakeSupplier, DoubleSupplier outakeSupplier) {
+  //   return runEnd(
+  //       () -> {
+  //         // if (outakeSupplier.getAsDouble() > .8) {
+  //         // setPivotOutput(1);
+  //         // } else if (intakeSupplier.getAsDouble() > .8) {
+  //         // setPivotOutput(-1);
+  //         // } else {
+  //         // setPivotOutput(0);
+  //         // }
 
-          if (intakeSupplier.getAsDouble() > .8) {
-            mPeriodicIO.mode = Mode.CONE;
-            setPivotPosition(PivotPosition.DOWN);
-            setIntake(IntakeMode.CONE_IN);
-          } else if (outakeSupplier.getAsDouble() > .8) {
-            mPeriodicIO.mode = Mode.CONE;
-            setIntake(IntakeMode.CONE_IN);
-          } else {
-            switch(mPeriodicIO.mode) {
-              case CONE:
-                setPivotPosition(PivotPosition.HANDOFF_CONE);
-                setIntake(IntakeMode.STOP);
-                break;
-              case CUBE:
-                setPivotPosition(PivotPosition.UP);
-                setIntake(IntakeMode.CUBE_HOLD);
-                break;
-            }
-          }
-        },
-        () -> {
-        });
-  }
+  //         if (intakeSupplier.getAsDouble() > .8) {
+  //           mPeriodicIO.mode = Mode.CONE;
+  //           setPivotPosition(PivotPosition.DOWN);
+  //           setIntake(IntakeMode.CONE_IN);
+  //         } else if (outakeSupplier.getAsDouble() > .8) {
+  //           mPeriodicIO.mode = Mode.CONE;
+  //           setIntake(IntakeMode.CONE_IN);
+  //         } else {
+  //           switch(mPeriodicIO.mode) {
+  //             case CONE:
+  //               setPivotPosition(PivotPosition.UP);
+  //               setIntake(IntakeMode.STOP);
+  //               break;
+  //             case CUBE:
+  //               setPivotPosition(PivotPosition.UP);
+  //               setIntake(IntakeMode.CUBE_HOLD);
+  //               break;
+  //           }
+  //         }
+  //       },
+  //       () -> {
+  //       });
+  // }
 
   public CommandBase testPivotCommand(DoubleSupplier output) {
     return runEnd(
@@ -285,6 +296,27 @@ public class Intake extends Subsystem {// swhere you make it
         () -> {
           setPivotOutput(0);
         });
+  }
+  
+  public Point getIntakePosition() {
+    return getIntakePosition(mPeriodicIO.pivotAngle.getDegrees());
+  }
+
+  public Point getIntakeTargetPosition() {
+    return getIntakePosition(mPeriodicIO.pivotTarget);
+  }
+
+  private Point getIntakePosition(double pivotDeg) {
+    double pivotDegAdj = 180 + pivotDeg - (14.192);
+    
+    double pivotRad = Math.toRadians(pivotDegAdj);
+    double x = Math.cos(pivotRad) * 17.553;
+    double y = Math.sin(pivotRad) * 17.553;
+
+    x -= 20.125;
+    y -= .54;
+
+    return new Point(x, y);
   }
 
   public double calcPivotArbFF() {
@@ -315,7 +347,34 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   private void writePivotAngle(double angle) {
-    pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(angle), DemandType.ArbitraryFeedForward,
+    double finalAngle = angle;
+
+    Point intakePos = getIntakePosition();
+    Point intakeTargetPos = getIntakeTargetPosition();
+
+    Point armPos = mArm.getArmPosition();
+    Point armTargetPos = mArm.getArmTargetPosition();
+    
+    // The intake is currently up.
+    //if(mPeriodicIO.pivotAngle.getDegrees() < PivotPosition.UP.mAngle - 10) {
+    //  // If either joint is back we don't want to move.
+    //  if(armPos.x < 1 || armTargetPos.x < 1) {
+    //    finalAngle = PivotPosition.UP.mAngle;
+    //  }
+    //}
+    // The intake is past vertical and the arm is close to vertical
+    if(intakePos.x < -25 && armPos.x < -20 && armPos.y < 16) {
+      finalAngle = PivotPosition.DOWN.mAngle;
+    }
+    // The intake is trying to go beyond vertical and the arm isn't safe
+    else if(intakePos.x < -23 && intakeTargetPos.x > -25 && armPos.x < -3 && armPos.x > intakePos.x) {
+      finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
+    }
+    else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -3) {
+      finalAngle = PivotPosition.UP.mAngle;
+    }
+
+    pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(finalAngle), DemandType.ArbitraryFeedForward,
         calcPivotArbFF());
   }
 
@@ -326,16 +385,6 @@ public class Intake extends Subsystem {// swhere you make it
   public double getUnclampedPivotAngleRadians() {
     return ((pivotMotor.getSelectedSensorPosition()) * kPivotPositionCoefficient);
   }
-
-  // public Rotation2d getPivotCanCoderAngle() {
-  // return
-  // Rotation2d.fromDegrees(Cancoders.getInstance().getArmShoulder().getAbsolutePosition());
-  // }
-
-  // public Rotation2d getAdjustedShoulderCanCoderAngle() {
-  // return
-  // getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
-  // }
 
   @Override
   public void periodic() {
@@ -363,7 +412,7 @@ public class Intake extends Subsystem {// swhere you make it
     setIntake(IntakeMode.STOP);
     updateIntake();
 
-    pivotMotor.set(ControlMode.PercentOutput, 0);
+    writePivotOutput(0);
   }
 
   @Override
@@ -375,6 +424,7 @@ public class Intake extends Subsystem {// swhere you make it
   @Override
   public void outputTelemetry() {
     if (Constants.Intake.kDebug) {
+      SmartDashboard.putString("IP PosName", mPeriodicIO.pivotPosition.name());
       SmartDashboard.putNumber("IP Target", mPeriodicIO.pivotTarget);
       SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
       double raw = pivotMotor.getSelectedSensorPosition(1);
@@ -384,6 +434,12 @@ public class Intake extends Subsystem {// swhere you make it
       SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
       SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
       SmartDashboard.putNumber("IP Amps", pivotMotor.getStatorCurrent());
+
+      Point pos = getIntakePosition();
+      SmartDashboard.putString("IP Pos", String.format("X:%f, Y:%f", pos.x, pos.y));
+
+      Point targetPos = getIntakeTargetPosition();
+      SmartDashboard.putString("IP T-Pos", String.format("X:%f, Y:%f", targetPos.x, targetPos.y));
     }
   }
 }

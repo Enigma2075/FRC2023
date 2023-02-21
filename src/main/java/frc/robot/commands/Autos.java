@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import frc.robot.commands.ArmMoveCommand.CommandMode;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
@@ -50,7 +51,7 @@ public final class Autos {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.CONE_IN), new ArmMoveCommand(arm, ArmPosition.HAND_OFF)));
     eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
-    eventMap.put("Middle", new ArmMoveCommand(arm, true, ArmPosition.MEDIUM));
+    eventMap.put("Middle", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.MEDIUM));
     eventMap.put("Score", arm.scoreCommand());
     eventMap.put("High", new ArmMoveCommand(arm, ArmPosition.HIGH1, ArmPosition.HIGH2));
 
@@ -65,11 +66,11 @@ public final class Autos {
 
   public static Command leftSide(Drive drive, Intake intake, Arm arm) {
     HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.IN), arm.armCommand(ArmPosition.HAND_OFF)));
-    eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
-    eventMap.put("Middle", arm.armCommand(ArmPosition.MEDIUM, true));
-    eventMap.put("Score", arm.scoreCommand());
-    eventMap.put("High", arm.armCommand(ArmPosition.HIGH));
+//    eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.IN), arm.armCommand(ArmPosition.HAND_OFF)));
+//    eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
+//    eventMap.put("Middle", arm.armCommand(ArmPosition.MEDIUM, true));
+//    eventMap.put("Score", arm.scoreCommand());
+//    eventMap.put("High", arm.armCommand(ArmPosition.HIGH));
 
     return setupAuto("Right Side", eventMap, drive,
       kFastConstraints

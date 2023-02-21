@@ -4,6 +4,10 @@
 
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
+import org.opencv.core.Point;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.SparkMaxPIDController;
@@ -26,6 +30,10 @@ public class Arm extends Subsystem {
     HANDOFF_CONE2(10, 40),
     HANDOFF_CONE3(5, 50),
     HANDOFF_CONE4(-15, 0),
+    HANDOFF2_CONE1(12, 63),
+    HANDOFF2_CONE2(25, 63),
+    HANDOFF2_CONE3(0, 70),
+    HANDOFF_CUBE(36, 56),
     INTAKE_CONE(1.70, 46.22),
     GRAB_CONE(18.32, 46.22),
     START(0, 0),
@@ -69,6 +77,8 @@ public class Arm extends Subsystem {
 
   private float mElbowForwardLimit;
   private float mElbowReverseLimit;
+
+  private Intake mIntake;
 
   // TODO: need to figure out if we need/want these.
   // private float mElbowForwardLimit;
@@ -197,6 +207,34 @@ public class Arm extends Subsystem {
     mElbowMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
   }
 
+  public void setIntake(Intake intake) {
+    mIntake = intake;
+  }
+
+  public Point getArmPosition() {
+    return getArmPosition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg);
+  }
+
+  public Point getArmTargetPosition() {
+    return getArmPosition(mPeriodicIO.shoulderTarget, mPeriodicIO.elbowTarget);
+  }
+
+  private Point getArmPosition(double shoulderDeg, double elbowDeg) {
+    double shoulderDegAdj = 90 + shoulderDeg;
+    double elbowDegAdj = 180 - elbowDeg;
+
+    double combinedRad = Math.toRadians(shoulderDegAdj + elbowDegAdj);
+    double shoulderRad = Math.toRadians(shoulderDegAdj);
+    double x = (Math.cos(combinedRad) * (28.741 + 1)) + (Math.cos(shoulderRad) * 40.719);
+    double y = (Math.sin(combinedRad) * (28.741 + 1)) + (Math.sin(shoulderRad) * 40.719);
+
+    return new Point(x, y);
+  }
+
+  public double getShoulderTarget() {
+    return mPeriodicIO.shoulderTarget;
+  }
+
   public Rotation2d getShoulderAngle() {
     return Rotation2d.fromRadians(getUnclampedShoulderAngleRadians());
   }
@@ -211,6 +249,10 @@ public class Arm extends Subsystem {
 
   public Rotation2d getAdjustedShoulderCanCoderAngle() {
     return getShoulderCanCoderAngle().rotateBy(Constants.Arm.kShoulderOffset.inverse());
+  }
+
+  public double getElbowTarget() {
+    return mPeriodicIO.shoulderTarget;
   }
 
   public Rotation2d getElbowAngle() {
@@ -297,10 +339,12 @@ public class Arm extends Subsystem {
 
   public void setPosition(ArmPosition position) {
     mPeriodicIO.targetPosition = position;
-  }
-
-  public void setElbowTarget(double target) {
-    mPeriodicIO.elbowTarget = target;
+    if(position.mElbowAngle != Double.MIN_VALUE) {
+      mPeriodicIO.elbowTarget = position.mElbowAngle;
+    }
+    if(position.mShoulderAngle != Double.MIN_VALUE) {
+      mPeriodicIO.shoulderTarget = position.mShoulderAngle;
+    }
   }
 
   public void writeElbowOutput() {
@@ -337,7 +381,29 @@ public class Arm extends Subsystem {
     if (mPeriodicIO.targetPosition.mShoulderAngle != Double.MIN_VALUE) {
       mPeriodicIO.shoulderTargetCalc = calcShoulderPosFromAngle(mPeriodicIO.targetPosition.mShoulderAngle);
     }
-    mShoulderPidController.setReference(mPeriodicIO.shoulderTargetCalc, ControlType.kSmartMotion, 0,
+
+    double finalTarget = mPeriodicIO.shoulderTargetCalc;
+    
+    Point intakePos = mIntake.getIntakePosition();
+    Point intakeTargetPos = mIntake.getIntakeTargetPosition();
+
+    Point armPos = getArmPosition();
+    Point armTargetPos = getArmTargetPosition();
+
+    // Intake is up and is staying up so we are good to do anything
+    if(intakePos.x > -7 && intakeTargetPos.x > -7) {
+
+    }
+    else if(intakePos.x < -23 && intakePos.x > -25 && intakeTargetPos.x < -23 && intakeTargetPos.x > -25) {
+
+    }
+    // Intake is up and wants to go down and we want to move the arm out 
+    else if (intakeTargetPos.x < -7
+      && armTargetPos.x < intakePos.x && armTargetPos.y < intakePos.y && armTargetPos.x < 0) {
+      finalTarget = 0;
+    }
+    
+    mShoulderPidController.setReference(finalTarget, ControlType.kSmartMotion, 0,
         calcShoulderArbFF(), ArbFFUnits.kPercentOut);
   }
 
@@ -483,6 +549,13 @@ public class Arm extends Subsystem {
 
       SmartDashboard.putNumber("H Current", mPeriodicIO.handCurrent);
       SmartDashboard.putNumber("H CurrentTime", mPeriodicIO.handCurrentTime);
+
+      Point pos = getArmPosition();
+      SmartDashboard.putString("A Pos", String.format("X:%f, Y:%f", pos.x, pos.y));
+
+      Point targetPos = getArmTargetPosition();
+      SmartDashboard.putString("A T-Pos", String.format("X:%f, Y:%f", targetPos.x, targetPos.y));
+      SmartDashboard.putString("A PosName", mPeriodicIO.targetPosition.name());
     }
   }
 }

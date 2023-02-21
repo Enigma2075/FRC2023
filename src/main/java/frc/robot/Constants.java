@@ -88,7 +88,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(190.634765625) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(191.25) : Rotation2d.fromDegrees(283.62);
 
     public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (18.0 / 44.0);
 

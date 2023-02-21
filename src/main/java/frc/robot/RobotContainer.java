@@ -7,14 +7,17 @@ package frc.robot;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
 import frc.robot.commands.ArmManualCommand;
+import frc.robot.commands.ArmMoveAfterIntakeCommand;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
+import frc.robot.commands.ArmMoveCommand.CommandMode;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Drive.DriveControlState;
 import frc.robot.subsystems.Intake.Mode;
+import frc.robot.subsystems.Intake.PivotPosition;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Arm.ArmPosition;
 
@@ -25,6 +28,7 @@ import java.util.List;
 import com.pathplanner.lib.server.PathPlannerServer;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -72,10 +76,14 @@ public class RobotContainer {
     PathPlannerServer.startServer(5811);
     
     mIntake = new Intake();
-    mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
+    mArm = new Arm();
+
+    mArm.setIntake(mIntake);
+    mIntake.setArm(mArm);
+    
+    //mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
     //mIntake.setDefaultCommand(mIntake.testPivotCommand(mOperatorController::getRightX));
     
-    mArm = new Arm();
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
     setSubsystems(mDrive, mIntake, mArm);
@@ -117,10 +125,13 @@ public class RobotContainer {
     //mOperatorController.b().whileTrue(mIntake.testPivotFFCommand());
   
     //mDriverController.rightBumper().whileTrue(mIntake.intakeCommand().alongWith(mArm.armCommand(ArmPosition.INTAKE_CONE)).handleInterrupt(() -> {mArm.setPosition(ArmPosition.GRAB_CONE);}));
-    mDriverController.rightBumper().whileTrue(mIntake.intakeCommand(Mode.CUBE));
+    new Trigger(mDriverController.rightTrigger(.8)).onTrue(mIntake.intakeCommand(Mode.CONE).alongWith(new ArmMoveCommand(mArm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1))).debounce(.125).onFalse(new ArmMoveAfterIntakeCommand(mArm, mIntake)).debounce(.125);
+    new Trigger(mDriverController.leftTrigger(.8)).whileTrue(mIntake.outtakeCommand(Mode.CONE));
+    mDriverController.rightBumper().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CUBE).andThen(mIntake.intakeCommand(Mode.CUBE)).handleInterrupt(() -> {mArm.setPosition(ArmPosition.DEFAULT);}));
     mDriverController.leftBumper().whileTrue(mIntake.outtakeCommand(Mode.CUBE));
 
-    mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
+    //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
+    mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
     mDriverController.b().whileTrue(mArm.scoreCommand());
 
     mOperatorController.b().whileTrue(new ArmMoveCommand(mArm, ArmPosition.MEDIUM));

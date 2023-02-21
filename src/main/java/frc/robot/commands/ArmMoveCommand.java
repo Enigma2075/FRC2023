@@ -20,23 +20,25 @@ import frc.robot.subsystems.Arm.ArmPosition;
 
 /** An example command that uses an example subsystem. */
 public class ArmMoveCommand extends CommandBase {
-  private final Arm mArm;
-  private final double mHandOutput;
-  private final boolean mWait;
-  private final ArmPosition[] mPositions;
+  public enum CommandMode {NORMAL, WAIT, DONT_END}
+
+  protected final Arm mArm;
+  protected final double mHandOutput;
+  protected final ArmPosition[] mPositions;
 
   private int mCurrentPos = 0;
   private boolean mAtPos = false;
+  private CommandMode mMode = CommandMode.NORMAL;
   
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ArmMoveCommand(Arm arm, double handOutput, boolean wait, ArmPosition... positions) {
+  public ArmMoveCommand(Arm arm, double handOutput, CommandMode mode, ArmPosition... positions) {
     mArm = arm;
     mHandOutput = handOutput;
-    mWait = wait;
+    mMode = mode;
     mPositions = positions;
   
     // Use addRequirements() here to declare subsystem dependencies.
@@ -46,17 +48,17 @@ public class ArmMoveCommand extends CommandBase {
   public ArmMoveCommand(Arm arm, double handOutput, ArmPosition... positions) {
     mArm = arm;
     mHandOutput = handOutput;
-    mWait = false;
+    mMode = CommandMode.NORMAL;
     mPositions = positions;
   
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
 
-  public ArmMoveCommand(Arm arm, boolean wait, ArmPosition... positions) {
+  public ArmMoveCommand(Arm arm, CommandMode mode, ArmPosition... positions) {
     mArm = arm;
     mHandOutput = Double.MIN_VALUE;
-    mWait = wait;
+    mMode = mode;
     mPositions = positions;
   
     // Use addRequirements() here to declare subsystem dependencies.
@@ -66,19 +68,23 @@ public class ArmMoveCommand extends CommandBase {
   public ArmMoveCommand(Arm arm, ArmPosition... positions) {
     mArm = arm;
     mHandOutput = Double.MIN_VALUE;
-    mWait = false;
+    mMode = CommandMode.NORMAL;
     mPositions = positions;
   
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
 
+  protected void reset() {
+    mAtPos = false;
+    mCurrentPos = 0;
+  }
+
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    mAtPos = false;
-    mCurrentPos = 0;
-  
+    reset();
+    
     if(mHandOutput != Double.MIN_VALUE) {
       mArm.setHandOutput(mHandOutput);
     }
@@ -112,8 +118,11 @@ public class ArmMoveCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(mWait) {
+    if(mMode == CommandMode.WAIT) {
       return mCurrentPos == mPositions.length;
+    }
+    else if(mMode == CommandMode.DONT_END) {
+      return false;
     }
     else {
       return mCurrentPos == mPositions.length - 1;
