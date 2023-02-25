@@ -17,8 +17,8 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "High",
-          "Score"
+          "Middle",
+          "ScoreMiddle"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -27,22 +27,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.497760556148787,
+        "x": 6.8,
         "y": 4.551312269528961
       },
       "prevControl": {
-        "x": 4.290717169166149,
+        "x": 4.592956613017362,
         "y": 4.574183185456242
       },
       "nextControl": {
-        "x": 4.290717169166149,
+        "x": 4.592956613017362,
         "y": 4.574183185456242
       },
       "holonomicAngle": 0.0,
       "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
         "names": [],
         "executionBehavior": "parallel",
@@ -67,7 +67,7 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Score"
+          "ScoreHigh"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -80,21 +80,21 @@
   "isReversed": null,
   "markers": [
     {
-      "position": 0.9,
+      "position": 0.1,
       "names": [
         "Intake"
       ]
     },
     {
-      "position": 1.05,
+      "position": 1.0,
       "names": [
         "Handoff"
       ]
     },
     {
-      "position": 1.5,
+      "position": 1.4400000000000168,
       "names": [
-        "Medium"
+        "High"
       ]
     }
   ]

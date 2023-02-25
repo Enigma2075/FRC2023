@@ -10,6 +10,7 @@ import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.StickyFaults;
 
 // Copyright (c) FIRST and other WPILib contributors.
@@ -24,6 +25,7 @@ import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
 import com.revrobotics.ColorSensorV3.RawColor;
 
+import edu.wpi.first.util.function.BooleanConsumer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 //import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -32,16 +34,10 @@ import frc.lib.other.Subsystem;
 import frc.robot.Constants;
 
 public class Intake extends Subsystem {// swhere you make it
-  public enum Mode {
-    CONE,
-    CUBE
-  }
-  
   public enum PivotPosition {
-    HANDOFF_CONE(-61.5),
+    HANDOFF_CONE(-71.5),
     HANDOFF_CUBE(-0),
     DOWN(-0),
-    HANDOFF(-85),
     UP(-117);
 
     public final double mAngle;
@@ -56,7 +52,8 @@ public class Intake extends Subsystem {// swhere you make it
     CONE_OUT(-.9),
     CUBE_IN(-.9),
     CUBE_OUT(.9),
-    HOLD(-.02),
+    CONE_HOLD(.02),
+    CUBE_HOLD(-.02),
     STOP(0);
 
     public final double mOutput;
@@ -69,6 +66,8 @@ public class Intake extends Subsystem {// swhere you make it
   private final CANSparkMax intakeMotor;
   private final TalonSRX pivotMotor;
 
+  private final RobotState mRobotState;
+
   private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
 
   private double mPivotOffset;
@@ -78,8 +77,6 @@ public class Intake extends Subsystem {// swhere you make it
   private static boolean mPivotReset = false;
 
   public static class PeriodicIO {
-    Mode mode = Mode.CONE;
-
     // Pivot
     PivotPosition pivotPosition = PivotPosition.UP;
     double pivotTarget;
@@ -92,7 +89,9 @@ public class Intake extends Subsystem {// swhere you make it
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   /** Creates a new ExampleSubsystem. */
-  public Intake() {
+  public Intake(RobotState robotState) {
+    mRobotState = robotState;
+
     // Pivot Motor
     pivotMotor = new TalonSRX(Constants.Intake.kPivotId);
 
@@ -134,6 +133,9 @@ public class Intake extends Subsystem {// swhere you make it
     pivotMotor.configContinuousCurrentLimit(0, 10);
     pivotMotor.enableCurrentLimit(true);
 
+    pivotMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+    5, 10);
+
     pivotMotor.configNeutralDeadband(0);
 
     // Intake Motor
@@ -144,6 +146,8 @@ public class Intake extends Subsystem {// swhere you make it
     intakeMotor.setIdleMode(IdleMode.kCoast);
 
     intakeMotor.setInverted(true);
+    //intakeMotor.setOpenLoopRampRate(.5);
+    intakeMotor.setSmartCurrentLimit(30);
   }
 
   public void setArm(Arm arm) {
@@ -159,11 +163,11 @@ public class Intake extends Subsystem {// swhere you make it
     mPeriodicIO.intakeMode = mode;
   }
 
-  public void updateIntake() {
+  public void writeIntake() {
     intakeMotor.set(mPeriodicIO.intakeMode.mOutput);
   }
 
-  public void updatePivot() {
+  public void writePivot() {
     if (mPivotReset) {
       switch (Constants.Intake.kPivotMode) {
         case MOTION_MAGIC:
@@ -196,45 +200,66 @@ public class Intake extends Subsystem {// swhere you make it
         });
   }
 
-  public CommandBase intakeCommand(Mode mode) {
-    return runEnd(
-        () -> {
-          mPeriodicIO.mode = mode;
-
-          setPivotPosition(PivotPosition.DOWN);
-          switch(mPeriodicIO.mode) {
-            case CUBE:
-              setIntake(IntakeMode.CUBE_IN);
-            break;
-            case CONE:
-              setIntake(IntakeMode.CONE_IN);
-            break;
-          }
-        },
-        () -> {
-          switch(mPeriodicIO.mode) {
-            case CUBE:
-              setIntake(IntakeMode.HOLD);
-            break;
-            case CONE:
-              setIntake(IntakeMode.HOLD);
-            break;
-          }
-          //setPivotPosition(PivotPosition.UP);
-        });
+  public CommandBase setPivot(PivotPosition pivot) {
+    return runOnce(
+      () -> {
+        setPivotPosition(pivot);
+      }
+    );
   }
 
-  public CommandBase outtakeCommand(Mode mode) {
+  public CommandBase intakeCommand() {
+    return intakeCommand(false);
+  }
+
+  public CommandBase intakeCommand(boolean runOnce) {
+   Runnable runnable = () -> {
+          setPivotPosition(PivotPosition.DOWN);
+          if(mRobotState.isCubeMode()) {
+            setIntake(IntakeMode.CUBE_IN);
+            }
+          else {
+            setIntake(IntakeMode.CONE_IN);
+          }
+        };
+       
+        if(runOnce) {
+          return runOnce(runnable);
+        }
+        else {
+          return runEnd(
+            runnable,
+            () -> {
+              if(mRobotState.isCubeMode()) {
+                setIntake(IntakeMode.CUBE_HOLD);
+              }
+              else {        
+                setIntake(IntakeMode.CONE_HOLD);
+              }  
+            }
+          );
+        }
+  }
+
+  public CommandBase holdCommand() {
+    return runOnce( () -> {
+      if(mRobotState.isCubeMode()) {
+        setIntake(IntakeMode.CUBE_HOLD);
+      }
+      else {
+        setIntake(IntakeMode.CONE_HOLD);
+      }
+    });
+  }
+
+  public CommandBase outtakeCommand() {
     return runEnd(
         () -> {
-          mPeriodicIO.mode = mode;
-          switch(mPeriodicIO.mode) {
-            case CUBE:
-              setIntake(IntakeMode.CUBE_OUT);
-            break;
-            case CONE:
-              setIntake(IntakeMode.CONE_OUT);
-            break;
+          if(mRobotState.isCubeMode()) {
+            setIntake(IntakeMode.CUBE_OUT);
+          }
+          else {
+            setIntake(IntakeMode.CONE_OUT);
           }
         },
         () -> {
@@ -367,10 +392,10 @@ public class Intake extends Subsystem {// swhere you make it
       finalAngle = PivotPosition.DOWN.mAngle;
     }
     // The intake is trying to go beyond vertical and the arm isn't safe
-    else if(intakePos.x < -23 && intakeTargetPos.x > -25 && armPos.x < -3 && armPos.x > intakePos.x) {
+    else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -3 && armPos.x > intakePos.x) {
       finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
     }
-    else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -3) {
+    else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -3 && armPos.x > intakePos.x) {
       finalAngle = PivotPosition.UP.mAngle;
     }
 
@@ -398,8 +423,8 @@ public class Intake extends Subsystem {// swhere you make it
 
   @Override
   public synchronized void writePeriodicOutputs() {
-    updateIntake();
-    updatePivot();
+    writeIntake();
+    writePivot();
   }
 
   @Override
@@ -410,7 +435,7 @@ public class Intake extends Subsystem {// swhere you make it
   @Override
   public void stop() {
     setIntake(IntakeMode.STOP);
-    updateIntake();
+    writeIntake();
 
     writePivotOutput(0);
   }
@@ -431,6 +456,8 @@ public class Intake extends Subsystem {// swhere you make it
       SmartDashboard.putNumber("IP Abs Raw", raw);
       SmartDashboard.putNumber("IP Arb FF", calcPivotArbFF());
 
+      SmartDashboard.putNumber("I Amps", intakeMotor.getOutputCurrent());
+      
       SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
       SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
       SmartDashboard.putNumber("IP Amps", pivotMotor.getStatorCurrent());

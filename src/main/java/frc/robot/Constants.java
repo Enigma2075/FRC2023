@@ -65,7 +65,7 @@ public final class Constants {
     public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
     public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(126.298828125) : Rotation2d.fromDegrees(283.62);
 
-    public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 7.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
+    public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 5.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
 
     public static final float kShoulderForwardLimitDeg = 35;// 35
     public static final float kShoulderReverseLimitDeg = -65;
@@ -82,7 +82,7 @@ public final class Constants {
 
     public static final double kShoulderMaxVel = kShoulderMaxRPM;
     public static final double kShoulderMinVel = 0;
-    public static final double kShoulderMaxAcc = 9000;
+    public static final double kShoulderMaxAcc = 8000;
     public static final double kShoulderAllowedErr = 0;
 
     // Elbow Constants
@@ -90,7 +90,7 @@ public final class Constants {
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(191.25) : Rotation2d.fromDegrees(283.62);
 
-    public static final double kElbowReduction = (1.0 / 7.0) * (1.0 / 7.0) * (18.0 / 44.0);
+    public static final double kElbowReduction = (1.0 / 10.0) * (1.0 / 3.0) * (18.0 / 44.0);
 
     public static final double kElbowMaxArbFF = 0.030;
 
@@ -103,7 +103,7 @@ public final class Constants {
 
     public static final double kElbowMaxVel = kElbowMaxRPM;
     public static final double kElbowMinVel = 0;
-    public static final double kElbowMaxAcc = 6000;
+    public static final double kElbowMaxAcc = 10000;
     public static final double kElbowAllowedErr = 0;
 
     // Hand Constants
@@ -139,7 +139,7 @@ public final class Constants {
 
     public static final double kPivotMaxArbFF = .09;
 
-    public static final double kPivotCruiseVel = 700;
+    public static final double kPivotCruiseVel = 1000;
     public static final double kPivotFF = (.9 * 1023.0) / 600.0;
     public static final double kPivotP = 3;
     public static final double kPivotI = 0;
@@ -148,7 +148,7 @@ public final class Constants {
 
     //public static final double kPivotMaxVel = kPivotCruiseVel;
     //public static final double kPivotMinVel = 0;
-    public static final double kPivotAcc = 1400;
+    public static final double kPivotAcc = 3000;
     //public static final double kPivotAllowedErr = 0;
   }
 

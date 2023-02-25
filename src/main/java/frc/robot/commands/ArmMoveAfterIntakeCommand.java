@@ -18,6 +18,7 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Arm.ArmPosition;
+import frc.robot.subsystems.Intake.IntakeMode;
 import frc.robot.subsystems.Intake.PivotPosition;
 
 /** An example command that uses an example subsystem. */
@@ -30,7 +31,7 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
    * @param subsystem The subsystem used by this command.
    */
   public ArmMoveAfterIntakeCommand(Arm arm, Intake intake) {
-    super(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT_ELBOW);
+    super(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.HANDOFF2_CONE4, ArmPosition.DEFAULT_ELBOW);
     
     mIntake = intake;
     addRequirements(mIntake);
@@ -47,12 +48,13 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!initialized && mIntake.getIntakePosition().x > -26) {
+    if(!initialized && mIntake.getIntakePosition().x > -27) {
+      mIntake.setIntake(IntakeMode.CONE_HOLD);
       super.initialize();
       initialized = true;
     }
     else if(initialized) {
-      if(mArm.getArmPosition().y < 17) {
+      if(mArm.getArmPosition().y < 15) {
         mIntake.setPivotPosition(PivotPosition.UP);    
       }
       super.execute();

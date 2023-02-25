@@ -11,14 +11,16 @@ import frc.robot.commands.ArmMoveAfterIntakeCommand;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
+import frc.robot.commands.SetConeModeCommand;
+import frc.robot.commands.SetCubeModeCommand;
 import frc.robot.commands.ArmMoveCommand.CommandMode;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Drive.DriveControlState;
-import frc.robot.subsystems.Intake.Mode;
 import frc.robot.subsystems.Intake.PivotPosition;
 import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.RobotState;
 import frc.robot.subsystems.Arm.ArmPosition;
 
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -49,6 +52,7 @@ public class RobotContainer {
   private final Drive mDrive;
   private final Intake mIntake;
   private final Arm mArm;
+  private final RobotState mRobotState;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController mDriverController =
@@ -75,8 +79,9 @@ public class RobotContainer {
 
     PathPlannerServer.startServer(5811);
     
-    mIntake = new Intake();
-    mArm = new Arm();
+    mRobotState = new RobotState();
+    mIntake = new Intake(mRobotState);
+    mArm = new Arm(mRobotState);
 
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
@@ -86,14 +91,15 @@ public class RobotContainer {
     
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
-    setSubsystems(mDrive, mIntake, mArm);
+    setSubsystems(mDrive, mIntake, mArm, mRobotState);
     
     mAutoChooser = new SendableChooser<>();
-    mAutoChooser.setDefaultOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
+    mAutoChooser.setDefaultOption("Left", Autos.leftSide(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
-
+    
     SmartDashboard.putData(mAutoChooser);
 
     // Configure the trigger bindings
@@ -110,30 +116,19 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
-    //new Trigger(m_exampleSubsystem::exampleCondition)
-    //    .onTrue(new ExampleCommand(m_exampleSubsystem));
+    // DRIVER CONTROLS
+    mDriverController.b().or(mOperatorController.rightBumper()).whileTrue(new SetConeModeCommand(mRobotState));
+    mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
-    // Schedule `exampleMethodCommand` when the Xbox controller's B button is pressed,
-    // cancelling on release.
-    //m_driverController.b().whileTrue(m_exampleSubsystemm.exampleMethodCommand());
+    new Trigger(mDriverController.rightTrigger(.8)).onTrue(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.leftTrigger(.8)).whileTrue(mIntake.outtakeCommand());
     
-    //mOperatorController.a().whileTrue(mIntake.IntakeCommand());
-    
-    //mDriverController.y().whileTrue(mIntake.IntakeCommand());
-    
-    //mOperatorController.b().whileTrue(mIntake.testPivotFFCommand());
-  
-    //mDriverController.rightBumper().whileTrue(mIntake.intakeCommand().alongWith(mArm.armCommand(ArmPosition.INTAKE_CONE)).handleInterrupt(() -> {mArm.setPosition(ArmPosition.GRAB_CONE);}));
-    new Trigger(mDriverController.rightTrigger(.8)).onTrue(mIntake.intakeCommand(Mode.CONE).alongWith(new ArmMoveCommand(mArm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1))).debounce(.125).onFalse(new ArmMoveAfterIntakeCommand(mArm, mIntake)).debounce(.125);
-    new Trigger(mDriverController.leftTrigger(.8)).whileTrue(mIntake.outtakeCommand(Mode.CONE));
-    mDriverController.rightBumper().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CUBE).andThen(mIntake.intakeCommand(Mode.CUBE)).handleInterrupt(() -> {mArm.setPosition(ArmPosition.DEFAULT);}));
-    mDriverController.leftBumper().whileTrue(mIntake.outtakeCommand(Mode.CUBE));
+    mDriverController.rightBumper().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF));
+    mDriverController.leftBumper().whileTrue(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(mArm.scoreCommand()));
 
     //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
-    mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
-    mDriverController.b().whileTrue(mArm.scoreCommand());
-
+    //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
+    
     mOperatorController.b().whileTrue(new ArmMoveCommand(mArm, ArmPosition.MEDIUM));
     mOperatorController.y().whileTrue(new ArmMoveCommand(mArm, ArmPosition.HIGH2));
     mOperatorController.a().whileTrue(mArm.handCommand());
@@ -141,6 +136,21 @@ public class RobotContainer {
     mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
   }
 
+  private final Command mIntakeConeStart() {
+    return new ArmMoveCommand(mArm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1);
+  }
+
+  private final Command mIntakeConeEnd() {
+    return new ArmMoveAfterIntakeCommand(mArm, mIntake);
+  }
+
+  private final Command mIntakeCubeStart() {
+    return new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CUBE);
+  }
+
+  private final Command mIntakeCubeEnd() {
+    return mIntake.setPivot(PivotPosition.UP).alongWith(new ArmMoveCommand(mArm, ArmPosition.DEFAULT));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
