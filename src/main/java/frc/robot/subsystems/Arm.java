@@ -30,10 +30,10 @@ public class Arm extends Subsystem {
     HANDOFF_CONE2(10, 40),
     HANDOFF_CONE3(5, 50),
     HANDOFF_CONE4(-15, 0),
-    HANDOFF2_CONE1(0, 53),
+    HANDOFF2_CONE1(0, 50),
     HANDOFF2_CONE2(5, 50),
-    HANDOFF2_CONE3(16, 43),
-    HANDOFF2_CONE4(0, 60),
+    HANDOFF2_CONE3(18, 43),
+    HANDOFF2_CONE4(0, 50),
     HANDOFF_CUBE(36, 45),
     INTAKE_CONE(1.70, 46.22),
     GRAB_CONE(18.32, 46.22),
@@ -44,7 +44,7 @@ public class Arm extends Subsystem {
     HIGH1(-10, -90),
     HIGH2(-24, -140),
     MEDIUM(-10, -92),
-    MEDIUM_AUTO_START(0, -92),
+    MEDIUM_AUTO_START(0, -70),
     HAND_OFF(0, 50),
     SCORE_OFFSET(Double.MIN_VALUE, 15, true),
     SHELF(21, -64);
@@ -100,6 +100,9 @@ public class Arm extends Subsystem {
 
   public static class PeriodicIO {
     ArmPosition targetPosition = ArmPosition.START;
+
+    Point armPosition;
+    Point armTargetPosition;
     
     // Shoulder
     double shoulderTarget = 0;
@@ -232,11 +235,11 @@ public class Arm extends Subsystem {
   }
 
   public Point getArmPosition() {
-    return getArmPosition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg);
+    return mPeriodicIO.armPosition;
   }
 
   public Point getArmTargetPosition() {
-    return getArmPosition(mPeriodicIO.shoulderTarget, mPeriodicIO.elbowTarget);
+    return mPeriodicIO.armTargetPosition;
   }
 
   private Point getArmPosition(double shoulderDeg, double elbowDeg) {
@@ -507,6 +510,9 @@ public class Arm extends Subsystem {
 
     // Hand
     mPeriodicIO.handCurrent = mHandMotor.getOutputCurrent();
+
+    mPeriodicIO.armPosition = getArmPosition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg);
+    mPeriodicIO.armTargetPosition = getArmPosition(mPeriodicIO.shoulderTarget, mPeriodicIO.elbowTarget);
   }
 
   @Override

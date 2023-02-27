@@ -120,8 +120,8 @@ public class RobotContainer {
     mDriverController.b().or(mOperatorController.rightBumper()).whileTrue(new SetConeModeCommand(mRobotState));
     mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
-    new Trigger(mDriverController.rightTrigger(.8)).onTrue(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
-    new Trigger(mDriverController.leftTrigger(.8)).whileTrue(mIntake.outtakeCommand());
+    new Trigger(mDriverController.rightTrigger(.7)).onTrue(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
     mDriverController.rightBumper().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF));
     mDriverController.leftBumper().whileTrue(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(mArm.scoreCommand()));
@@ -137,7 +137,7 @@ public class RobotContainer {
   }
 
   private final Command mIntakeConeStart() {
-    return new ArmMoveCommand(mArm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1);
+    return new ArmMoveCommand(mArm, .9, CommandMode.DONT_END, ArmPosition.HANDOFF2_CONE1);
   }
 
   private final Command mIntakeConeEnd() {

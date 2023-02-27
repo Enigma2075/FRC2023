@@ -36,8 +36,8 @@ import frc.robot.Constants;
 public class Intake extends Subsystem {// swhere you make it
   public enum PivotPosition {
     HANDOFF_CONE(-71.5),
-    HANDOFF_CUBE(-0),
-    DOWN(-0),
+    HANDOFF_CUBE(0),
+    DOWN(3),
     UP(-117);
 
     public final double mAngle;
@@ -49,6 +49,7 @@ public class Intake extends Subsystem {// swhere you make it
 
   public enum IntakeMode {
     CONE_IN(.9),
+    CONE_HANDOFF(-.02),
     CONE_OUT(-.9),
     CUBE_IN(-.9),
     CUBE_OUT(.9),
@@ -146,8 +147,8 @@ public class Intake extends Subsystem {// swhere you make it
     intakeMotor.setIdleMode(IdleMode.kCoast);
 
     intakeMotor.setInverted(true);
-    //intakeMotor.setOpenLoopRampRate(.5);
-    intakeMotor.setSmartCurrentLimit(30);
+    //intakeMotor.setOpenLoopRampRate(1);
+    //intakeMotor.setSmartCurrentLimit(60);
   }
 
   public void setArm(Arm arm) {
@@ -460,6 +461,7 @@ public class Intake extends Subsystem {// swhere you make it
       
       SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
       SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
+      SmartDashboard.putNumber("I Temp", intakeMotor.getMotorTemperature());
       SmartDashboard.putNumber("IP Amps", pivotMotor.getStatorCurrent());
 
       Point pos = getIntakePosition();

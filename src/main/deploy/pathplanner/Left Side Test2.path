@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.9007064547652628,
-        "y": 4.940117840292742
+        "x": 1.87,
+        "y": 4.96
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.7354948861110273,
-        "y": 4.962988756220023
+        "x": 2.705101672794442,
+        "y": 4.96
       },
       "holonomicAngle": 0.0,
       "isReversal": false,
@@ -27,16 +27,16 @@
     },
     {
       "anchorPoint": {
-        "x": 6.8,
+        "x": 6.5,
         "y": 4.551312269528961
       },
       "prevControl": {
-        "x": 4.627262986908285,
-        "y": 4.905811466401819
+        "x": 4.298533259701112,
+        "y": 4.551312269528961
       },
       "nextControl": {
-        "x": 4.627262986908285,
-        "y": 4.905811466401819
+        "x": 4.298533259701112,
+        "y": 4.551312269528961
       },
       "holonomicAngle": 0.0,
       "isReversal": true,
@@ -52,16 +52,16 @@
     },
     {
       "anchorPoint": {
-        "x": 1.9007064547652628,
-        "y": 4.951553298256383
+        "x": 1.81,
+        "y": 4.96
       },
       "prevControl": {
-        "x": 3.3987514480021828,
-        "y": 4.917246924365461
+        "x": 3.308437762822249,
+        "y": 4.96
       },
       "nextControl": {
-        "x": 3.3987514480021828,
-        "y": 4.917246924365461
+        "x": 3.308437762822249,
+        "y": 4.96
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -79,22 +79,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.9,
-        "y": 3.4
+        "x": 4.634250969423272,
+        "y": 4.8
       },
       "prevControl": {
-        "x": 6.213872522181562,
-        "y": 4.737948581745951
+        "x": 3.5036804871625336,
+        "y": 5.214731885452431
       },
       "nextControl": {
-        "x": 6.213872522181562,
-        "y": 4.737948581745951
+        "x": 6.058711182184913,
+        "y": 4.277459318936685
       },
-      "holonomicAngle": -20.0,
-      "isReversal": true,
+      "holonomicAngle": -30.0,
+      "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [],
         "executionBehavior": "parallel",
@@ -104,19 +104,22 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8892709968016221,
-        "y": 3.865184791710525
+        "x": 6.5,
+        "y": 3.65
       },
       "prevControl": {
-        "x": 3.330138700220339,
-        "y": 5.46614890662021
+        "x": 5.455382347653462,
+        "y": 4.354603503351681
       },
-      "nextControl": null,
-      "holonomicAngle": 0,
-      "isReversal": false,
+      "nextControl": {
+        "x": 5.455382347653462,
+        "y": 4.354603503351681
+      },
+      "holonomicAngle": -40.0,
+      "isReversal": true,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
         "names": [
           "ScoreHigh"
@@ -125,8 +128,33 @@
         "waitBehavior": "none",
         "waitTime": 0
       }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.89,
+        "y": 3.84
+      },
+      "prevControl": {
+        "x": 3.555239903536897,
+        "y": 5.755639375472608
+      },
+      "nextControl": null,
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
     }
   ],
+  "maxVelocity": 5.0,
+  "maxAcceleration": 3.0,
+  "isReversed": null,
   "markers": [
     {
       "position": 0.05,
@@ -135,33 +163,21 @@
       ]
     },
     {
-      "position": 1.44,
+      "position": 1.01,
       "names": [
-        "High"
+        "Handoff"
       ]
     },
     {
-      "position": 3.55,
+      "position": 4.01,
       "names": [
-        "High"
+        "Handoff"
       ]
     },
     {
       "position": 2.05,
       "names": [
         "Intake"
-      ]
-    },
-    {
-      "position": 1.0,
-      "names": [
-        "Handoff"
-      ]
-    },
-    {
-      "position": 3.0,
-      "names": [
-        "Handoff"
       ]
     }
   ]

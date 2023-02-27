@@ -26,8 +26,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public final class Autos {
-  private static final PathConstraints kDefaultConstraints = new PathConstraints(4, 3);
-  private static final PathConstraints kMediumConstraints = new PathConstraints(1.5, 3);
+  private static final PathConstraints kDefaultConstraints = new PathConstraints(4, 4.5);
+  private static final PathConstraints kMedium1Constraints = new PathConstraints(1.9, 3);
+  private static final PathConstraints kMedium2Constraints = new PathConstraints(1.9, 3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
   private static final PathConstraints kFastConstraints = new PathConstraints(4, 3);
 
@@ -69,14 +70,13 @@ public final class Autos {
   public static Command leftSide(Drive drive, Intake intake, Arm arm, RobotState robotstate) {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("Intake", new SetConeModeCommand(robotstate).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1))));
-    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
-    eventMap.put("Middle", new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.MEDIUM));
+    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake, ArmPosition.HIGH2));
+    eventMap.put("Middle", new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.MEDIUM_AUTO_START, ArmPosition.MEDIUM));
     eventMap.put("ScoreMiddle", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(arm.scoreCommand()));
     eventMap.put("ScoreHigh", arm.scoreCommand());
-    eventMap.put("High", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.HIGH2));
-
+    
     return setupAuto("Left Side Test2", eventMap, drive,
-      kDefaultConstraints, kMediumConstraints, kDefaultConstraints, kMediumConstraints
+      kDefaultConstraints, kMedium1Constraints, kDefaultConstraints, kMedium2Constraints
     );
   }
   private static Command setupAuto(String pathName, HashMap<String, Command> eventMap, Drive drive) {
@@ -92,10 +92,11 @@ public final class Autos {
       drive::getWpiPose, 
       drive::resetWpiPose, 
       frc.robot.Constants.Drive.kKinematics.asWpiSwerveDriveKinematics(), 
-      new PIDConstants(5, 0, 0), 
-      new PIDConstants(.9, 0, 0), 
+      new PIDConstants(8, 0, 0), 
+      new PIDConstants(2, 0, 0), 
       drive::setWpiModuleStates, 
       eventMap,
+      true,
       drive);
 
       return autoBuilder.fullAuto(pathGroup);

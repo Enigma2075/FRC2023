@@ -16,6 +16,8 @@ public class RobotState extends Subsystem {
 
     public RobotState() {
         Leds = new CANifier(1);
+
+        setGamePeiceMode(GamePieceMode.CONE);
     }
 
     public boolean isCubeMode() {
@@ -38,14 +40,14 @@ public class RobotState extends Subsystem {
         mGamePieceMode = mode;
         switch(mGamePieceMode) {
             case CUBE:
+                Leds.setLEDOutput(190.0/255.0, CANifier.LEDChannel.LEDChannelA);
+                Leds.setLEDOutput(0.0/255.0, CANifier.LEDChannel.LEDChannelB);
+                Leds.setLEDOutput(204.0/255.0, CANifier.LEDChannel.LEDChannelC);
+            break;
+            case CONE:
                 Leds.setLEDOutput(255.0/255.0, CANifier.LEDChannel.LEDChannelA);
                 Leds.setLEDOutput(255.0/255.0, CANifier.LEDChannel.LEDChannelB);
                 Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
-            break;
-            case CONE:
-                Leds.setLEDOutput(162.0/255.0, CANifier.LEDChannel.LEDChannelA);
-                Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelB);
-                Leds.setLEDOutput(250.0/255.0, CANifier.LEDChannel.LEDChannelC);
             break;
         }
     }
