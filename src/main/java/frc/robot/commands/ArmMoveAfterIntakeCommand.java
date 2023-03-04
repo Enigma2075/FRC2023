@@ -46,13 +46,12 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   public void initialize() {
     initialized = false;
     mIntake.setPivotPosition(PivotPosition.HANDOFF_CONE);
-    reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!initialized && mIntake.getIntakePosition().x > -27) {
+    if(!initialized && mIntake.getIntakePosition().x > -22) {
       mIntake.setIntake(IntakeMode.CONE_HANDOFF);
       super.initialize();
       initialized = true;
@@ -68,12 +67,14 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    
+    if(mMode == CommandMode.WAIT && !interrupted && mArm.handHasGamePeice()) {
+      mArm.setPosition(ArmPosition.HOLD);
+    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return super.isFinished();
+    return super.isFinished() && initialized;
   }
 }

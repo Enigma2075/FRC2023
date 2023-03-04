@@ -27,8 +27,8 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4, 4.5);
-  private static final PathConstraints kMedium1Constraints = new PathConstraints(1.9, 3);
-  private static final PathConstraints kMedium2Constraints = new PathConstraints(1.9, 3);
+  private static final PathConstraints kMedium1Constraints = new PathConstraints(1.5, 3);
+  private static final PathConstraints kMedium2Constraints = new PathConstraints(1.5, 3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
   private static final PathConstraints kFastConstraints = new PathConstraints(4, 3);
 

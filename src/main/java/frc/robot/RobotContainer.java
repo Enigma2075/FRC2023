@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
+import frc.robot.commands.ArmDefaultCommand;
 import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.ArmMoveAfterIntakeCommand;
 import frc.robot.commands.ArmMoveCommand;
@@ -35,6 +36,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -86,6 +88,8 @@ public class RobotContainer {
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
     
+    mArm.setDefaultCommand(new ArmDefaultCommand(mArm));
+
     //mIntake.setDefaultCommand(mIntake.defaultCommand(mDriverController::getRightTriggerAxis, mDriverController::getLeftTriggerAxis));
     //mIntake.setDefaultCommand(mIntake.testPivotCommand(mOperatorController::getRightX));
     
@@ -120,11 +124,11 @@ public class RobotContainer {
     mDriverController.b().or(mOperatorController.rightBumper()).whileTrue(new SetConeModeCommand(mRobotState));
     mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
-    new Trigger(mDriverController.rightTrigger(.7)).onTrue(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith(mIntake.intakeCommand())).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
-    mDriverController.rightBumper().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF));
-    mDriverController.leftBumper().whileTrue(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(mArm.scoreCommand()));
+    mDriverController.rightBumper().onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice));
+    mDriverController.leftBumper().whileTrue(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(mArm.scoreCommand()).andThen(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.HOLD, ArmPosition.DEFAULT).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)));
 
     //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
     //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
