@@ -80,9 +80,9 @@ public class DriveDefaultCommand extends CommandBase {
     // }
 
     // if (wantSmoothMode) {
-    //   mDrive.setKinematicLimits(Constants.kSmoothKinematicLimits);
+    //   mDrive.setKinematicLimits(Constants.Drive.kSmoothKinematicLimits);
     // } else {
-    //     mDrive.setKinematicLimits(Constants.kUncappedKinematicLimits);
+    //     mDrive.setKinematicLimits(Constants.Drive.kUncappedKinematicLimits);
     // }
   }
 
