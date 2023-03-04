@@ -6,12 +6,10 @@ import org.opencv.core.Point;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.InvertType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.StickyFaults;
 
 // Copyright (c) FIRST and other WPILib contributors.
 // Open Source Software; you can modify and/or share it under the terms of
@@ -23,22 +21,19 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import com.revrobotics.ColorSensorV3.RawColor;
 
-import edu.wpi.first.util.function.BooleanConsumer;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-//import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.geometry.Rotation2d;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants;
 
-public class Intake extends Subsystem {// swhere you make it
+public class Intake extends Subsystem {
   public enum PivotPosition {
     HANDOFF_CONE(-71.5),
     HANDOFF_CUBE(0),
-    DOWN(3),
-    UP(-117);
+    DOWN(6),
+    UP(-125);
 
     public final double mAngle;
 
@@ -69,9 +64,10 @@ public class Intake extends Subsystem {// swhere you make it
 
   private final RobotState mRobotState;
 
-  private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096 * Constants.Intake.kPivotReduction;
+  private final double kPivotPositionCoefficient = 2.0 * Math.PI / 4096.0 * Constants.Intake.kPivotReduction;
+  private final double kPivotAbsPositionCoefficient = 2.0 * Math.PI / 1 * Constants.Intake.kPivotReduction;
 
-  private double mPivotOffset;
+  //private Rotation2d mPivotOffset;
 
   private Arm mArm;
 
@@ -82,6 +78,7 @@ public class Intake extends Subsystem {// swhere you make it
     PivotPosition pivotPosition = PivotPosition.UP;
     double pivotTarget;
     Rotation2d pivotAngle;
+    double pivotAbs;
 
     // Intake
     IntakeMode intakeMode = IntakeMode.STOP;
@@ -104,11 +101,11 @@ public class Intake extends Subsystem {// swhere you make it
 
     pivotMotor.configFeedbackNotContinuous(true, 10);
 
-    pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, 10);
+    //pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute, 1, 10);
     pivotMotor.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 10);
     pivotMotor.setSensorPhase(true);
 
-    double pivotAbsPos = pivotMotor.getSelectedSensorPosition(1);
+    // double pivotAbsPos = pivotMotor.getSelectedSensorPosition(1);
     // We want the encoder counts for all the way up to be 118 deg
     // mPivotOffset = pivotAbsPos > Constants.Intake.kPivotOffset + 100
     // ? (4096 - pivotAbsPos + Constants.Intake.kPivotOffset)
@@ -148,7 +145,9 @@ public class Intake extends Subsystem {// swhere you make it
 
     intakeMotor.setInverted(true);
     //intakeMotor.setOpenLoopRampRate(1);
-    //intakeMotor.setSmartCurrentLimit(60);
+    intakeMotor.setSmartCurrentLimit(40);
+
+    zeroMotors();
   }
 
   public void setArm(Arm arm) {
@@ -164,12 +163,46 @@ public class Intake extends Subsystem {// swhere you make it
     mPeriodicIO.intakeMode = mode;
   }
 
+  public Rotation2d getPivotCanCoderAngle() {
+    return Rotation2d.fromDegrees(Cancoders.getInstance().getIntakePivot().getAbsolutePosition());
+  }
+
+  public double getAdjustedPivotCanCoderAngle() {
+    Rotation2d raw = getPivotCanCoderAngle();
+    if(raw.getDegrees() < Constants.Intake.kPivotOffset.getDegrees()) {
+      return (Constants.Intake.kPivotOffset.getDegrees() - raw.getDegrees()) * -1;
+    }
+    else {
+      return (360.0 - raw.getDegrees() + Constants.Intake.kPivotOffset.getDegrees()) * -1;
+    }
+  }
+
+  private void zeroMotors() {
+    //Rotation2d zeroOffset = getAdjustedPivotCanCoderAngle();
+
+    //if(zeroOffset.getRadians() < 0) {
+    //  zeroOffset = Rotation2d.fromRadians(kPivotPositionCoefficient);
+    //}
+
+    double startingPosition = Math.toRadians(getAdjustedPivotCanCoderAngle() + 14) / kPivotAbsPositionCoefficient / kPivotPositionCoefficient;
+
+    //if(startingPosition < 0) {
+      
+    //}
+    pivotMotor.setSelectedSensorPosition(startingPosition);
+
+
+    //mPivotOffset = Rotation2d.fromRadians(pivotMotor.getSelectedSensorPosition() *
+    //kPivotPositionCoefficient)
+    //.rotateBy(getAdjustedPivotCanCoderAngle().inverse());
+  }
+
   public void writeIntake() {
     intakeMotor.set(mPeriodicIO.intakeMode.mOutput);
   }
 
   public void writePivot() {
-    if (mPivotReset) {
+    //if (mPivotReset) {
       switch (Constants.Intake.kPivotMode) {
         case MOTION_MAGIC:
           writePivotAngle(mPeriodicIO.pivotPosition.mAngle);
@@ -181,16 +214,16 @@ public class Intake extends Subsystem {// swhere you make it
           writePivotVelocity(mPeriodicIO.pivotTarget);
           break;
       }
-    } else {
-      if (Math.abs(pivotMotor.getStatorCurrent()) > 40) {
-        writePivotOutput(0);
-        mPivotReset = true;
-        double startingPosition = (Math.toRadians(-118 - 16) / kPivotPositionCoefficient);
-        pivotMotor.setSelectedSensorPosition(startingPosition);
-      } else {
-        writePivotOutput(-1);
-      }
-    }
+    //} else {
+    //  if (Math.abs(pivotMotor.getStatorCurrent()) > 40) {
+    //    writePivotOutput(0);
+    //    mPivotReset = true;
+    //    double startingPosition = (Math.toRadians(-118 - 16) / kPivotPositionCoefficient);
+    //    pivotMotor.setSelectedSensorPosition(startingPosition);
+    //  } else {
+    //    writePivotOutput(-1);
+    // }
+    //}
   }
 
   public CommandBase autoCommand(PivotPosition pivot, IntakeMode intake) {
@@ -339,6 +372,7 @@ public class Intake extends Subsystem {// swhere you make it
     double x = Math.cos(pivotRad) * 17.553;
     double y = Math.sin(pivotRad) * 17.553;
 
+    // Adjust coordinates to the same as the shoulder
     x -= 20.125;
     y -= .54;
 
@@ -409,7 +443,7 @@ public class Intake extends Subsystem {// swhere you make it
   }
 
   public double getUnclampedPivotAngleRadians() {
-    return ((pivotMotor.getSelectedSensorPosition()) * kPivotPositionCoefficient);
+    return (pivotMotor.getSelectedSensorPosition() * kPivotPositionCoefficient);
   }
 
   @Override
@@ -419,6 +453,8 @@ public class Intake extends Subsystem {// swhere you make it
 
   @Override
   public synchronized void readPeriodicInputs() {
+    mPeriodicIO.pivotAbs = Cancoders.getInstance().getIntakePivot().getAbsolutePosition();
+
     mPeriodicIO.pivotAngle = getPivotAngle();
   }
 
@@ -453,8 +489,10 @@ public class Intake extends Subsystem {// swhere you make it
       SmartDashboard.putString("IP PosName", mPeriodicIO.pivotPosition.name());
       SmartDashboard.putNumber("IP Target", mPeriodicIO.pivotTarget);
       SmartDashboard.putNumber("IP Deg", mPeriodicIO.pivotAngle.getDegrees());
-      double raw = pivotMotor.getSelectedSensorPosition(1);
-      SmartDashboard.putNumber("IP Abs Raw", raw);
+      SmartDashboard.putNumber("IP Abs", getPivotCanCoderAngle().getDegrees());
+      //SmartDashboard.putNumber("IP Abs1", getAdjustedPivotCanCoderAngle());
+      //SmartDashboard.putNumber("IP Calc Deg", Math.toDegrees(Math.toRadians(getAdjustedPivotCanCoderAngle() + 14) / kPivotAbsPositionCoefficient));
+      //SmartDashboard.putNumber("IP Offset", Constants.Intake.kPivotOffset.getDegrees());
       SmartDashboard.putNumber("IP Arb FF", calcPivotArbFF());
 
       SmartDashboard.putNumber("I Amps", intakeMotor.getOutputCurrent());

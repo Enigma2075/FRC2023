@@ -63,7 +63,7 @@ public final class Constants {
     public static final int kShoulderRightId = 1;
     public static final int kShoulderLeftId = 2;
     public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
-    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(126.298828125) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(257.607421875) : Rotation2d.fromDegrees(283.62);
 
     public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 5.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
 
@@ -88,7 +88,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(191.25) : Rotation2d.fromDegrees(283.62);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(187.9) : Rotation2d.fromDegrees(283.62);
 
     public static final double kElbowReduction = (1.0 / 10.0) * (1.0 / 3.0) * (18.0 / 44.0);
 
@@ -126,16 +126,12 @@ public final class Constants {
 
     // Pivot contants
     public static final int kPivotId = 1;
-    public static final CanDeviceId kPivotEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
-    // This should be the raw abs encoder count when the intake is up at the hardstop.
+    public static final CanDeviceId kPivotEncoderId = new CanDeviceId(7, Can.kCANivoreBusName);
+    // This should be the raw abs encoder count when the intake is down at the hardstop.
     // Make sure you are forcing the gear back to take out all slop
-    // We add 5 more on to be safe
-    public static final double kPivotOffset = (Robot.kPracticeBot ? 780 : 465) + 5;
+    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(275.361328125) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(283.62);
 
     public static final double kPivotReduction = (24.0 / 60.0); //277.7;
-
-    //public static final float kPivotForwardLimitDeg = 35;// 35
-    //public static final float kPivotReverseLimitDeg = -65;
 
     public static final double kPivotMaxArbFF = .09;
 
@@ -225,8 +221,8 @@ public final class Constants {
     // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
     public static final double kMaxAngularVelocityRadiansPerSecond = 11.386413;
 
-    public static final double kScaleTranslationInputs = 1;
-    public static final double kScaleRotationInputs = 0.5;
+    public static final double kScaleTranslationInputs = 1 * .6;
+    public static final double kScaleRotationInputs = 0.5 * .6;
 
     public static final KinematicLimits kUncappedKinematicLimits = new KinematicLimits();
     static {

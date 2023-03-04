@@ -26,9 +26,8 @@ public class ArmMoveCommand extends CommandBase {
   protected final double mHandOutput;
   protected final ArmPosition[] mPositions;
 
-  private int mCurrentPos = 0;
-  private boolean mAtPos = false;
-  private CommandMode mMode = CommandMode.NORMAL;
+  //protected boolean mAtPos = false;
+  protected CommandMode mMode = CommandMode.NORMAL;
   
   /**
    * Creates a new ExampleCommand.
@@ -44,7 +43,7 @@ public class ArmMoveCommand extends CommandBase {
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
-
+  
   public ArmMoveCommand(Arm arm, double handOutput, ArmPosition... positions) {
     mArm = arm;
     mHandOutput = handOutput;
@@ -75,39 +74,18 @@ public class ArmMoveCommand extends CommandBase {
     addRequirements(arm);
   }
 
-  protected void reset() {
-    mAtPos = false;
-    mCurrentPos = 0;
-  }
-
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    reset();
-    
+  public void initialize() {    
     if(mHandOutput != Double.MIN_VALUE) {
       mArm.setHandOutput(mHandOutput);
     }
-    mArm.setPosition(mPositions[mCurrentPos]);
+    mArm.setPositions(mPositions);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!mAtPos || mCurrentPos < mPositions.length) {
-      if(mArm.atPosition()) {
-        mAtPos = true;
-        mCurrentPos++;
-        if(mCurrentPos < mPositions.length) {
-          mArm.setPosition(mPositions[mCurrentPos]);
-        }
-      }
-      else {
-        if(mCurrentPos < mPositions.length) {
-          mArm.setPosition(mPositions[mCurrentPos]);
-        }
-      }
-    }
   }
 
   // Called once the command ends or is interrupted.
@@ -119,13 +97,13 @@ public class ArmMoveCommand extends CommandBase {
   @Override
   public boolean isFinished() {
     if(mMode == CommandMode.WAIT) {
-      return mCurrentPos == mPositions.length;
+      return mArm.isSequenceComplete();
     }
     else if(mMode == CommandMode.DONT_END) {
       return false;
     }
     else {
-      return mCurrentPos == mPositions.length - 1;
+      return mArm.isSequenceComplete(false);
     }
   }
 }
