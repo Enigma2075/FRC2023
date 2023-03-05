@@ -28,6 +28,12 @@ import frc.lib.other.Subsystem;
 import frc.robot.Constants;
 
 public class Arm extends Subsystem {
+  public enum ScoreMode {
+    LOW,
+    MEDIUM,
+    HIGH
+  }
+
   public enum ArmPosition {
     HANDOFF_CONE1(0, 30),
     HANDOFF_CONE2(10, 40),
@@ -44,9 +50,10 @@ public class Arm extends Subsystem {
     DEFAULT(0, 0),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
     DEFAULT_ELBOW(Double.MIN_VALUE, 0),
-    HIGH1(-10, -90),
-    HIGH2(-24, -140),
-    MEDIUM(-10, -92),
+    HIGH_CONE(-24, -140),
+    MEDIUM_CONE(-10, -92),
+    HIGH_CUBE(-7, -92),
+    MEDIUM_CUBE(20, -55),
     MEDIUM_AUTO_START(0, -70),
     HAND_OFF(0, 50),
     SCORE_OFFSET(Double.MIN_VALUE, 15, true),
@@ -67,52 +74,6 @@ public class Arm extends Subsystem {
       this.mIsOffset = isOffset;
       this.mShoulderAngle = shoulderAngle;
       this.mElbowAngle = elbowAngle;
-    }
-  }
-
-  public interface ArmMotionCondition {
-    boolean conditionCheck(Point p);
-  }
-
-  public class ArmMotion {
-    private ArmPosition mPosition;
-    private ArmMotionCondition mElbowCondition;
-    private ArmMotionCondition mShoulderCondition;
-
-    public ArmMotion(ArmPosition position) {
-      this(position, null, null);
-    }
-
-    public ArmMotion(ArmPosition position, ArmMotionCondition elbowCondition) {
-      this(position, elbowCondition, null);
-    }
-
-    public ArmMotion(ArmPosition position, ArmMotionCondition elbowCondition, ArmMotionCondition ShoulderCondition) {
-      mPosition = position;
-      mElbowCondition = elbowCondition;
-      mShoulderCondition = ShoulderCondition;
-    }
-
-    public ArmPosition getPosition() {
-      return mPosition;
-    }
-
-    public ArmMotionCondition getElbowCondition() {
-      if(mElbowCondition == null) {
-        return (p) -> {return true; };
-      }
-      else {
-        return mElbowCondition;
-      }
-    }
-
-    public ArmMotionCondition getShoulderCondition() {
-      if(mShoulderCondition == null) {
-        return (p) -> {return true;};
-      }
-      else {
-        return mShoulderCondition;
-      }
     }
   }
 
@@ -397,13 +358,79 @@ public class Arm extends Subsystem {
         .rotateBy(getAdjustedShoulderCanCoderAngle().inverse());
   }
 
+  public CommandBase moveToScore(ScoreMode mode) {
+    return runOnce(() -> {
+      if(mRobotState.isConeMode()) {
+        switch(mode) {
+          case LOW:
+          break;
+          case MEDIUM:
+            setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (p) -> {return p.y > 16;}));
+          break;
+          case HIGH:
+            setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (p) -> {return p.y > 16;}));
+          break;
+        }
+      }
+      else {
+        switch(mode) {
+          case LOW:
+          break;
+          case MEDIUM:
+            setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE, null, (p) -> {return p.y > 16;}));
+          break;
+          case HIGH:
+            setPosition(new ArmMotion(ArmPosition.HIGH_CUBE, null, (p) -> {return p.y > 16;}));
+          break;
+        }
+      }
+    });
+  }
+
   public CommandBase scoreCommand() {
-    return runEnd(
+    return startEnd(
         () -> {
-          mPeriodicIO.handTarget = -.2;
+          ScoreMode mode = null;
+          switch(mPeriodicIO.targetPosition) {
+            case HIGH_CONE:
+            case HIGH_CUBE:
+              mode = ScoreMode.HIGH;
+            break;
+            case MEDIUM_CONE:
+            case MEDIUM_CUBE:
+              mode = ScoreMode.MEDIUM;
+            break;
+            default:
+          }
+
+          if(mode == null) {return;}
+
+          if(mRobotState.isConeMode()) {
+            switch(mode) {
+              case LOW:
+              break;
+              case MEDIUM:
+                mPeriodicIO.handTarget = -.2;
+                setPosition(ArmPosition.SCORE_OFFSET);
+              break;
+              case HIGH:
+                mPeriodicIO.handTarget = -.3;
+              break;
+            }
+          }
+          else {
+            mPeriodicIO.handTarget = -.7;
+          }
         },
         () -> {
           mPeriodicIO.handTarget = 0;
+          
+          if(mRobotState.isConeMode()) {
+            setPositions(new ArmMotion(ArmPosition.HOLD, (p) -> {return p.x < 40;}), new ArmMotion(ArmPosition.DEFAULT));
+          }
+          else {
+            setPositions(new ArmMotion(ArmPosition.DEFAULT, (p) -> {return p.x < 30;}));
+          }
         }).withTimeout(.5);
   }
 
@@ -459,7 +486,7 @@ public class Arm extends Subsystem {
     setPositions(new ArmMotion[] {motion});
   }
 
-  public void setPositions(ArmPosition[] positions) {
+  public void setPositions(ArmPosition... positions) {
     ArrayList<ArmMotion> motions = new ArrayList<ArmMotion>();
 
     for (ArmPosition position : positions) {
@@ -471,7 +498,7 @@ public class Arm extends Subsystem {
     mPeriodicIO.sequenceIndex = 0;
   }
 
-  public void setPositions(ArmMotion[] motions) {
+  public void setPositions(ArmMotion... motions) {
     mPeriodicIO.sequence = motions;
     mPeriodicIO.sequenceIndex = 0;
   }
@@ -488,7 +515,12 @@ public class Arm extends Subsystem {
   }
 
   public void writeElbowPosition() {
-    if(!mPeriodicIO.sequence[mPeriodicIO.sequenceIndex].getElbowCondition().conditionCheck(getArmPosition())) {
+    int index = mPeriodicIO.sequenceIndex;
+    if(index > 0) {
+      index--;
+    }
+    
+    if(!mPeriodicIO.sequence[index].checkElbowCondition(getArmPosition())) {
       return;
     }
 
@@ -511,7 +543,11 @@ public class Arm extends Subsystem {
   }
 
   public void writeShoulderPosition() {
-    if(!mPeriodicIO.sequence[mPeriodicIO.sequenceIndex].getElbowCondition().conditionCheck(getArmPosition())) {
+    int index = mPeriodicIO.sequenceIndex;
+    if(index > 0) {
+      index--;
+    }
+    if(!mPeriodicIO.sequence[index].checkShoulderCondition(getArmPosition())) {
       return;
     }
     
@@ -620,12 +656,12 @@ public class Arm extends Subsystem {
 
     ArmMotion motion = mPeriodicIO.sequence[mPeriodicIO.sequenceIndex];
 
-    if(motion.mPosition == mPeriodicIO.targetPosition) {
+    if(motion.getPosition() == mPeriodicIO.targetPosition) {
       return;
     }
 
     if(atPosition()) {
-      ArmPosition position = mPeriodicIO.targetPosition = motion.mPosition;
+      ArmPosition position = mPeriodicIO.targetPosition = motion.getPosition();
       mPeriodicIO.sequenceIndex++;
 
       if(position.mIsOffset) {

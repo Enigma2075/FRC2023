@@ -10,6 +10,7 @@ import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.RobotState;
 import frc.robot.subsystems.Arm.ArmPosition;
+import frc.robot.subsystems.Arm.ScoreMode;
 import frc.robot.subsystems.Intake.IntakeMode;
 import frc.robot.subsystems.Intake.PivotPosition;
 
@@ -54,9 +55,9 @@ public final class Autos {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("Intake", new ParallelCommandGroup(intake.autoCommand(PivotPosition.DOWN, IntakeMode.CONE_IN), new ArmMoveCommand(arm, ArmPosition.HAND_OFF)));
     eventMap.put("HandOff", intake.autoCommand(PivotPosition.UP, IntakeMode.STOP));
-    eventMap.put("Middle", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.MEDIUM));
+    eventMap.put("Middle", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.MEDIUM_CONE));
     eventMap.put("Score", arm.scoreCommand());
-    eventMap.put("High", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.HIGH1, ArmPosition.HIGH2));
+    eventMap.put("High", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.HIGH_CONE));
 
     return setupAuto("Right Side", eventMap, drive,
       kDefaultConstraints, //start to bump
@@ -70,8 +71,8 @@ public final class Autos {
   public static Command leftSide(Drive drive, Intake intake, Arm arm, RobotState robotstate) {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("Intake", new SetConeModeCommand(robotstate).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF2_CONE1))));
-    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake, ArmPosition.HIGH2));
-    eventMap.put("Middle", new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.MEDIUM_AUTO_START, ArmPosition.MEDIUM));
+    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake, ArmPosition.HIGH_CONE));
+    eventMap.put("Middle", new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.MEDIUM_AUTO_START, ArmPosition.MEDIUM_CONE));
     eventMap.put("ScoreMiddle", new ArmMoveCommand(arm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(arm.scoreCommand()));
     eventMap.put("ScoreHigh", arm.scoreCommand());
     

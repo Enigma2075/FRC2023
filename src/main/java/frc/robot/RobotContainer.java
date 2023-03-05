@@ -23,6 +23,7 @@ import frc.robot.subsystems.Intake.PivotPosition;
 import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.RobotState;
 import frc.robot.subsystems.Arm.ArmPosition;
+import frc.robot.subsystems.Arm.ScoreMode;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -128,13 +129,13 @@ public class RobotContainer {
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
     mDriverController.rightBumper().onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice));
-    mDriverController.leftBumper().whileTrue(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.SCORE_OFFSET).andThen(mArm.scoreCommand()).andThen(new ArmMoveCommand(mArm, CommandMode.WAIT, ArmPosition.HOLD, ArmPosition.DEFAULT).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)));
+    mDriverController.leftBumper().onTrue(mArm.scoreCommand().withInterruptBehavior(InterruptionBehavior.kCancelIncoming)).debounce(.5);
 
     //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
     //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
     
-    mOperatorController.b().whileTrue(new ArmMoveCommand(mArm, ArmPosition.MEDIUM));
-    mOperatorController.y().whileTrue(new ArmMoveCommand(mArm, ArmPosition.HIGH2));
+    mOperatorController.b().onTrue(mArm.moveToScore(ScoreMode.MEDIUM));
+    mOperatorController.y().onTrue(mArm.moveToScore(ScoreMode.HIGH));
     mOperatorController.a().whileTrue(mArm.handCommand());
     
     mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));

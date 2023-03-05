@@ -221,8 +221,8 @@ public final class Constants {
     // Here we calculate the theoretical maximum angular velocity. You can also replace this with a measured amount.
     public static final double kMaxAngularVelocityRadiansPerSecond = 11.386413;
 
-    public static final double kScaleTranslationInputs = 1 * .6;
-    public static final double kScaleRotationInputs = 0.5 * .6;
+    public static final double kScaleTranslationInputs = 1 * .7;
+    public static final double kScaleRotationInputs = 0.5 * .7;
 
     public static final KinematicLimits kUncappedKinematicLimits = new KinematicLimits();
     static {
