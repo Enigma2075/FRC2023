@@ -36,7 +36,8 @@ public final class Autos {
   public static Command straightTest(Drive drive) {
     HashMap<String, Command> eventMap = new HashMap<>();
 
-    return setupAuto("Straight Test", eventMap, drive);
+    return setupAuto("Straight Test", eventMap, drive
+    );
   }
   
   public static Command splineTest(Drive drive) {
