@@ -365,10 +365,10 @@ public class Arm extends Subsystem {
           case LOW:
           break;
           case MEDIUM:
-            setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (p) -> {return p.y > 16;}));
+            setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (s, e) -> {return e < -10;}));
           break;
           case HIGH:
-            setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (p) -> {return p.y > 16;}));
+            setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -5;}));
           break;
         }
       }
@@ -377,10 +377,10 @@ public class Arm extends Subsystem {
           case LOW:
           break;
           case MEDIUM:
-            setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE, null, (p) -> {return p.y > 16;}));
+            setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE, null, (s, e) -> {return e < -10;}));
           break;
           case HIGH:
-            setPosition(new ArmMotion(ArmPosition.HIGH_CUBE, null, (p) -> {return p.y > 16;}));
+            setPosition(new ArmMotion(ArmPosition.HIGH_CUBE, null, (s, e) -> {return e < -10;}));
           break;
         }
       }
@@ -426,10 +426,17 @@ public class Arm extends Subsystem {
           mPeriodicIO.handTarget = 0;
           
           if(mRobotState.isConeMode()) {
-            setPositions(new ArmMotion(ArmPosition.HOLD, (p) -> {return p.x < 40;}), new ArmMotion(ArmPosition.DEFAULT));
+            double shoulderCondition = mPeriodicIO.shoulderDeg + 5;
+            setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {return s > shoulderCondition;}), new ArmMotion(ArmPosition.DEFAULT));
           }
           else {
-            setPositions(new ArmMotion(ArmPosition.DEFAULT, (p) -> {return p.x < 30;}));
+            double shoulderCondition = mPeriodicIO.shoulderDeg + 2;
+            if(mPeriodicIO.shoulderDeg > 0) {
+              setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > -1;}));
+            }
+            else {
+              setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > shoulderCondition;}));
+            }
           }
         }).withTimeout(.5);
   }
@@ -520,7 +527,7 @@ public class Arm extends Subsystem {
       index--;
     }
     
-    if(!mPeriodicIO.sequence[index].checkElbowCondition(getArmPosition())) {
+    if(!mPeriodicIO.sequence[index].checkElbowCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
       return;
     }
 
@@ -547,7 +554,7 @@ public class Arm extends Subsystem {
     if(index > 0) {
       index--;
     }
-    if(!mPeriodicIO.sequence[index].checkShoulderCondition(getArmPosition())) {
+    if(!mPeriodicIO.sequence[index].checkShoulderCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
       return;
     }
     
