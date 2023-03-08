@@ -9,6 +9,8 @@ import frc.lib.other.Subsystem;
 // earlier than everything else and DI them to the swerve modules
 public class RobotState extends Subsystem {
     public enum GamePieceMode {CONE, CUBE, UNKNOWN}
+    private boolean mHasGamePiece;
+    private double mBlinkTimer = 0;
 
     private final CANifier Leds;
 
@@ -36,8 +38,38 @@ public class RobotState extends Subsystem {
         setGamePeiceMode(GamePieceMode.CUBE);
     }
 
+    public void setHasGamePiece(boolean hasGamePiece) {
+        mHasGamePiece = hasGamePiece;
+    }
+
     public void setGamePeiceMode(GamePieceMode mode) {
         mGamePieceMode = mode;
+        
+    }
+
+    @Override
+    public void stop() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public boolean checkSystem() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void writePeriodicOutputs() {
+        if (mHasGamePiece && Timer.getFPGATimestamp() - mBlinkTimer > 1 ) {
+            mBlinkTimer = Timer.getFPGATimestamp();
+        }
+
+        if (mHasGamePiece && Timer.getFPGATimestamp() - mBlinkTimer < 1 ) {
+            Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelA);
+            Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelB);
+            Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
+        }
+        else {
         switch(mGamePieceMode) {
             case CUBE:
                 Leds.setLEDOutput(190.0/255.0, CANifier.LEDChannel.LEDChannelA);
@@ -50,17 +82,7 @@ public class RobotState extends Subsystem {
                 Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
             break;
         }
-    }
-
-    @Override
-    public void stop() {
-        // TODO Auto-generated method stub
-    }
-
-    @Override
-    public boolean checkSystem() {
-        // TODO Auto-generated method stub
-        return false;
+        }
     }
 
     @Override
