@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.CANifier;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.other.Subsystem;
 
@@ -43,8 +44,9 @@ public class RobotState extends Subsystem {
     }
 
     public void setGamePeiceMode(GamePieceMode mode) {
+        if (mHasGamePiece = false) {
         mGamePieceMode = mode;
-        
+        }
     }
 
     @Override
@@ -69,6 +71,7 @@ public class RobotState extends Subsystem {
             Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelB);
             Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
         }
+
         else {
         switch(mGamePieceMode) {
             case CUBE:
