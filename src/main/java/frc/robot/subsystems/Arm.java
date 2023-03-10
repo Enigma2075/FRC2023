@@ -26,11 +26,12 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.lib.geometry.Rotation2d;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants;
+import frc.robot.commands.ArmMoveToScoreCommand;
 
 public class Arm extends Subsystem {
   public enum ScoreMode {
     LOW,
-    MEDIUM,
+    MIDDLE,
     HIGH
   }
 
@@ -46,7 +47,7 @@ public class Arm extends Subsystem {
     HANDOFF_CUBE(36, 45),
     INTAKE_CONE(1.70, 46.22),
     GRAB_CONE(18.32, 46.22),
-    START(17, 4),
+    START(24, -5),
     DEFAULT(0, 0),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
     DEFAULT_ELBOW(Double.MIN_VALUE, 0),
@@ -56,9 +57,10 @@ public class Arm extends Subsystem {
     MEDIUM_CUBE(20, -55),
     MEDIUM_AUTO_START(0, -70),
     HAND_OFF(0, 50),
-    SCORE_OFFSET(Double.MIN_VALUE, 15, true),
+    SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
+    SCORE_OFFSET_CONE_HIGH(Double.MIN_VALUE, 15, true),
     HOLD(24, -5),
-    SHELF(21, -63);
+    SHELF(15, -65);
 
     public final double mShoulderAngle;
     public final double mElbowAngle;
@@ -159,7 +161,7 @@ public class Arm extends Subsystem {
 
     // Configure Time Of Flight
     mTimeOfFlight = new TimeOfFlight(0);
-    mTimeOfFlight.setRangeOfInterest(0, 10, 15, 15);
+    mTimeOfFlight.setRangeOfInterest(8, 8, 12, 12);
 
     // Configure Shoulder motors
     mShoulderLeftMotor = new CANSparkMax(Constants.Arm.kShoulderLeftId, MotorType.kBrushless);
@@ -251,6 +253,8 @@ public class Arm extends Subsystem {
     mElbowMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     setPosition(ArmPosition.START);
+    writeShoulderPosition(true);
+    writeElbowPosition();
   }
 
   public void setIntake(Intake intake) {
@@ -279,7 +283,12 @@ public class Arm extends Subsystem {
 
   public boolean handHasGamePeice() {
     if(mTimeOfFlight.isRangeValid()) {
-      mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 100;
+      if(mRobotState.isConeMode()) {
+        mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 50;
+      }
+      else {
+        mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 200;
+      }
     } 
     return mPeriodicIO.handHasGamePeiceLast;
   }
@@ -344,6 +353,10 @@ public class Arm extends Subsystem {
     return ((Math.toRadians(angle) + mElbowOffset.getRadians()) / kElbowPositionCoefficient);
   }
 
+  public boolean isConeMode() {
+    return mRobotState.isConeMode();
+  }
+
   public void rezeroMotors() {
     mElbowOffset = Rotation2d.fromRadians(mElbowEncoder.getPosition() *
         kElbowPositionCoefficient)
@@ -359,86 +372,11 @@ public class Arm extends Subsystem {
   }
 
   public CommandBase moveToScore(ScoreMode mode) {
-    return runOnce(() -> {
-      if(mRobotState.isConeMode()) {
-        switch(mode) {
-          case LOW:
-          break;
-          case MEDIUM:
-            setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (s, e) -> {return e < -10;}));
-          break;
-          case HIGH:
-            setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -5;}));
-          break;
-        }
-      }
-      else {
-        switch(mode) {
-          case LOW:
-          break;
-          case MEDIUM:
-            setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE, null, (s, e) -> {return e < -10;}));
-          break;
-          case HIGH:
-            setPosition(new ArmMotion(ArmPosition.HIGH_CUBE, null, (s, e) -> {return e < -10;}));
-          break;
-        }
-      }
-    });
+    return new ArmMoveToScoreCommand(this, mRobotState, mode, false);
   }
 
-  public CommandBase scoreCommand() {
-    return startEnd(
-        () -> {
-          ScoreMode mode = null;
-          switch(mPeriodicIO.targetPosition) {
-            case HIGH_CONE:
-            case HIGH_CUBE:
-              mode = ScoreMode.HIGH;
-            break;
-            case MEDIUM_CONE:
-            case MEDIUM_CUBE:
-              mode = ScoreMode.MEDIUM;
-            break;
-            default:
-          }
-
-          if(mode == null) {return;}
-
-          if(mRobotState.isConeMode()) {
-            switch(mode) {
-              case LOW:
-              break;
-              case MEDIUM:
-                mPeriodicIO.handTarget = -.2;
-                setPosition(ArmPosition.SCORE_OFFSET);
-              break;
-              case HIGH:
-                mPeriodicIO.handTarget = -.3;
-              break;
-            }
-          }
-          else {
-            mPeriodicIO.handTarget = -.7;
-          }
-        },
-        () -> {
-          mPeriodicIO.handTarget = 0;
-          
-          if(mRobotState.isConeMode()) {
-            double shoulderCondition = mPeriodicIO.shoulderDeg + 5;
-            setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {return s > shoulderCondition;}), new ArmMotion(ArmPosition.DEFAULT));
-          }
-          else {
-            double shoulderCondition = mPeriodicIO.shoulderDeg + 2;
-            if(mPeriodicIO.shoulderDeg > 0) {
-              setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > -1;}));
-            }
-            else {
-              setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > shoulderCondition;}));
-            }
-          }
-        }).withTimeout(.5);
+  public ArmPosition getTargetPosition() {
+    return mPeriodicIO.targetPosition;
   }
 
   public CommandBase handCommand() {
@@ -550,6 +488,17 @@ public class Arm extends Subsystem {
   }
 
   public void writeShoulderPosition() {
+    writeShoulderPosition(true);
+  }
+
+  public void writeShoulderPosition(boolean force) {
+    if(force) {
+      mPeriodicIO.shoulderTargetCalc = calcShoulderPosFromAngle(mPeriodicIO.shoulderTarget);
+      mShoulderPidController.setReference(mPeriodicIO.shoulderTargetCalc, ControlType.kSmartMotion, 0,
+      calcShoulderArbFF(), ArbFFUnits.kPercentOut);
+      return;
+    }
+
     int index = mPeriodicIO.sequenceIndex;
     if(index > 0) {
       index--;
