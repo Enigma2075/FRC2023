@@ -10,6 +10,7 @@ import java.util.function.DoubleSupplier;
 
 import org.opencv.core.Point;
 
+import com.ctre.phoenix.CANifier;
 import com.playingwithfusion.TimeOfFlight;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.RelativeEncoder;
@@ -290,6 +291,7 @@ public class Arm extends Subsystem {
         mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 200;
       }
     } 
+    mRobotState.setHasGamePiece(mPeriodicIO.handHasGamePeiceLast);
     return mPeriodicIO.handHasGamePeiceLast;
   }
 
