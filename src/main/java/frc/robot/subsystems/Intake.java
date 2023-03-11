@@ -242,6 +242,16 @@ public class Intake extends Subsystem {
     );
   }
 
+  public CommandBase intakeFeederCommand() {
+    return runEnd(() -> {
+      setPivotPosition(PivotPosition.HANDOFF_CONE);
+      setIntake(IntakeMode.CONE_IN);
+    },
+    () -> {
+      setIntake(IntakeMode.CONE_HOLD);
+    });
+  }
+
   public CommandBase intakeCommand() {
     return intakeCommand(false);
   }

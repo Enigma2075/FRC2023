@@ -39,7 +39,7 @@ public class Drive extends Subsystem {
     // private final DriveMotionPlanner mMotionPlanner;
     // private boolean mOverrideTrajectory = false;
     private DriveControlState mDriveControlState = DriveControlState.VELOCITY_CONTROL;
-    private KinematicLimits mKinematicLimits = Constants.Drive.kTeleopKinematicLimits;
+    private KinematicLimits mKinematicLimits = Constants.Drive.kUncappedKinematicLimits;
 
     private SwerveDriveOdometry mOdometry;
 

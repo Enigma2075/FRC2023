@@ -27,21 +27,21 @@ public class ArmMotion {
       return mPosition;
     }
 
-    public boolean checkElbowCondition(Point p) {
+    public boolean checkElbowCondition(double shoulderAngle, double elbowAngle) {
       if(mElbowCondition == null) {
        return true;
       }
       else {
-        return mElbowCondition.conditionCheck(p);
+        return mElbowCondition.conditionCheck(shoulderAngle, elbowAngle);
       }
     }
 
-    public boolean checkShoulderCondition(Point p) {
+    public boolean checkShoulderCondition(double shoulderAngle, double elbowAngle) {
       if(mShoulderCondition == null) {
         return true;
       }
       else {
-        return mShoulderCondition.conditionCheck(p);
+        return mShoulderCondition.conditionCheck(shoulderAngle, elbowAngle);
       }
     }
   }
