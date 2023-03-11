@@ -9,9 +9,16 @@ import frc.lib.other.Subsystem;
 // Conatiner to hold the Cancoders so we can initialize them
 // earlier than everything else and DI them to the swerve modules
 public class RobotState extends Subsystem {
-    public enum GamePieceMode {CONE, CUBE, UNKNOWN}
+    public enum GamePieceMode {
+        CONE, CUBE, UNKNOWN
+    }
+
+    private final double mBlinkOffDuration = .25;
+    private final double mBlinkOnDuration = .25;
+
     private boolean mHasGamePiece;
     private double mBlinkTimer = 0;
+    private boolean mLedsOn = true;
 
     private final CANifier Leds;
 
@@ -44,8 +51,8 @@ public class RobotState extends Subsystem {
     }
 
     public void setGamePeiceMode(GamePieceMode mode) {
-        if (mHasGamePiece = false) {
-        mGamePieceMode = mode;
+        if (mHasGamePiece == false) {
+            mGamePieceMode = mode;
         }
     }
 
@@ -62,29 +69,37 @@ public class RobotState extends Subsystem {
 
     @Override
     public void writePeriodicOutputs() {
-        if (mHasGamePiece && Timer.getFPGATimestamp() - mBlinkTimer > 1 ) {
-            mBlinkTimer = Timer.getFPGATimestamp();
+        if (mHasGamePiece) {
+            if(Timer.getFPGATimestamp() - mBlinkTimer > mBlinkOffDuration && !mLedsOn) {
+                mBlinkTimer = Timer.getFPGATimestamp();
+                mLedsOn = !mLedsOn;
+            }
+            else if(Timer.getFPGATimestamp() - mBlinkTimer > mBlinkOnDuration && mLedsOn) {
+                mBlinkTimer = Timer.getFPGATimestamp();
+                mLedsOn = !mLedsOn;
+            }
+        }
+        else if(!mHasGamePiece) {
+            mLedsOn = true;
         }
 
-        if (mHasGamePiece && Timer.getFPGATimestamp() - mBlinkTimer < 1 ) {
+        if (!mLedsOn) {
             Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelA);
             Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelB);
             Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
-        }
-
-        else {
-        switch(mGamePieceMode) {
-            case CUBE:
-                Leds.setLEDOutput(190.0/255.0, CANifier.LEDChannel.LEDChannelA);
-                Leds.setLEDOutput(0.0/255.0, CANifier.LEDChannel.LEDChannelB);
-                Leds.setLEDOutput(204.0/255.0, CANifier.LEDChannel.LEDChannelC);
-            break;
-            case CONE:
-                Leds.setLEDOutput(255.0/255.0, CANifier.LEDChannel.LEDChannelA);
-                Leds.setLEDOutput(255.0/255.0, CANifier.LEDChannel.LEDChannelB);
-                Leds.setLEDOutput(0, CANifier.LEDChannel.LEDChannelC);
-            break;
-        }
+        } else {
+            switch (mGamePieceMode) {
+                case CUBE:
+                    Leds.setLEDOutput(190.0 / 255.0, CANifier.LEDChannel.LEDChannelA);
+                    Leds.setLEDOutput(0.0 / 255.0, CANifier.LEDChannel.LEDChannelB);
+                    Leds.setLEDOutput(204.0 / 255.0, CANifier.LEDChannel.LEDChannelC);
+                    break;
+                case CONE:
+                    Leds.setLEDOutput(255.0 / 255.0, CANifier.LEDChannel.LEDChannelA);
+                    Leds.setLEDOutput(255.0 / 255.0, CANifier.LEDChannel.LEDChannelB);
+                    Leds.setLEDOutput(0.0/ 255.0, CANifier.LEDChannel.LEDChannelC);
+                    break;
+            }
         }
     }
 

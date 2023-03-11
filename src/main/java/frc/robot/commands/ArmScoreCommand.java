@@ -25,9 +25,9 @@ import frc.robot.subsystems.Arm.ScoreMode;
 public class ArmScoreCommand extends CommandBase {
   protected final Arm mArm;
 
-  protected ScoreMode mMode; 
+  protected ScoreMode mMode;
   protected double mTimer;
-  
+
   /**
    * Creates a new ExampleCommand.
    *
@@ -42,84 +42,106 @@ public class ArmScoreCommand extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {    
-    mTimer = Timer.getFPGATimestamp();
-    switch(mArm.getTargetPosition()) {
+  public void initialize() {
+    mTimer = Double.MIN_VALUE;
+    switch (mArm.getTargetPosition()) {
       case HIGH_CONE:
       case HIGH_CUBE:
         mMode = ScoreMode.HIGH;
-      break;
+        break;
       case MEDIUM_CONE:
       case MEDIUM_CUBE:
         mMode = ScoreMode.MIDDLE;
-      break;
+        break;
+      case HOLD:
+        mMode = ScoreMode.LOW;
+        break;
       default:
     }
-    
-    if(mMode == null) {return;}
 
-    if(mArm.isConeMode()) {
-      switch(mMode) {
+    if (mMode == null) {
+      return;
+    }
+
+    if (mArm.isConeMode()) {
+      switch (mMode) {
         case LOW:
-        break;
+          mArm.setPosition(ArmPosition.LOW);
+          break;
         case MIDDLE:
           mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_MID);
-        break;
+          break;
         case HIGH:
           mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_HIGH);
-        break;
+          break;
       }
-    }
-    else {
+    } else {
+      switch (mMode) {
+        case LOW:
+          mArm.setPosition(ArmPosition.LOW);
+          break;
+        default:
+      }
     }
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(mMode == null) {
+    if (mMode == null) {
       return;
     }
 
-    if(mArm.atPosition()) {
-    if(mArm.isConeMode()) {
-      switch(mMode) {
-        case LOW:
-        break;
-        case MIDDLE:
-          mArm.setHandOutput(-.2);
-        break;
-        case HIGH:
-          mArm.setHandOutput(-.2);
-        break;
+    if (mArm.atPosition() && mTimer == Double.MIN_VALUE) {
+      mTimer = Timer.getFPGATimestamp();
+    
+      if (mArm.isConeMode()) {
+        switch (mMode) {
+          case LOW:
+            mArm.setHandOutput(-1);
+            break;
+          case MIDDLE:
+            mArm.setHandOutput(-.2);
+            break;
+          case HIGH:
+            mArm.setHandOutput(-.2);
+            break;
+        }
+      } else {
+        mArm.setHandOutput(-.7);
       }
     }
-    else {
-      mArm.setHandOutput(-.7);
-    }
-  }
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    if(mMode == null) {
+    if (mMode == null) {
       return;
     }
 
     mArm.setHandOutput(0);
-          
-    if(mArm.isConeMode()) {
-      double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 5;
-      mArm.setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {return s > shoulderCondition;}), new ArmMotion(ArmPosition.DEFAULT));
+
+    if (mMode == ScoreMode.LOW) {
+      mArm.setPosition(ArmPosition.DEFAULT);
+      return;
     }
-    else {
+
+    if (mArm.isConeMode()) {
+      double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 5;
+      mArm.setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {
+        return s > shoulderCondition;
+      }), new ArmMotion(ArmPosition.DEFAULT));
+    } else {
       double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 2;
-      if(mArm.getShoulderAngle().getDegrees() > 0) {
-        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > -1;}));
-      }
-      else {
-        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {return s > shoulderCondition;}));
+      if (mArm.getShoulderAngle().getDegrees() > 0) {
+        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {
+          return s > -1;
+        }));
+      } else {
+        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {
+          return s > shoulderCondition;
+        }));
       }
     }
 
@@ -128,7 +150,7 @@ public class ArmScoreCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    if(mMode == null) {
+    if (mMode == null) {
       return true;
     }
 
