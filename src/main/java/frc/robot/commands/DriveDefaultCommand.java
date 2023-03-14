@@ -21,20 +21,24 @@ public class DriveDefaultCommand extends CommandBase {
   private final Drive mDrive;
   private final DoubleSupplier mThrottledSupplier;
   private final DoubleSupplier mStrafeSupplier;
-  private final DoubleSupplier mRotationSupplier;
+  private final DoubleSupplier mRotationXSupplier;
+  private final DoubleSupplier mRotationYSupplier;
   private final BooleanSupplier mRequestCrabModeSupplier;
+  private final BooleanSupplier mRequestOrientTrigger;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier, DoubleSupplier rotationSupplier, Trigger requestCrabModeTrigger) {
+  public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier, DoubleSupplier rotationXSupplier, DoubleSupplier rotationYSupplier, Trigger requestCrabModeTrigger, Trigger requestOrientTrigger) {
     mDrive = drive;
     mThrottledSupplier = throttleSupplier;
     mStrafeSupplier = strafeSupplier;
-    mRotationSupplier = rotationSupplier;
+    mRotationXSupplier = rotationXSupplier;
+    mRotationYSupplier = rotationYSupplier;
     mRequestCrabModeSupplier = requestCrabModeTrigger;
+    mRequestOrientTrigger = requestOrientTrigger;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
@@ -52,7 +56,9 @@ public class DriveDefaultCommand extends CommandBase {
     //Adjust inputs
     double throttle = Util.handleDeadband(-mThrottledSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
     double strafe = Util.handleDeadband(-mStrafeSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
-    double rot = Util.handleDeadband(-mRotationSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    double rot = Util.handleDeadband(-mRotationXSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    double rotY = Util.handleDeadband(-mRotationYSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
+    
   
 
     throttle = Math.signum(throttle) * throttle * throttle;
@@ -66,12 +72,21 @@ public class DriveDefaultCommand extends CommandBase {
                 Rotation2d.fromDegrees(-45),
                 Rotation2d.fromDegrees(45)
         ));
-    } else {
-        mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-                throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-                strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-                rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
-                mDrive.getFieldRelativeGyroscopeRotation()));
+    } 
+    else {
+      if(mRequestOrientTrigger.getAsBoolean()) {
+        double requestedAngle = Math.toDegrees(Math.tanh(rotY/rot));
+        long cardinal = Math.round(requestedAngle / 90.0) * 90;
+        double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
+        
+        rot = 180.0 / error;
+      }
+
+      mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+            throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+            strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+            rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
+            mDrive.getFieldRelativeGyroscopeRotation()));
     }
 
     //TODO: Do we need smooth?

@@ -30,8 +30,9 @@ import frc.robot.Constants;
 
 public class Intake extends Subsystem {
   public enum PivotPosition {
-    HANDOFF_CONE(-71.5),
+    HANDOFF_CONE(-71.5, -68),
     HANDOFF_CUBE(0),
+    FEEDER(-68),
     DOWN(6),
     UP(-125);
 
@@ -39,6 +40,15 @@ public class Intake extends Subsystem {
 
     private PivotPosition(double angle) {
       this.mAngle = angle;
+    }
+
+    private PivotPosition(double angle, double compAngle) {
+      if(!Constants.Robot.kPracticeBot) {
+        this.mAngle = compAngle;
+      }
+      else {
+        this.mAngle = angle;
+      }
     }
   }
 
@@ -145,7 +155,7 @@ public class Intake extends Subsystem {
 
     intakeMotor.setInverted(true);
     //intakeMotor.setOpenLoopRampRate(1);
-    intakeMotor.setSmartCurrentLimit(40);
+    intakeMotor.setSmartCurrentLimit(50);
 
     zeroMotors();
   }
@@ -244,7 +254,7 @@ public class Intake extends Subsystem {
 
   public CommandBase intakeFeederCommand() {
     return runEnd(() -> {
-      setPivotPosition(PivotPosition.HANDOFF_CONE);
+      setPivotPosition(PivotPosition.FEEDER);
       setIntake(IntakeMode.CONE_IN);
     },
     () -> {

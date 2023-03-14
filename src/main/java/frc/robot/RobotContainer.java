@@ -81,7 +81,7 @@ public class RobotContainer {
 
     // Dirty swerve init hack step 2: Build all the rest of the subsystems
     mDrive = Drive.getInstance();
-    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x()));
+    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController::getRightY, mDriverController.x(), mDriverController.povRight()));
 
     PathPlannerServer.startServer(5811);
     
@@ -105,7 +105,7 @@ public class RobotContainer {
     mAutoChooser.setDefaultOption("Left - 3 Pieces Balance", Autos.leftSide_3PiecesBalance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Left - 4 Pieces", Autos.leftSide_4Pieces(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Left - 3 Cone", Autos.leftSide_3Cone(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("Right", Autos.rightSide(mDrive, mIntake, mArm));
+    mAutoChooser.addOption("Right", Autos.rightSide(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
@@ -126,30 +126,37 @@ public class RobotContainer {
    * joysticks}.
    */
   private void configureBindings() {
-    // DRIVER CONTROLS
+    // CONE MODE
     mDriverController.b().or(mOperatorController.rightBumper()).whileTrue(new SetConeModeCommand(mRobotState));
+    // CUBE MODE
     mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
+    // FLOOR INTAKE
     new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith(mIntake.intakeCommand())).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    // OUTTAKE
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
+    // SCORE
     mDriverController.leftBumper().onTrue(new ArmScoreCommand(mArm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)).debounce(.5);
 
-    //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, ArmPosition.DEFAULT));
-    //mDriverController.a().whileTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF2_CONE1, ArmPosition.HANDOFF2_CONE2, ArmPosition.HANDOFF2_CONE3, ArmPosition.DEFAULT));
-    
+    // SHELF
     new Trigger(mOperatorController.rightTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).debounce(.5).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice)).debounce(.5);
-    new Trigger(mOperatorController.leftTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, CommandMode.DONT_END, ArmPosition.HANDOFF2_CONE1).alongWith(mIntake.intakeFeederCommand())).debounce(.5).onFalse(mIntake.setPivot(PivotPosition.UP).alongWith(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice))).debounce(.5);
+    // FEEDER
+    new Trigger(mOperatorController.leftTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1).alongWith(mIntake.intakeFeederCommand())).debounce(.5).onFalse(mIntakeConeEnd()).debounce(.5);
 
+    // MIDDLE
     mOperatorController.b().onTrue(mArm.moveToScore(ScoreMode.MIDDLE));
+    // HIGH
     mOperatorController.y().onTrue(mArm.moveToScore(ScoreMode.HIGH));
+    // HAND
     mOperatorController.a().whileTrue(mArm.handCommand());
     
+    // DEFAULT
     mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
   }
 
   private final Command mIntakeConeStart() {
-    return new ArmMoveCommand(mArm, .9, CommandMode.DONT_END, ArmPosition.HANDOFF2_CONE1);
+    return new ArmMoveCommand(mArm, .9, CommandMode.DONT_END, ArmPosition.HANDOFF_CONE1);
   }
 
   private final Command mIntakeConeEnd() {
@@ -157,7 +164,7 @@ public class RobotContainer {
   }
 
   private final Command mIntakeCubeStart() {
-    return new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CUBE);
+    return new ArmMoveCommand(mArm, .7, ArmPosition.HANDOFF_CUBE);
   }
 
   private final Command mIntakeCubeEnd() {

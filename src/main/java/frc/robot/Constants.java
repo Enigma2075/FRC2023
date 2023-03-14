@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final Mode kPivotMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kDebug = false;
+    public static final boolean kDebug = true;
 
     // Intake contants
     public static final int kIntakeId = 5;
@@ -149,7 +149,7 @@ public final class Constants {
   }
 
   public static class Drive {
-    public static final boolean kDebug = true;
+    public static final boolean kDebug = false;
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
     // If you want to just use voltage set this to false
