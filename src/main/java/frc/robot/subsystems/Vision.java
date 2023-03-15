@@ -14,22 +14,24 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Vision extends SubsystemBase {
-public final double rawX;
-public final double rawY;
-public final double rawRotate;
-public final double calcX;
-public final double calcY;
-public final double calcRot;
+
+public double rawX;
+public double rawY;
+public double rawRotate;
+public double calcX;
+public double calcY;
+public double calcRot;
   /** Creates a new ExampleSubsystem. */
   public Vision() {
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpired").getDoubleArray(new double[6]);
-    
-    double rawX = (double)Array.getDouble(botpose_wpired, 0);
-    double rawY = (double)Array.getDouble(limelight, 1);
-    double rawRotate = (double)Array.getDouble(limelight, 5);
-    double calcX = rawX - 8.265;
-    double calcY = rawY - 4;
-    double calcRot = rawRotate - 180;
+    /*
+    rawX = (double)Array.getDouble(botpose_wpired, 0);
+    rawY = (double)Array.getDouble(botpose_wpired, 1);
+    rawRotate = (double)Array.getDouble(botpose_wpired, 5);
+    calcX = rawX - 8.265;
+    calcY = rawY - 4;
+    calcRot = rawRotate - 180; 
+    */
   }
   /**
    * Example command factory method.
@@ -57,10 +59,21 @@ public final double calcRot;
 
   @Override
   public void periodic() {
+   double[] robotPosition = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpired").getDoubleArray(new double[6]);
 
-    SmartDashboard.putNumber("Raw X", rawX);
-    SmartDashboard.putNumber("Raw Y", rawY);
-    SmartDashboard.putNumber("Raw Rotation", rawRotate);
+    //double rawX = (double)Array.getDouble(botpose_wpired, 0);
+    //double rawY = (double)Array.getDouble(botpose_wpired, 1);
+    //double rawRotate = (double)Array.getDouble(botpose_wpired, 5);
+    //double calcX = rawX - 8.265;
+    double calcX = robotPosition[0] - 8.265;
+    //double calcY = rawY - 4;
+    double calcY = robotPosition[1] - 4;
+    //double calcRot = rawRotate - 180;
+    double calcRot = robotPosition[5] - 180;
+
+    //SmartDashboard.putNumber("Raw X", rawX);
+    //SmartDashboard.putNumber("Raw Y", rawY);
+    //SmartDashboard.putNumber("Raw Rotation", rawRotate);
     SmartDashboard.putNumber("Calculated X", calcX);
     SmartDashboard.putNumber("Calculated Y", calcY);
     SmartDashboard.putNumber("Calculated Rotation", calcRot);
