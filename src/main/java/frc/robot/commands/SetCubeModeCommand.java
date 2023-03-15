@@ -11,20 +11,27 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 /** An example command that uses an example subsystem. */
 public class SetCubeModeCommand extends CommandBase {
   private final RobotState mRobotState;
+  private final boolean mForce;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
+  
   public SetCubeModeCommand(RobotState robotState) {
+    this(robotState, false);
+  }
+
+  public SetCubeModeCommand(RobotState robotState, boolean force) {
     mRobotState = robotState;
+    mForce = force;
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    mRobotState.setCubeMode();
+    mRobotState.setCubeMode(mForce);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

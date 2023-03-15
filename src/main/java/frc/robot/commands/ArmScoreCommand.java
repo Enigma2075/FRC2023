@@ -108,7 +108,17 @@ public class ArmScoreCommand extends CommandBase {
             break;
         }
       } else {
-        mArm.setHandOutput(-.7);
+        switch (mMode) {
+          case LOW:
+            mArm.setHandOutput(-.7);
+            break;
+          case MIDDLE:
+            mArm.setHandOutput(-.7);
+            break;
+          case HIGH:
+            mArm.setHandOutput(-.5);
+            break;
+        }
       }
     }
   }
@@ -120,8 +130,6 @@ public class ArmScoreCommand extends CommandBase {
       return;
     }
 
-    mArm.setHandOutput(0);
-
     if (mMode == ScoreMode.LOW) {
       mArm.setPosition(ArmPosition.DEFAULT);
       return;
@@ -132,19 +140,22 @@ public class ArmScoreCommand extends CommandBase {
       mArm.setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {
         return s > shoulderCondition;
       }), new ArmMotion(ArmPosition.DEFAULT));
-    } else {
+    } 
+    else {
       double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 2;
-      if (mArm.getShoulderAngle().getDegrees() > 0) {
-        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {
-          return s > -1;
-        }));
-      } else {
+      if (mArm.getShoulderAngle().getDegrees() < 0) {
         mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {
           return s > shoulderCondition;
+        }));
+      } else {
+        mArm.setPositions(new ArmMotion
+        (ArmPosition.DEFAULT, (s, e) -> {
+          return s > -2;
         }));
       }
     }
 
+    mArm.setHandOutput(0);
   }
 
   // Returns true when the command should end.
@@ -154,6 +165,6 @@ public class ArmScoreCommand extends CommandBase {
       return true;
     }
 
-    return mArm.isSequenceComplete() && Timer.getFPGATimestamp() - mTimer > .5;
+    return mArm.isSequenceComplete() && mTimer != Double.MIN_VALUE && Timer.getFPGATimestamp() - mTimer > .5;
   }
 }

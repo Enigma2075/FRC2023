@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.geometry.Rotation2d;
@@ -75,13 +76,41 @@ public class DriveDefaultCommand extends CommandBase {
     } 
     else {
       if(mRequestOrientTrigger.getAsBoolean()) {
-        double requestedAngle = Math.toDegrees(Math.tanh(rotY/rot));
-        long cardinal = Math.round(requestedAngle / 90.0) * 90;
-        double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
-        
-        rot = 180.0 / error;
-      }
+        if(rotY != 0 || rot != 0) {
+          Rotation2d robot = mDrive.getFieldRelativeGyroscopeRotation();
+          double cardinal = Double.MIN_VALUE;
+          double dist = Double.MIN_VALUE;
+          if((rot < rotY && Math.signum(rot) == -1 && Math.signum(rotY) == -1) || (Math.signum(rot) == -1 && (Math.signum(rotY) == 1 || Math.signum(rotY) == 0) && Math.abs(rot) > Math.abs(rotY))){
+            // Right
+            cardinal = -90;
+          }
+          else if(rotY < rot && Math.signum(rotY) == -1){
+            // Reverse
+            cardinal = 180;
+          }
+          else if(rot > rotY && Math.signum(rot) == 1){
+            // Left
+            cardinal = 90;
+          }
+          else if(rotY > rot && Math.signum(rotY) == 1){
+            // Forward
+            cardinal = 0;
+          }
 
+          dist = robot.distance(Rotation2d.fromDegrees(cardinal));
+
+          //double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
+          
+          //double tmpRot = 180.0 / error;
+          SmartDashboard.putNumber("O-Change", dist);
+          SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
+          SmartDashboard.putNumber("O-Desire", cardinal);  
+          SmartDashboard.putNumber("O-X", rot);  
+          SmartDashboard.putNumber("O-Y", rotY);
+
+          rot = 0;
+        }
+      }
       mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
             throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
             strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,

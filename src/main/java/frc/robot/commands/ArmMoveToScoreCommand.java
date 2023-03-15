@@ -27,6 +27,7 @@ public class ArmMoveToScoreCommand extends CommandBase {
   protected final Arm mArm;
   protected final RobotState mRobotState;
   protected final boolean mWait;
+  protected final double mHand;
 
   protected ScoreMode mMode;
   
@@ -36,10 +37,15 @@ public class ArmMoveToScoreCommand extends CommandBase {
    * @param subsystem The subsystem used by this command.
    */
   public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait) {
+    this(arm, robotState, mode, wait, Double.MIN_VALUE);
+  }
+    
+  public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait, double hand) {
     mArm = arm;
     mRobotState = robotState;
     mWait = wait;
     mMode = mode;
+    mHand = hand;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
@@ -48,6 +54,10 @@ public class ArmMoveToScoreCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {    
+      if(mHand != Double.MIN_VALUE) {
+        mArm.setHandOutput(mHand);
+      }
+
       if(mRobotState.isConeMode()) {
         switch(mMode) {
           case LOW:
@@ -56,7 +66,7 @@ public class ArmMoveToScoreCommand extends CommandBase {
             mArm.setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (s, e) -> {return e < -10;}));
           break;
           case HIGH:
-            mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -5;}));
+            mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -10;}));
           break;
         }
       }

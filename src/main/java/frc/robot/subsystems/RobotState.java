@@ -39,11 +39,19 @@ public class RobotState extends Subsystem {
     }
 
     public void setConeMode() {
-        setGamePeiceMode(GamePieceMode.CONE);
+        setConeMode(false);
+    }
+    
+    public void setConeMode(boolean force) {
+        setGamePeiceMode(GamePieceMode.CONE, force);
     }
 
     public void setCubeMode() {
-        setGamePeiceMode(GamePieceMode.CUBE);
+        setCubeMode(false);
+    }
+
+    public void setCubeMode(boolean force) {
+        setGamePeiceMode(GamePieceMode.CUBE, force);
     }
 
     public void setHasGamePiece(boolean hasGamePiece) {
@@ -51,7 +59,11 @@ public class RobotState extends Subsystem {
     }
 
     public void setGamePeiceMode(GamePieceMode mode) {
-        if (mHasGamePiece == false) {
+        setGamePeiceMode(mode, false);
+    }
+
+    public void setGamePeiceMode(GamePieceMode mode, boolean force) {
+        if (mHasGamePiece == false || force) {
             mGamePieceMode = mode;
         }
     }

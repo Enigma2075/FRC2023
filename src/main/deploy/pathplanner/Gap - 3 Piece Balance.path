@@ -181,22 +181,22 @@
     },
     {
       "anchorPoint": {
-        "x": 5.0,
-        "y": 4.55
+        "x": 2.452647626769386,
+        "y": 3.300811307504968
       },
       "prevControl": {
-        "x": 4.567172759252133,
-        "y": 4.619541744815664
+        "x": 2.0151907064976435,
+        "y": 3.272405013980829
       },
       "nextControl": {
-        "x": 5.8443590735516,
-        "y": 4.414338013651222
+        "x": 2.59664888692536,
+        "y": 3.3101620386839277
       },
-      "holonomicAngle": -30.0,
+      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": false,
+      "isStopPoint": true,
       "stopEvent": {
         "names": [],
         "executionBehavior": "parallel",
@@ -206,22 +206,22 @@
     },
     {
       "anchorPoint": {
-        "x": 6.702229137980602,
-        "y": 2.5
+        "x": 4.0,
+        "y": 3.3
       },
       "prevControl": {
-        "x": 6.412484944034383,
-        "y": 3.2101573381034783
+        "x": 3.3466552489448,
+        "y": 3.283767531390485
       },
       "nextControl": null,
-      "holonomicAngle": -50.0,
+      "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "IntakeUp"
+          "Crab"
         ],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
@@ -239,7 +239,8 @@
     {
       "position": 1.05,
       "names": [
-        "High"
+        "High",
+        "IntakeUp"
       ]
     },
     {
@@ -249,9 +250,10 @@
       ]
     },
     {
-      "position": 4.130909090909315,
+      "position": 4.2,
       "names": [
-        "Middle"
+        "Middle",
+        "IntakeUp"
       ]
     }
   ]

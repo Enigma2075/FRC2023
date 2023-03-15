@@ -2,13 +2,13 @@
   "waypoints": [
     {
       "anchorPoint": {
-        "x": 1.87,
-        "y": 4.96
+        "x": 1.81,
+        "y": 4.99
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.705101672794442,
-        "y": 4.96
+        "x": 2.645101672794442,
+        "y": 4.99
       },
       "holonomicAngle": 0.0,
       "isReversal": false,
@@ -17,26 +17,26 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "CubeMode",
-          "FirstDrop"
+          "HighWait",
+          "ScoreHigh"
         ],
-        "executionBehavior": "parallel",
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     },
     {
       "anchorPoint": {
-        "x": 6.5,
-        "y": 4.551312269528961
+        "x": 6.65,
+        "y": 4.65
       },
       "prevControl": {
-        "x": 4.276331671019119,
-        "y": 4.721125983711925
+        "x": 4.4485332597011125,
+        "y": 4.65
       },
       "nextControl": {
-        "x": 4.276331671019119,
-        "y": 4.721125983711925
+        "x": 4.4485332597011125,
+        "y": 4.65
       },
       "holonomicAngle": 0.0,
       "isReversal": true,
@@ -52,16 +52,16 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8447529453528086,
-        "y": 4.35
+        "x": 1.86,
+        "y": 4.38
       },
       "prevControl": {
-        "x": 2.606041611799738,
-        "y": 4.560206572078629
+        "x": 3.2597226224540945,
+        "y": 4.453188110977992
       },
       "nextControl": {
-        "x": 2.606041611799738,
-        "y": 4.560206572078629
+        "x": 3.2597226224540945,
+        "y": 4.453188110977992
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -70,7 +70,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "ScoreMiddle"
+          "ScoreHigh"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -83,12 +83,12 @@
         "y": 4.55
       },
       "prevControl": {
-        "x": 4.463813208278437,
-        "y": 4.721125983711925
+        "x": 4.482771797402001,
+        "y": 4.772028924588824
       },
       "nextControl": {
-        "x": 5.598748845167366,
-        "y": 4.358907107173106
+        "x": 5.426622313698929,
+        "y": 4.366865180513388
       },
       "holonomicAngle": -30.0,
       "isReversal": false,
@@ -104,16 +104,16 @@
     },
     {
       "anchorPoint": {
-        "x": 6.6,
-        "y": 3.65
+        "x": 6.8,
+        "y": 3.7
       },
       "prevControl": {
-        "x": 6.25682830231713,
-        "y": 3.89734347151189
+        "x": 5.755382347653462,
+        "y": 4.404603503351681
       },
       "nextControl": {
-        "x": 6.25682830231713,
-        "y": 3.89734347151189
+        "x": 5.755382347653462,
+        "y": 4.404603503351681
       },
       "holonomicAngle": -40.0,
       "isReversal": true,
@@ -133,14 +133,14 @@
         "y": 4.55
       },
       "prevControl": {
-        "x": 5.611427466653659,
-        "y": 4.465469341994672
+        "x": 5.346099945575774,
+        "y": 4.409542961348944
       },
       "nextControl": {
-        "x": 4.285513912386697,
-        "y": 4.648778649006646
+        "x": 4.757227213569471,
+        "y": 4.648523987313462
       },
-      "holonomicAngle": -30.0,
+      "holonomicAngle": 0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
@@ -154,49 +154,22 @@
     },
     {
       "anchorPoint": {
-        "x": 1.8617967214672921,
-        "y": 4.35
+        "x": 2.65,
+        "y": 4.598207161016092
       },
       "prevControl": {
-        "x": 2.344703711377657,
-        "y": 4.35
+        "x": 3.416116139289508,
+        "y": 4.979108896167411
       },
       "nextControl": {
-        "x": 2.344703711377657,
-        "y": 4.35
+        "x": 2.2344725223114525,
+        "y": 4.391612978831911
       },
       "holonomicAngle": 0,
-      "isReversal": true,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": true,
-      "stopEvent": {
-        "names": [
-          "ScoreHigh"
-        ],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 2.452647626769386,
-        "y": 3.300811307504968
-      },
-      "prevControl": {
-        "x": 2.0151907064976435,
-        "y": 3.272405013980829
-      },
-      "nextControl": {
-        "x": 2.59664888692536,
-        "y": 3.3101620386839277
-      },
-      "holonomicAngle": 0.0,
       "isReversal": false,
       "velOverride": null,
       "isLocked": false,
-      "isStopPoint": true,
+      "isStopPoint": false,
       "stopEvent": {
         "names": [],
         "executionBehavior": "parallel",
@@ -206,12 +179,12 @@
     },
     {
       "anchorPoint": {
-        "x": 4.0,
-        "y": 3.3
+        "x": 1.87,
+        "y": 3.73
       },
       "prevControl": {
-        "x": 3.3466552489448,
-        "y": 3.283767531390485
+        "x": 2.7085354575528435,
+        "y": 3.689399556120161
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -221,38 +194,41 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "Crab"
+          "ScoreHigh"
         ],
-        "executionBehavior": "parallel",
+        "executionBehavior": "sequential",
         "waitBehavior": "none",
         "waitTime": 0
       }
     }
   ],
+  "maxVelocity": 2.0,
+  "maxAcceleration": 3.0,
+  "isReversed": null,
   "markers": [
     {
       "position": 0.1,
       "names": [
-        "Intake"
+        "IntakeCube"
       ]
     },
     {
-      "position": 1.05,
+      "position": 1.02,
       "names": [
-        "High"
+        "High",
+        "IntakeUp"
+      ]
+    },
+    {
+      "position": 4.02,
+      "names": [
+        "HandoffHigh"
       ]
     },
     {
       "position": 2.1,
       "names": [
-        "Intake"
-      ]
-    },
-    {
-      "position": 4.2,
-      "names": [
-        "Middle",
-        "IntakeUp"
+        "IntakeCone"
       ]
     }
   ]

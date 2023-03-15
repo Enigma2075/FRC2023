@@ -37,18 +37,18 @@ public class Arm extends Subsystem {
   }
 
   public enum ArmPosition {
-    HANDOFF_CONE1(0, 55, 0, 50),
-    HANDOFF_CONE2(5, 55, 5, 50),
+    HANDOFF_CONE1(0, 55, 0, 55),
+    HANDOFF_CONE2(5, 55, 5, 55),
     HANDOFF_CONE3(20, 43),
     HANDOFF_CONE4(0, 50),
-    HANDOFF_CUBE(36, 45),
+    HANDOFF_CUBE(35, 47, 36, 42),
     //INTAKE_CONE(1.70, 46.22),
     //GRAB_CONE(18.32, 46.22),
     START(24, -5),
     DEFAULT(0, 0),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
     DEFAULT_ELBOW(Double.MIN_VALUE, 0),
-    HIGH_CONE(-24, -140),
+    HIGH_CONE(-24, -140, -27, -140),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -92),
     MEDIUM_CUBE(20, -55),
@@ -131,7 +131,7 @@ public class Arm extends Subsystem {
     ArmMotion[] sequence;
     int sequenceIndex = 0;
 
-    ArmPosition targetPosition = ArmPosition.START;
+    ArmPosition targetPosition;
 
     Point armPosition;
     Point armTargetPosition;
@@ -241,6 +241,7 @@ public class Arm extends Subsystem {
     // Configure Hand motor
     mHandMotor = new CANSparkMax(Constants.Arm.kHandId, MotorType.kBrushless);
     mHandMotor.restoreFactoryDefaults();
+    mHandMotor.setSmartCurrentLimit(60);
 
     mHandMotor.setInverted(false);
 
@@ -267,8 +268,7 @@ public class Arm extends Subsystem {
     mElbowMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
 
     setPosition(ArmPosition.START);
-    writeShoulderPosition(true);
-    writeElbowPosition();
+    updatePositionSequence();
   }
 
   public void setIntake(Intake intake) {
@@ -305,7 +305,7 @@ public class Arm extends Subsystem {
         mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 50;
       }
       else {
-        mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 150;
+        mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 100;
       }
     } 
     mRobotState.setHasGamePiece(mPeriodicIO.handHasGamePeiceLast);
@@ -399,13 +399,28 @@ public class Arm extends Subsystem {
   }
 
   public CommandBase handCommand() {
+    return handCommand(true);
+  }
+  
+  public CommandBase handCommand(boolean end) {
     return runEnd(
         () -> {
           mPeriodicIO.handTarget = .9;
         },
         () -> {
-          mPeriodicIO.handTarget = 0;
+          if(end) {
+            mPeriodicIO.handTarget = 0;
+          }
         });
+  }
+
+  public boolean atHold() {
+    if(atPosition()) {
+      if(mPeriodicIO.elbowTarget == ArmPosition.HOLD.mElbowAngle && mPeriodicIO.shoulderTarget == ArmPosition.HOLD.mShoulderAngle) {
+        return true;
+      }
+    }
+    return false;
   }
 
   public boolean atDefault() {
@@ -509,7 +524,7 @@ public class Arm extends Subsystem {
   }
 
   public void writeShoulderPosition() {
-    writeShoulderPosition(true);
+    writeShoulderPosition(false);
   }
 
   public void writeShoulderPosition(boolean force) {
@@ -524,6 +539,7 @@ public class Arm extends Subsystem {
     if(index > 0) {
       index--;
     }
+
     if(!mPeriodicIO.sequence[index].checkShoulderCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
       return;
     }

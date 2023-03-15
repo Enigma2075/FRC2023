@@ -7,9 +7,11 @@ package frc.robot;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants.DriverStation;
 import frc.robot.commands.ArmDefaultCommand;
+import frc.robot.commands.ArmMakeSureDefaultCommand;
 import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.ArmMoveAfterIntakeCommand;
 import frc.robot.commands.ArmMoveCommand;
+import frc.robot.commands.ArmMoveMotionCommand;
 import frc.robot.commands.ArmScoreCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
@@ -17,6 +19,7 @@ import frc.robot.commands.SetConeModeCommand;
 import frc.robot.commands.SetCubeModeCommand;
 import frc.robot.commands.ArmMoveCommand.CommandMode;
 import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.ArmMotion;
 import frc.robot.subsystems.Cancoders;
 import frc.robot.subsystems.Drive;
 import frc.robot.subsystems.Drive.DriveControlState;
@@ -102,10 +105,10 @@ public class RobotContainer {
     setSubsystems(mDrive, mIntake, mArm, mRobotState);
     
     mAutoChooser = new SendableChooser<>();
-    mAutoChooser.setDefaultOption("Left - 3 Pieces Balance", Autos.leftSide_3PiecesBalance(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("Left - 4 Pieces", Autos.leftSide_4Pieces(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("Left - 3 Cone", Autos.leftSide_3Cone(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("Right", Autos.rightSide(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.setDefaultOption("Gap - Link", Autos.gap_Link(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Gap - 3 Pieces Balance", Autos.gap_3PiecesBalance(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Gap - 4 Pieces", Autos.gap_4Pieces(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Bump - Balance", Autos.bump_Balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));
@@ -132,12 +135,12 @@ public class RobotContainer {
     mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
     // FLOOR INTAKE
-    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith(mIntake.intakeCommand())).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith(mIntake.intakeCommand()))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
     // OUTTAKE
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
     // SCORE
-    mDriverController.leftBumper().onTrue(new ArmScoreCommand(mArm).withInterruptBehavior(InterruptionBehavior.kCancelIncoming)).debounce(.5);
+    mDriverController.leftBumper().onTrue(new ArmScoreCommand(mArm)).debounce(.5);
 
     // SHELF
     new Trigger(mOperatorController.rightTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).debounce(.5).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice)).debounce(.5);
@@ -164,7 +167,7 @@ public class RobotContainer {
   }
 
   private final Command mIntakeCubeStart() {
-    return new ArmMoveCommand(mArm, .7, ArmPosition.HANDOFF_CUBE);
+    return new ArmMoveMotionCommand(mArm, .7, new ArmMotion(ArmPosition.HANDOFF_CUBE, (s, e) -> {return s > 2;}));
   }
 
   private final Command mIntakeCubeEnd() {

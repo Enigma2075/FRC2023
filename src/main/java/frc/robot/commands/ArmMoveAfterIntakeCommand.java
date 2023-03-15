@@ -25,6 +25,7 @@ import frc.robot.subsystems.Intake.PivotPosition;
 public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   private final Intake mIntake;
   private boolean initialized = false;
+  private boolean mHasCustomEndPosition;
   /**
    * Creates a new ExampleCommand.
    *
@@ -32,11 +33,13 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
    */
   public ArmMoveAfterIntakeCommand(Arm arm, Intake intake) {
     this(arm, intake, ArmPosition.DEFAULT);
+    mHasCustomEndPosition = false;
   }
 
   public ArmMoveAfterIntakeCommand(Arm arm, Intake intake, ArmPosition endPosition) {
     super(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE2, ArmPosition.HANDOFF_CONE3, ArmPosition.HANDOFF_CONE4, endPosition);
 
+    mHasCustomEndPosition = true;
     mIntake = intake;
     addRequirements(mIntake);
   }
@@ -57,7 +60,7 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
       initialized = true;
     }
     else if(initialized) {
-      if(mArm.getArmPosition().y < 15) {
+      if(mArm.getArmPosition().y < 14) {
         mIntake.setPivotPosition(PivotPosition.UP);    
       }
       super.execute();
@@ -68,7 +71,9 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   @Override
   public void end(boolean interrupted) {
     if(mMode == CommandMode.WAIT && !interrupted && mArm.handHasGamePeice()) {
-      mArm.setPosition(ArmPosition.HOLD);
+      if(!mHasCustomEndPosition) {
+        mArm.setPosition(ArmPosition.HOLD);
+      }
     }
   }
 

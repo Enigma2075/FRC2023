@@ -56,10 +56,10 @@ public class Intake extends Subsystem {
     CONE_IN(.9),
     CONE_HANDOFF(-.02),
     CONE_OUT(-.9),
-    CUBE_IN(-.9),
+    CUBE_IN(-.5),
     CUBE_OUT(.9),
     CONE_HOLD(.02),
-    CUBE_HOLD(-.02),
+    CUBE_HOLD(.04),
     STOP(0);
 
     public final double mOutput;
