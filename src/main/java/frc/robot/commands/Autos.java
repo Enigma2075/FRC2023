@@ -75,7 +75,8 @@ public final class Autos {
       kSlowConstraints, //cros bump 2
       kDefaultConstraints, //
       kDefaultConstraints,  //back to start/end
-      kSlowConstraints //cros bump 2
+      kSlowConstraints, //cros bump 2
+      kDefaultConstraints //cros bump 2
     );
   }
 
