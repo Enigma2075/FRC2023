@@ -56,8 +56,8 @@ public final class Constants {
     public static final Mode kShoulderMode = Mode.MOTION_MAGIC;
     public static final Mode kElbowMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kShoulderDebug = true;
-    public static final boolean kElbowDebug = true;
+    public static final boolean kShoulderDebug = false;
+    public static final boolean kElbowDebug = false;
 
     // Shoulder contants
     public static final int kShoulderRightId = 1;
@@ -197,7 +197,7 @@ public final class Constants {
     public static final CanDeviceId kBackRightDriveId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final CanDeviceId kBackRightSteerId = new CanDeviceId(5, Can.kCANivoreBusName);
     public static final CanDeviceId kBackRightEncoderId = new CanDeviceId(3, Can.kCANivoreBusName);
-    public static final Rotation2d kBackRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(54.843750000000014) : Rotation2d.fromDegrees(-8.964843750000027);
+    public static final Rotation2d kBackRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(54.843750000000014) : Rotation2d.fromDegrees(43.59375000000001);
 
     public static final CanDeviceId kBackLeftDriveId = new CanDeviceId(8, Can.kCANivoreBusName);
     public static final CanDeviceId kBackLeftSteerId = new CanDeviceId(7, Can.kCANivoreBusName);
