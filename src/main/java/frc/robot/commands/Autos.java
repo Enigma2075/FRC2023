@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4.33, 3.6);
   private static final PathConstraints kMedium1Constraints = new PathConstraints(1.8, 3);
-  private static final PathConstraints kMedium2Constraints = new PathConstraints(1.5, 3);
+  private static final PathConstraints kMedium2Constraints = new PathConstraints(4.33, 3.3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
   private static final PathConstraints kFastConstraints = new PathConstraints(4, 3);
 
@@ -194,7 +194,7 @@ public final class Autos {
     }
 
     return setupAuto(pathName, eventMap, drive,
-      kDefaultConstraints, kDefaultConstraints, kDefaultConstraints, kMedium1Constraints
+      kDefaultConstraints, kMedium2Constraints, kDefaultConstraints, kMedium1Constraints
     );
   }
   

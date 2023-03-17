@@ -192,7 +192,7 @@ public final class Constants {
     public static final CanDeviceId kFrontRightDriveId = new CanDeviceId(4, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightSteerId = new CanDeviceId(3, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightEncoderId = new CanDeviceId(2, Can.kCANivoreBusName);
-    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(-162.24609374999997);
+    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(-169.36523437500006);
 
     public static final CanDeviceId kBackRightDriveId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final CanDeviceId kBackRightSteerId = new CanDeviceId(5, Can.kCANivoreBusName);
@@ -202,7 +202,7 @@ public final class Constants {
     public static final CanDeviceId kBackLeftDriveId = new CanDeviceId(8, Can.kCANivoreBusName);
     public static final CanDeviceId kBackLeftSteerId = new CanDeviceId(7, Can.kCANivoreBusName);
     public static final CanDeviceId kBackLeftEncoderId = new CanDeviceId(4, Can.kCANivoreBusName);
-    public static final Rotation2d kBackLeftSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.60546874999999) : Rotation2d.fromDegrees(-96.41601562500001);
+    public static final Rotation2d kBackLeftSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.60546874999999) : Rotation2d.fromDegrees(-95.18554687499999);
 
     public static final double kSteerKp = 0.75;
     public static final double kSteerKi = 0;
