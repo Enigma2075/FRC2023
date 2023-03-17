@@ -21,6 +21,7 @@ import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -141,8 +142,11 @@ public class Intake extends Subsystem {
     pivotMotor.configContinuousCurrentLimit(0, 10);
     pivotMotor.enableCurrentLimit(true);
 
+    
+    pivotMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+    20, 10);
     pivotMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
-    5, 10);
+    10, 10);
 
     pivotMotor.configNeutralDeadband(0);
 
@@ -156,6 +160,11 @@ public class Intake extends Subsystem {
     intakeMotor.setInverted(true);
     //intakeMotor.setOpenLoopRampRate(1);
     intakeMotor.setSmartCurrentLimit(50);
+
+    intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10);
+    intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);
+    intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 500);
+    intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 500);
 
     zeroMotors();
   }
@@ -515,11 +524,11 @@ public class Intake extends Subsystem {
       //SmartDashboard.putNumber("IP Offset", Constants.Intake.kPivotOffset.getDegrees());
       SmartDashboard.putNumber("IP Arb FF", calcPivotArbFF());
 
-      SmartDashboard.putNumber("I Amps", intakeMotor.getOutputCurrent());
+      //SmartDashboard.putNumber("I Amps", intakeMotor.getOutputCurrent());
       
-      SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
-      SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
-      SmartDashboard.putNumber("I Temp", intakeMotor.getMotorTemperature());
+      //SmartDashboard.putNumber("I Vel", intakeMotor.getEncoder().getVelocity());
+      //SmartDashboard.putNumber("I Output", intakeMotor.getAppliedOutput());
+      //SmartDashboard.putNumber("I Temp", intakeMotor.getMotorTemperature());
       SmartDashboard.putNumber("IP Amps", pivotMotor.getStatorCurrent());
 
       Point pos = getIntakePosition();

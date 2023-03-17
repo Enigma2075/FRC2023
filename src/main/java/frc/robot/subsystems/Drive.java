@@ -244,7 +244,9 @@ public class Drive extends Subsystem {
     private void readModules() {
         for (int i = 0; i < mModules.length; ++i) {
             mPeriodicIO.measured_states[i] = mModules[i].getState();
-            mPeriodicIO.moduleAbsSteerAngleDeg[i] = mModules[i].getCanCoderAngle().getDegrees();
+            if(Constants.Drive.kDebug) {
+                mPeriodicIO.moduleAbsSteerAngleDeg[i] = mModules[i].getCanCoderAngle().getDegrees();
+            }
         }
     }
 

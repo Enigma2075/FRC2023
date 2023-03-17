@@ -19,6 +19,7 @@ import com.revrobotics.CANSparkMax.ControlType;
 import com.revrobotics.CANSparkMax.IdleMode;
 import com.revrobotics.CANSparkMax.SoftLimitDirection;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import com.revrobotics.CANSparkMaxLowLevel.PeriodicFrame;
 import com.revrobotics.SparkMaxPIDController.ArbFFUnits;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -50,14 +51,14 @@ public class Arm extends Subsystem {
     DEFAULT_ELBOW(Double.MIN_VALUE, 0),
     HIGH_CONE(-24, -140, -27, -140),
     MEDIUM_CONE(-10, -92),
-    HIGH_CUBE(-7, -92),
+    HIGH_CUBE(-7, -94),
     MEDIUM_CUBE(20, -55),
     //MEDIUM_AUTO_START(0, -70),
     //HAND_OFF(0, 50),
     SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
     SCORE_OFFSET_CONE_HIGH(Double.MIN_VALUE, 15, true),
     HOLD(24, -5),
-    SHELF(15, -65),
+    SHELF(15, -66),
     AUTO_DROP(0, -10),
     LOW(24, -25);
 
@@ -196,6 +197,18 @@ public class Arm extends Subsystem {
     mShoulderRightMotor.setSmartCurrentLimit(40);
 
     mShoulderRightMotor.follow(mShoulderLeftMotor, true);
+
+    mShoulderRightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
+    mShoulderRightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200);
+    mShoulderRightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200);
+    mShoulderRightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
+    mShoulderRightMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
+
+    mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 5);
+    mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200);
+    mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
+    mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
+    mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
   
     mShoulderEncoder = mShoulderLeftMotor.getEncoder();
 
@@ -223,6 +236,12 @@ public class Arm extends Subsystem {
 
     mElbowMotor.setOpenLoopRampRate(0);
     mElbowMotor.setSmartCurrentLimit(40);
+    
+    mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
+    mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200);
+    mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
+    mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
+    mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
 
     mElbowEncoder = mElbowMotor.getEncoder();
 
@@ -247,6 +266,12 @@ public class Arm extends Subsystem {
 
     mHandMotor.setIdleMode(IdleMode.kBrake);
 
+    mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
+    mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200);
+    mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 200);
+    mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
+    mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
+
     // Zero the motors
     rezeroMotors();
 
@@ -266,6 +291,8 @@ public class Arm extends Subsystem {
     mElbowMotor.setSoftLimit(SoftLimitDirection.kReverse, mElbowReverseLimit);
     mElbowMotor.enableSoftLimit(SoftLimitDirection.kForward, true);
     mElbowMotor.enableSoftLimit(SoftLimitDirection.kReverse, true);
+
+    setHandOutput(.9);
 
     setPosition(ArmPosition.START);
     updatePositionSequence();
@@ -578,7 +605,12 @@ public class Arm extends Subsystem {
   public void writeHandOutput() {
     if (mPeriodicIO.handTarget > 0) {
       if (mPeriodicIO.handHasGamePeice) {
-        mHandMotor.set(.02);
+        if(mRobotState.isConeMode()) {
+          mHandMotor.set(.04);
+        }
+        else {
+          mHandMotor.set(.02);  
+        }
       } else { 
       //if (mPeriodicIO.handCurrent > 10) {
         //if(mPeriodicIO.handCurrentTime == Double.MIN_VALUE) {
@@ -636,7 +668,9 @@ public class Arm extends Subsystem {
     }
 
     // Hand
-    mPeriodicIO.handCurrent = mHandMotor.getOutputCurrent();
+    if(Constants.Arm.kElbowDebug || Constants.Arm.kShoulderDebug) {
+      mPeriodicIO.handCurrent = mHandMotor.getOutputCurrent();
+    }
 
     mPeriodicIO.armPosition = getArmPosition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg);
     mPeriodicIO.armTargetPosition = getArmPosition(mPeriodicIO.shoulderTarget, mPeriodicIO.elbowTarget);

@@ -28,6 +28,7 @@ public class ArmMoveToScoreCommand extends CommandBase {
   protected final RobotState mRobotState;
   protected final boolean mWait;
   protected final double mHand;
+  protected final boolean mAuto;
 
   protected ScoreMode mMode;
   
@@ -36,16 +37,26 @@ public class ArmMoveToScoreCommand extends CommandBase {
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait) {
-    this(arm, robotState, mode, wait, Double.MIN_VALUE);
+  
+  public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait, boolean auto) {
+    this(arm, robotState, mode, wait, Double.MIN_VALUE, auto);
   }
-    
+  
+   public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait) {
+    this(arm, robotState, mode, wait, Double.MIN_VALUE, false);
+  }
+  
   public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait, double hand) {
+    this(arm, robotState, mode, wait, Double.MIN_VALUE, false);
+  }
+
+  public ArmMoveToScoreCommand(Arm arm, RobotState robotState, ScoreMode mode, boolean wait, double hand, boolean auto) {
     mArm = arm;
     mRobotState = robotState;
     mWait = wait;
     mMode = mode;
     mHand = hand;
+    mAuto = auto;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
@@ -66,7 +77,12 @@ public class ArmMoveToScoreCommand extends CommandBase {
             mArm.setPosition(new ArmMotion(ArmPosition.MEDIUM_CONE, null, (s, e) -> {return e < -10;}));
           break;
           case HIGH:
-            mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -10;}));
+            //if(mAuto) {
+            //  mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, null));
+            //}
+            //else {
+              mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CONE, null, (s, e) -> {return e < -10;}));
+            //}
           break;
         }
       }
