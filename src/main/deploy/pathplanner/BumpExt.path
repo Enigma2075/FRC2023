@@ -158,8 +158,160 @@
         "y": 1.1
       },
       "prevControl": {
-        "x": 2.492416437703181,
-        "y": 0.9714952385255585
+        "x": 2.6211403064746213,
+        "y": 1.132110338400419
+      },
+      "nextControl": {
+        "x": 2.6211403064746213,
+        "y": 1.132110338400419
+      },
+      "holonomicAngle": 0,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [
+          "ScoreHigh"
+        ],
+        "executionBehavior": "sequential",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 2.8,
+        "y": 0.9491430109821704
+      },
+      "prevControl": {
+        "x": 2.091001606254282,
+        "y": 0.9262720950548883
+      },
+      "nextControl": {
+        "x": 3.680369308552192,
+        "y": 0.9775420209354679
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.633780908075368,
+        "y": 0.95
+      },
+      "prevControl": {
+        "x": 4.4882148680006475,
+        "y": 0.9566926914976881
+      },
+      "nextControl": {
+        "x": 5.6286657509121,
+        "y": 0.9042581681454381
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 6.509196014112427,
+        "y": 2.1727370130917154
+      },
+      "prevControl": {
+        "x": 5.871160684629063,
+        "y": 2.1293180086360186
+      },
+      "nextControl": {
+        "x": 5.871160684629063,
+        "y": 2.1293180086360186
+      },
+      "holonomicAngle": 0,
+      "isReversal": true,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.5194263284389615,
+        "y": 0.95
+      },
+      "prevControl": {
+        "x": 5.560053003130258,
+        "y": 0.93856454203636
+      },
+      "nextControl": {
+        "x": 3.4787996537476653,
+        "y": 0.9614354579636399
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 3.2843968683657767,
+        "y": 0.95
+      },
+      "prevControl": {
+        "x": 3.959176541981879,
+        "y": 0.9535331896534821
+      },
+      "nextControl": {
+        "x": 2.1809851312010333,
+        "y": 0.944222465368008
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": true,
+      "stopEvent": {
+        "names": [],
+        "executionBehavior": "parallel",
+        "waitBehavior": "none",
+        "waitTime": 0
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 1.8664000808743408,
+        "y": 1.64
+      },
+      "prevControl": {
+        "x": 2.402588362869036,
+        "y": 1.6668416990680142
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -168,9 +320,7 @@
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
-        "names": [
-          "ScoreHigh"
-        ],
+        "names": [],
         "executionBehavior": "parallel",
         "waitBehavior": "none",
         "waitTime": 0
@@ -192,6 +342,19 @@
       "names": [
         "High",
         "IntakeUp"
+      ]
+    },
+    {
+      "position": 9.1,
+      "names": [
+        "Handoff"
+      ]
+    },
+    {
+      "position": 6.1,
+      "names": [
+        "ConeMode",
+        "Intake"
       ]
     }
   ]

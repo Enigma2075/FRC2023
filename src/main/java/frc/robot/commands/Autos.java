@@ -108,6 +108,39 @@ public final class Autos {
     );
   }
 
+  
+  public static Command bumpExt(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("ConeMode", new SetConeModeCommand(robotState, true));
+    eventMap.put("CubeMode", new SetCubeModeCommand(robotState, true));
+    eventMap.put("Intake", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
+    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
+    eventMap.put("ScoreMiddle", new ArmScoreCommand(arm));
+    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
+    eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
+    eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
+    eventMap.put("FirstDrop", new ArmMoveCommand(arm, -.5, ArmPosition.AUTO_DROP));
+    eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
+    eventMap.put("Crab", new DriveCrabCommand(drive));
+    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
+
+
+    return setupAuto("BumpExt", eventMap, drive,
+      kDefaultConstraints, //start to bump
+      kSlowConstraints, //cross bump 1
+      kDefaultConstraints, //to cone and back
+      kDefaultConstraints, //to cone and back
+      kSlowConstraints, //cros bump 2
+      kDefaultConstraints, //
+      kDefaultConstraints,  //back to start/end
+      kSlowConstraints, //cros bump 2
+      kDefaultConstraints, //cros bump 2
+      kDefaultConstraints,//grab 2nd
+      kSlowConstraints,//cross bump 3?
+      kDefaultConstraints,//crossed bump
+      kDefaultConstraints//done
+    );
+  }
 
   public static Command gap_3PiecesBalance(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
