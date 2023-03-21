@@ -231,11 +231,11 @@
     },
     {
       "anchorPoint": {
-        "x": 4.24,
+        "x": 4.33,
         "y": 2.21
       },
       "prevControl": {
-        "x": 3.9100465022320607,
+        "x": 4.000046502232061,
         "y": 2.21
       },
       "nextControl": null,
@@ -265,10 +265,10 @@
       ]
     },
     {
-      "position": 3.1,
+      "position": 3.15,
       "names": [
-        "High",
-        "IntakeUp"
+        "IntakeUp",
+        "High"
       ]
     }
   ]

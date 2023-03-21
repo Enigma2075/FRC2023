@@ -56,8 +56,8 @@ public final class Constants {
     public static final Mode kShoulderMode = Mode.MOTION_MAGIC;
     public static final Mode kElbowMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kShoulderDebug = false;
-    public static final boolean kElbowDebug = false;
+    public static final boolean kShoulderDebug = true;
+    public static final boolean kElbowDebug = true;
 
     // Shoulder contants
     public static final int kShoulderRightId = 1;
