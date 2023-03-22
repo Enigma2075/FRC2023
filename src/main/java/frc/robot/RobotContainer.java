@@ -62,6 +62,7 @@ public class RobotContainer {
   private final Intake mIntake;
   private final Arm mArm;
   private final RobotState mRobotState;
+  private final Vision mVision;
   
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandXboxController mDriverController =
@@ -91,6 +92,7 @@ public class RobotContainer {
     mRobotState = new RobotState();
     mIntake = new Intake(mRobotState);
     mArm = new Arm(mRobotState);
+    mVision = new Vision();
 
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
