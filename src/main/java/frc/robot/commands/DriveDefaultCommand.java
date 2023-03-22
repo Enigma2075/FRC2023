@@ -60,11 +60,11 @@ public class DriveDefaultCommand extends CommandBase {
     double rot = Util.handleDeadband(-mRotationXSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     double rotY = Util.handleDeadband(-mRotationYSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     
-  
-
     throttle = Math.signum(throttle) * throttle * throttle;
     strafe = Math.signum(strafe) * strafe * strafe;
     rot = Math.signum(rot) * rot * rot;
+
+    SmartDashboard.putNumber("Rot", rot);
     if (mRequestCrabModeSupplier.getAsBoolean() ) {//&&
             //(RobotState.getInstance().getMeasuredVelocity().norm() < 0.25)) {
         mDrive.orientModules(List.of(
@@ -97,18 +97,29 @@ public class DriveDefaultCommand extends CommandBase {
             cardinal = 0;
           }
 
+          cardinal = 90;
+
           dist = robot.distance(Rotation2d.fromDegrees(cardinal));
+
+          double percent = Math.PI / dist;
+
+          double minSrc = -1;
+          double maxSrc = 1;
+          double minDest = -.1;
+          double maxDest = .1;
+          percent = (((percent - minSrc) /(maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
 
           //double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
           
           //double tmpRot = 180.0 / error;
-          SmartDashboard.putNumber("O-Change", dist);
+          SmartDashboard.putNumber("O-Change", percent);
           SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
           SmartDashboard.putNumber("O-Desire", cardinal);  
           SmartDashboard.putNumber("O-X", rot);  
           SmartDashboard.putNumber("O-Y", rotY);
 
-          rot = 0;
+          rot = percent;
+
         }
       }
       mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(

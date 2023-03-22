@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final Mode kPivotMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kDebug = false;
+    public static final boolean kDebug = true;
 
     // Intake contants
     public static final int kIntakeId = 5;
@@ -129,7 +129,7 @@ public final class Constants {
     public static final CanDeviceId kPivotEncoderId = new CanDeviceId(7, Can.kCANivoreBusName);
     // This should be the raw abs encoder count when the intake is down at the hardstop.
     // Make sure you are forcing the gear back to take out all slop
-    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(276.361328125) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
+    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(1.0546875) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
 
     public static final double kPivotReduction = (24.0 / 60.0); //277.7;
 

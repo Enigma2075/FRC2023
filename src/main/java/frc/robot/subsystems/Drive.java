@@ -502,5 +502,29 @@ public class Drive extends Subsystem {
             // SmartDashboard.putNumber("Back Right Azi Angle",
             // mModules[kBackRightModuleIdx].getSteerAngle().getDegrees());
         }
+
+        Rotation2d robot = getFieldRelativeGyroscopeRotation();
+        double cardinal = Double.MIN_VALUE;
+        double dist = Double.MIN_VALUE;
+        
+        cardinal = 90;
+
+        dist = robot.distance(Rotation2d.fromDegrees(cardinal));
+
+        dist = dist / Math.PI;
+
+
+        double minSrc = -1;
+          double maxSrc = 1;
+          double minDest = -.1;
+          double maxDest = .1;
+          dist = (((dist - minSrc) /(maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
+
+        //double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
+        
+        //double tmpRot = 180.0 / error;
+        SmartDashboard.putNumber("O-Change", dist);
+        SmartDashboard.putNumber("O-RobotRot", getFieldRelativeGyroscopeRotation().getDegrees());
+        SmartDashboard.putNumber("O-Desire", cardinal);          
     }
 }
