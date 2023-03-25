@@ -1,15 +1,17 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatorCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
-import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.sensors.CANCoder;
-import com.ctre.phoenix.sensors.SensorVelocityMeasPeriod;
+import com.ctre.phoenixpro.configs.MotorOutputConfigs;
+import com.ctre.phoenixpro.configs.TalonFXConfiguration;
+import com.ctre.phoenixpro.configs.TalonFXConfigurator;
+import com.ctre.phoenixpro.controls.CoastOut;
+import com.ctre.phoenixpro.controls.DutyCycleOut;
+import com.ctre.phoenixpro.controls.PositionDutyCycle;
+import com.ctre.phoenixpro.controls.StaticBrake;
+import com.ctre.phoenixpro.controls.VelocityDutyCycle;
+import com.ctre.phoenixpro.hardware.TalonFX;
+import com.ctre.phoenixpro.signals.InvertedValue;
+import com.ctre.phoenixpro.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.other.CanDeviceId;
@@ -22,19 +24,31 @@ import frc.robot.Constants;
 
 public class SwerveModule {
     private final TalonFX mSteeringMotor;
+    private final TalonFXConfigurator mSteeringConfigurator;
+    private final TalonFXConfiguration mSteeringConfiguration;
     private final TalonFX mDriveMotor;
+    private final TalonFXConfigurator mDriveConfigurator;
+    private final TalonFXConfiguration mDriveConfiguration;
     private final CANCoder mCanCoder;
     private final Rotation2d mEncoderZero;
     private Rotation2d mTalonOffset;
 
-    private final double kDrivePositionCoefficient = Math.PI * Constants.Drive.kWheelDiameter * Constants.Drive.kDriveReduction / 2048.0;
+    private final double kDrivePositionCoefficient = Math.PI * Constants.Drive.kWheelDiameter * Constants.Drive.kDriveReduction / 1.0;
     private final double kDriveVelocityCoefficient = kDrivePositionCoefficient * 10.0;
 
-    private final double kSteerPositionCoefficient = 2.0 * Math.PI / 2048.0 * Constants.Drive.kSteerReduction;
+    private final double kSteerPositionCoefficient = 2.0 * Math.PI / 1.0 * Constants.Drive.kSteerReduction;
 
     public SwerveModule(CanDeviceId driveId, CanDeviceId steeringId,  CANCoder cancoder, Rotation2d encoderZero) {
         mDriveMotor = TalonFXFactory.createDefaultTalon(driveId);
+        mDriveConfigurator = mDriveMotor.getConfigurator();
+        mDriveConfiguration = new TalonFXConfiguration();
+        mDriveConfigurator.refresh(mDriveConfiguration);
+
         mSteeringMotor = TalonFXFactory.createDefaultTalon(steeringId);
+        mSteeringConfigurator = mSteeringMotor.getConfigurator();
+        mSteeringConfiguration = new TalonFXConfiguration();
+        mSteeringConfigurator.refresh(mSteeringConfiguration);
+
         mCanCoder = cancoder;
         mEncoderZero = encoderZero;
 
@@ -57,134 +71,148 @@ public class SwerveModule {
     }
 
     public void configureTalons() throws RuntimeException {
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.configVoltageCompSaturation(Constants.Drive.kMaxVoltage, Constants.Can.kLongTimeoutMs),
-                "Failed to set voltage compensation");
+        mDriveConfiguration.CurrentLimits.StatorCurrentLimit = 120;
+        mDriveConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(false, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
-                "Failed to set supply current limit");
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
-                "Failed to set stator current limit");
+        mDriveConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+        mDriveConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Brake;
 
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_5Ms, Constants.Can.kLongTimeoutMs),
-                "Failed to set velocity measurement period");
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.configVelocityMeasurementWindow(32, Constants.Can.kLongTimeoutMs),
-                "Failed to set velocity measurement window");
+        mDriveConfiguration.Slot0.kP = Constants.Drive.kVelocityKp;
+        mDriveConfiguration.Slot0.kI = Constants.Drive.kVelocityKi;
+        mDriveConfiguration.Slot0.kD = Constants.Drive.kVelocityKd;
+        mDriveConfiguration.Slot0.kV = Constants.Drive.kVelocityKf;
+        //mDriveConfiguration.Slot0.kS = Constants.Drive.kVelocityKp;
 
-        mDriveMotor.enableVoltageCompensation(true);
-        mDriveMotor.setNeutralMode(NeutralMode.Brake);
-        mDriveMotor.setInverted(TalonFXInvertType.Clockwise);
-        mDriveMotor.setSensorPhase(true);
-        mDriveMotor.setSelectedSensorPosition(0.0);
-        mDriveMotor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_5Ms, 10);
-        mDriveMotor.configVelocityMeasurementWindow(32, 10);
+        mDriveConfigurator.apply(mDriveConfiguration);
+
+        // No Equivelant
+        // TalonUtil.checkErrorWithThrow(
+        //         mDriveMotor.configVoltageCompSaturation(Constants.Drive.kMaxVoltage, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set voltage compensation");
+
+        // TalonUtil.checkErrorWithThrow(
+        //         mDriveMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(false, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
+        //         "Failed to set supply current limit");
+        // TalonUtil.checkErrorWithThrow(
+        //         mDriveMotor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
+        //         "Failed to set stator current limit");
+
+        // TalonUtil.checkErrorWithThrow(
+        //         mDriveMotor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_5Ms, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set velocity measurement period");
+        // TalonUtil.checkErrorWithThrow(
+        //         mDriveMotor.configVelocityMeasurementWindow(32, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set velocity measurement window");
+
+
+        //mDriveMotor.enableVoltageCompensation(true);
+        //mDriveMotor.setSensorPhase(true);
+        //mDriveMotor.setSelectedSensorPosition(0.0);
+        
+        //mDriveMotor.configVelocityMeasurementPeriod(SensorVelocityMeasPeriod.Period_5Ms, 10);
+        //mDriveMotor.configVelocityMeasurementWindow(32, 10);
 
         // Reduce CAN status frame rates
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.setStatusFramePeriod(
-                        StatusFrameEnhanced.Status_1_General,
-                        250,
-                        Constants.Can.kLongTimeoutMs
-                ),
-                "Failed to configure Falcon status frame period"
-        );
+        //TalonUtil.checkErrorWithThrow(
+        //        mDriveMotor.setStatusFramePeriod(
+        //                StatusFrameEnhanced.Status_1_General,
+        //                250,
+        //                Constants.Can.kLongTimeoutMs
+        //        ),
+        //        "Failed to configure Falcon status frame period"
+        //);
 
         // Reduce CAN status frame rates
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.setStatusFramePeriod(
-                        StatusFrameEnhanced.Status_2_Feedback0,
-                        5,
-                        Constants.Can.kLongTimeoutMs
-                ),
-                "Failed to configure Falcon status frame period"
-        );
-        mDriveMotor.setSelectedSensorPosition(0.0);
+        //TalonUtil.checkErrorWithThrow(
+        //        mDriveMotor.setStatusFramePeriod(
+        //                StatusFrameEnhanced.Status_2_Feedback0,
+        //                5,
+        //                Constants.Can.kLongTimeoutMs
+        //        ),
+        //        "Failed to configure Falcon status frame period"
+        //);
+        //mDriveMotor.setSelectedSensorPosition(0.0);
 
-        // PID
-        // TODO(get rid of dependency on Constants)
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.config_kI(0, Constants.Drive.kVelocityKi, Constants.Can.kLongTimeoutMs),
-                "Failed to set kI");
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.config_kP(0, Constants.Drive.kVelocityKp, Constants.Can.kLongTimeoutMs),
-                "Failed to set kP");
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.config_kD(0, Constants.Drive.kVelocityKd, Constants.Can.kLongTimeoutMs),
-                "Failed to set kD");
-        TalonUtil.checkErrorWithThrow(
-                mDriveMotor.config_kF(0, Constants.Drive.kVelocityKf, Constants.Can.kLongTimeoutMs),
-                "Failed to set kF");
 
         // Steering
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.Can.kLongTimeoutMs),
-                "Failed to set encoder");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.configVoltageCompSaturation(Constants.Drive.kMaxVoltage, Constants.Can.kLongTimeoutMs),
-                "Failed to set voltage compensation");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(false, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
-                "Failed to set supply current limit");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
-                "Failed to set stator current limit");
+        mSteeringConfiguration.CurrentLimits.StatorCurrentLimit = 100;
+        mSteeringConfiguration.CurrentLimits.StatorCurrentLimitEnable = true;
 
-        mSteeringMotor.enableVoltageCompensation(true);
-        mSteeringMotor.setNeutralMode(NeutralMode.Coast);
-        mSteeringMotor.setInverted(TalonFXInvertType.Clockwise);
-        mSteeringMotor.setSensorPhase(false);
+        mSteeringConfiguration.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        mSteeringConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+
+        mSteeringConfiguration.Slot0.kP = Constants.Drive.kSteerKp;
+        mSteeringConfiguration.Slot0.kI = Constants.Drive.kSteerKi;
+        mSteeringConfiguration.Slot0.kD = Constants.Drive.kSteerKd;
+        //mSteeringConfiguration.Slot0.kV = Constants.Drive.kSteerKf;
+        //mSteeringConfiguration.Slot0.kS = Constants.Drive.kSteerKp;
+        
+        // No Equivelant
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set encoder");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.configVoltageCompSaturation(Constants.Drive.kMaxVoltage, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set voltage compensation");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(false, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
+        //         "Failed to set supply current limit");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.configStatorCurrentLimit(new StatorCurrentLimitConfiguration(true, 100.0, 120.0, 0.0), Constants.Can.kLongTimeoutMs),
+        //         "Failed to set stator current limit");
+
+        //mSteeringMotor.enableVoltageCompensation(true);
+        //mSteeringMotor.setNeutralMode(NeutralMode.Coast);
+        //mSteeringMotor.setInverted(TalonFXInvertType.Clockwise);
+        //mSteeringMotor.setSensorPhase(false);
 
         // Reduce CAN status frame rates
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.setStatusFramePeriod(
-                        StatusFrameEnhanced.Status_1_General,
-                        5,
-                        Constants.Can.kLongTimeoutMs
-                ),
-                "Failed to configure Falcon status frame period"
-        );
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.setStatusFramePeriod(
+        //                 StatusFrameEnhanced.Status_1_General,
+        //                 5,
+        //                 Constants.Can.kLongTimeoutMs
+        //         ),
+        //         "Failed to configure Falcon status frame period"
+        // );
 
         // Reduce CAN status frame rates
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.setStatusFramePeriod(
-                        StatusFrameEnhanced.Status_2_Feedback0,
-                        5,
-                        Constants.Can.kLongTimeoutMs
-                ),
-                "Failed to configure Falcon status frame period"
-        );
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.setStatusFramePeriod(
+        //                 StatusFrameEnhanced.Status_2_Feedback0,
+        //                 5,
+        //                 Constants.Can.kLongTimeoutMs
+        //         ),
+        //         "Failed to configure Falcon status frame period"
+        // );
 
         // PID
         // TODO(get rid of dependency on Constants)
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.config_kP(0, Constants.Drive.kSteerKp, Constants.Can.kLongTimeoutMs),
-                "Failed to set kP");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.config_kI(0, Constants.Drive.kSteerKi, Constants.Can.kLongTimeoutMs),
-                "Failed to set kI");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.config_kD(0, Constants.Drive.kSteerKd, Constants.Can.kLongTimeoutMs),
-                "Failed to set kD");
-        TalonUtil.checkErrorWithThrow(
-                mSteeringMotor.config_kF(0, 0.0, Constants.Can.kLongTimeoutMs),
-                "Failed to set kF");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.config_kP(0, Constants.Drive.kSteerKp, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set kP");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.config_kI(0, Constants.Drive.kSteerKi, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set kI");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.config_kD(0, Constants.Drive.kSteerKd, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set kD");
+        // TalonUtil.checkErrorWithThrow(
+        //         mSteeringMotor.config_kF(0, 0.0, Constants.Can.kLongTimeoutMs),
+        //         "Failed to set kF");
     }
 
 
     public void setSteerCoastMode() {
-        mSteeringMotor.setNeutralMode(NeutralMode.Coast);
+       mSteeringMotor.setControl(new CoastOut());
     }
 
     public void setSteerBrakeMode() {
-        mSteeringMotor.setNeutralMode(NeutralMode.Brake);
+        mSteeringMotor.setControl(new StaticBrake());
     }
 
     public void rezeroSteeringMotor() {
-        mTalonOffset = Rotation2d.fromRadians(mSteeringMotor.getSelectedSensorPosition() * kSteerPositionCoefficient)
+        mTalonOffset = Rotation2d.fromRadians(mSteeringMotor.getRotorPosition().getValue() * kSteerPositionCoefficient)
                 .rotateBy(getAdjustedCanCoderAngle().inverse());
     }
 
@@ -201,17 +229,17 @@ public class SwerveModule {
     }
 
     public double getDriveClosedLoopError() {
-        return mDriveMotor.getClosedLoopError() * kDriveVelocityCoefficient;
+        return mDriveMotor.getClosedLoopError().getValue() * kDriveVelocityCoefficient;
     }
 
-    public double getSteerClosedLoopError() { return mSteeringMotor.getClosedLoopError() * kSteerPositionCoefficient;}
+    public double getSteerClosedLoopError() { return mSteeringMotor.getClosedLoopError().getValue() * kSteerPositionCoefficient;}
 
     public double getDriveDistance() {
-        return mDriveMotor.getSelectedSensorPosition() * kDrivePositionCoefficient;
+        return mDriveMotor.getRotorPosition().getValue() * kDrivePositionCoefficient;
     }
 
     public double getDriveVelocity() {
-        return mDriveMotor.getSelectedSensorVelocity() * kDriveVelocityCoefficient;
+        return mDriveMotor.getRotorVelocity().getValue() * kDriveVelocityCoefficient;
     }
 
     public Rotation2d getSteerAngle() {
@@ -219,27 +247,31 @@ public class SwerveModule {
     }
 
     public double getUnclampedSteerAngleRadians() {
-        return (mSteeringMotor.getSelectedSensorPosition() * kSteerPositionCoefficient) - mTalonOffset.getRadians();
+        return (mSteeringMotor.getRotorPosition().getValue() * kSteerPositionCoefficient) - mTalonOffset.getRadians();
     }
 
     public void setWithVoltageShortestPath(double drivePercentage, Rotation2d steerAngle) {
         final boolean flip = setSteerAngleShortestPath(steerAngle);
-        mDriveMotor.set(TalonFXControlMode.PercentOutput, flip ? -drivePercentage : drivePercentage);
+        mDriveMotor.setControl(new DutyCycleOut(flip ? -drivePercentage : drivePercentage, true, false));
+        //mDriveMotor.set(TalonFXControlMode.PercentOutput, flip ? -drivePercentage : drivePercentage);
     }
 
     public void setWithVelocityShortestPath(double driveVelocity, Rotation2d steerAngle) {
         final boolean flip = setSteerAngleShortestPath(steerAngle);
-        mDriveMotor.set(TalonFXControlMode.Velocity, (flip ? -driveVelocity : driveVelocity) / kDriveVelocityCoefficient);
+        mDriveMotor.setControl(new VelocityDutyCycle((flip ? -driveVelocity : driveVelocity) / kDriveVelocityCoefficient, true, 0, 0, false));
+        //mDriveMotor.set(TalonFXControlMode.Velocity, (flip ? -driveVelocity : driveVelocity) / kDriveVelocityCoefficient);
     }
 
     public void setWithVoltageUnclamped(double drivePercentage, double steerAngleRadians) {
         setSteerAngleUnclamped(steerAngleRadians);
-        mDriveMotor.set(TalonFXControlMode.PercentOutput, drivePercentage);
+        mDriveMotor.setControl(new DutyCycleOut(drivePercentage, true, false));
+        //mDriveMotor.set(TalonFXControlMode.PercentOutput, drivePercentage);
     }
 
     public void setWithVelocityUnclamped(double driveVelocity, double steerAngleRadians) {
         setSteerAngleUnclamped(steerAngleRadians);
-        mDriveMotor.set(TalonFXControlMode.Velocity, driveVelocity / kDriveVelocityCoefficient);
+        mDriveMotor.setControl(new VelocityDutyCycle(driveVelocity / kDriveVelocityCoefficient, true, 0, 0, false));
+        //mDriveMotor.set(TalonFXControlMode.Velocity, driveVelocity / kDriveVelocityCoefficient);
     }
 
     // Returns true if the drive velocity should be inverted.
@@ -266,13 +298,16 @@ public class SwerveModule {
 
     private void setSteerAngleUnclamped(double steerAngleRadians) {
         //System.out.println((steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient);
-        mSteeringMotor.set(TalonFXControlMode.Position, (steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient);
+        mSteeringMotor.setControl(new PositionDutyCycle((steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient, true, 0, 0, false));
+        //mSteeringMotor.set(TalonFXControlMode.Position, (steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient);
     }
 
     public void stop() {
         System.out.println("stopping");
         setSteerCoastMode();
-        mDriveMotor.set(TalonFXControlMode.PercentOutput, 0.0);
-        mSteeringMotor.set(TalonFXControlMode.PercentOutput, 0.0);
+        mDriveMotor.setControl(new DutyCycleOut(0));
+        mSteeringMotor.setControl(new DutyCycleOut(0));
+        //mDriveMotor.set(TalonFXControlMode.PercentOutput, 0.0);
+        //mSteeringMotor.set(TalonFXControlMode.PercentOutput, 0.0);
     }
 }
