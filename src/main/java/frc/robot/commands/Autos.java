@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4.33, 3.6);
-  private static final PathConstraints kMedium1Constraints = new PathConstraints(1.8, 3);
+  private static final PathConstraints kMedium1Constraints = new PathConstraints(2, 3);
   private static final PathConstraints kMedium2Constraints = new PathConstraints(4.33, 3.3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
   private static final PathConstraints kFastConstraints = new PathConstraints(4, 3);
@@ -126,19 +126,19 @@ public final class Autos {
 
 
     return setupAuto("BumpExt", eventMap, drive,
-      kDefaultConstraints, //start to bump
-      kSlowConstraints, //cross bump 1
-      kDefaultConstraints, //to cone and back
-      kDefaultConstraints, //to cone and back
-      kSlowConstraints, //cros bump 2
-      kDefaultConstraints, //
-      kDefaultConstraints,  //back to start/end
-      kSlowConstraints, //cros bump 2
-      kDefaultConstraints, //cros bump 2
-      kDefaultConstraints,//grab 2nd
-      kSlowConstraints,//cross bump 3?
-      kDefaultConstraints,//crossed bump
-      kDefaultConstraints//done
+      kMedium1Constraints //start to bump
+      //kSlowConstraints, //cross bump 1
+      //kDefaultConstraints, //to cone and back
+      //kDefaultConstraints, //to cone and back
+      //kSlowConstraints, //cros bump 2
+      //kDefaultConstraints, //
+      //kDefaultConstraints,  //back to start/end
+      //kSlowConstraints, //cros bump 2
+      //kDefaultConstraints, //cros bump 2
+      //kDefaultConstraints,//grab 2nd
+      //kSlowConstraints,//cross bump 3?
+      //kDefaultConstraints,//crossed bump
+      //kDefaultConstraints//done
     );
   }
 

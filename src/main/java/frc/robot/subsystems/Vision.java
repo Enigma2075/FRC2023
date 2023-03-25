@@ -4,80 +4,39 @@
 
 package frc.robot.subsystems;
 
-import java.lang.reflect.Array;
-
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.other.Subsystem;
 
-public class Vision extends SubsystemBase {
+public class Vision extends Subsystem {
+  private final NetworkTableEntry blueEntry; 
+  private final NetworkTableEntry targetIdEntry;
 
-public double rawX;
-public double rawY;
-public double rawRotate;
-public double calcX;
-public double calcY;
-public double calcRot;
-  /** Creates a new ExampleSubsystem. */
+  private final PeriodicIO mPeriodicIO = new PeriodicIO();
+
+  public static class PeriodicIO {
+    boolean hasValidTarget = false;
+    Pose2d rawPose = new Pose2d();
+
+    Pose2d calcPose = new Pose2d();
+  }
+
   public Vision() {
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpired").getDoubleArray(new double[6]);
-    /*
-    rawX = (double)Array.getDouble(botpose_wpired, 0);
-    rawY = (double)Array.getDouble(botpose_wpired, 1);
-    rawRotate = (double)Array.getDouble(botpose_wpired, 5);
-    calcX = rawX - 8.265;
-    calcY = rawY - 4;
-    calcRot = rawRotate - 180; 
-    */
-  }
-  /**
-   * Example command factory method.
-   *
-   * @return a command
-   */
-  public CommandBase exampleMethodCommand() {
-    // Inline construction of command goes here.
-    // Subsystem::RunOnce implicitly requires `this` subsystem.
-    return runOnce(
-        () -> {
-          /* one-time action goes here */
-        });
+    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
+    blueEntry = limelight.getEntry("botpose_wpiblue");
+    targetIdEntry = limelight.getEntry("tid");
   }
 
-  /**
-   * An example method querying a boolean state of the subsystem (for example, a digital sensor).
-   *
-   * @return value of some boolean subsystem state, such as a digital sensor.
-   */
-  public boolean exampleCondition() {
-    // Query some boolean state, such as a digital sensor.
-    return false;
+  public Pose2d getRawPose() {
+    return mPeriodicIO.rawPose;
   }
 
   @Override
   public void periodic() {
-   double[] robotPosition = NetworkTableInstance.getDefault().getTable("limelight").getEntry("botpose_wpiblue").getDoubleArray(new double[6]);
-
-    //double rawX = (double)Array.getDouble(botpose_wpired, 0);
-    //double rawY = (double)Array.getDouble(botpose_wpired, 1);
-    //double rawRotate = (double)Array.getDouble(botpose_wpired, 5);
-    //double calcX = rawX - 8.265;
-    double calcX = robotPosition[0]; //- 8.265;
-    //double calcY = rawY - 4;
-    double calcY = robotPosition[1]; //- 4;
-    //double calcRot = rawRotate - 180;
-    double calcRot = robotPosition[5]; //- 180;
-
-    //SmartDashboard.putNumber("Raw X", rawX);
-    //SmartDashboard.putNumber("Raw Y", rawY);
-    //SmartDashboard.putNumber("Raw Rotation", rawRotate);
-    SmartDashboard.putNumber("Calculated X", calcX);
-    SmartDashboard.putNumber("Calculated Y", calcY);
-    SmartDashboard.putNumber("Calculated Rotation", calcRot);
-    // This method will be called once per scheduler run
   }
 
   @Override
@@ -85,6 +44,7 @@ public double calcRot;
     // This method will be called once per scheduler run during simulation
     
   }
+
   /** 
    step 1: get tx?, ty?, and rx from limelight 
    tx - 8.265 = 0 in pathplanner
@@ -94,4 +54,51 @@ public double calcRot;
    tx, calculated x, ty, calculated y, rx, calculated rotation go in shuffleboard?
    should all be good then but idk
   **/
+  
+  @Override
+  public synchronized void readPeriodicInputs() {
+    double tid = targetIdEntry.getDouble(Double.MIN_VALUE);
+
+    SmartDashboard.putNumber("tid", tid);
+
+    if(tid < 0) {
+      mPeriodicIO.hasValidTarget = false;
+      return;
+    }
+    
+    mPeriodicIO.hasValidTarget = true;
+
+    double[] robotPosition = blueEntry.getDoubleArray(new double[6]);
+
+    double rawX = robotPosition[0]; //- 8.265;
+    double rawY = robotPosition[1]; //- 4;
+    double rawRot = robotPosition[5]; //- 180;
+
+    //double rawX = (double)Array.getDouble(botpose_wpired, 0);
+    //double rawY = (double)Array.getDouble(botpose_wpired, 1);
+    //double rawRotate = (double)Array.getDouble(botpose_wpired, 5);
+    //double calcX = rawX - 8.265;
+    //double calcY = rawY - 4;
+    //double calcRot = rawRotate - 180;
+
+    mPeriodicIO.rawPose = new Pose2d(rawX, rawY, Rotation2d.fromDegrees(rawRot));
+  }
+
+  @Override
+  public void stop() {
+    // TODO Auto-generated method stub
+    
+  }
+  @Override
+  public boolean checkSystem() {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void outputTelemetry() {
+    SmartDashboard.putString("V Raw", String.format("X:%f, Y:%f, Rot:%f",
+    mPeriodicIO.rawPose.getX(), mPeriodicIO.rawPose.getY(), mPeriodicIO.rawPose.getRotation().getDegrees()));
+    SmartDashboard.putBoolean("V Has-Target", mPeriodicIO.hasValidTarget);
+  }
 }

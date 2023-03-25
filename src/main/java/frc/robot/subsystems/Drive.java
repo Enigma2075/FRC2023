@@ -23,6 +23,8 @@ import frc.lib.swerve.SwerveSetpointGenerator.KinematicLimits;
 import frc.robot.Constants;
 
 public class Drive extends Subsystem {
+    private final Vision mVision;
+
     private final Pigeon2 mPigeon = new Pigeon2(Constants.Drive.kPigeonIMUId, Constants.Can.kCANivoreBusName);
 
     private final SwerveModule[] mModules;
@@ -43,16 +45,17 @@ public class Drive extends Subsystem {
 
     private SwerveDriveOdometry mOdometry;
 
-    private static Drive mInstance = null;
+    //private static Drive mInstance = null;
 
-    public static Drive getInstance() {
-        if (mInstance == null) {
-            mInstance = new Drive();
-        }
-        return mInstance;
-    }
+    //public static Drive getInstance() {
+    //    if (mInstance == null) {
+    //        mInstance = new Drive();
+    //    }
+    //    return mInstance;
+    //}
 
-    private Drive() {
+    public Drive(Vision vision) {
+        mVision = vision;
         mModules = new SwerveModule[4];
 
         mModules[kFrontLeftModuleIdx] = new SwerveModule(
@@ -395,6 +398,7 @@ public class Drive extends Subsystem {
                 break;
             case OPEN_LOOP:
             case VELOCITY_CONTROL:
+                mOdometry.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
                 updateDesiredStates();
             default:
                 break;
@@ -446,29 +450,29 @@ public class Drive extends Subsystem {
     public void outputTelemetry() {
         if (Constants.Drive.kDebug) {
             edu.wpi.first.math.geometry.Pose2d pose = mOdometry.getPoseMeters();
-            SmartDashboard.putString("Wpi Odometry", String.format("X:%f, Y:%f, Rot:%f",
+            SmartDashboard.putString("D Pos", String.format("X:%f, Y:%f, Rot:%f",
                     pose.getX(), pose.getY(), pose.getRotation().getDegrees()));
 
-            SmartDashboard.putString("FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
+            SmartDashboard.putString("D FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
 
-            SmartDashboard.putString("Chassis Speeds", mPeriodicIO.des_chassis_speeds.toString());
-            SmartDashboard.putString("Gyro Rot", getFieldRelativeGyroscopeRotation().toString());
+            SmartDashboard.putString("D Chassis Speeds", mPeriodicIO.des_chassis_speeds.toString());
+            SmartDashboard.putString("D Gyro Rot", getFieldRelativeGyroscopeRotation().toString());
             // SmartDashboard.putString("Gyro Roll", getRoll().toString());
 
-            SmartDashboard.putNumber("FL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
-            SmartDashboard.putNumber("FR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
-            SmartDashboard.putNumber("BL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackLeftModuleIdx]);
-            SmartDashboard.putNumber("BR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackRightModuleIdx]);
+            SmartDashboard.putNumber("D FL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
+            SmartDashboard.putNumber("D FR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontRightModuleIdx]);
+            SmartDashboard.putNumber("D BL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackLeftModuleIdx]);
+            SmartDashboard.putNumber("D BR Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kBackRightModuleIdx]);
 
-            SmartDashboard.putNumber("FL Deg", mPeriodicIO.measured_states[kFrontLeftModuleIdx].angle.getDegrees());
-            SmartDashboard.putNumber("FR Deg", mPeriodicIO.measured_states[kFrontRightModuleIdx].angle.getDegrees());
-            SmartDashboard.putNumber("BL Deg", mPeriodicIO.measured_states[kBackLeftModuleIdx].angle.getDegrees());
-            SmartDashboard.putNumber("BR Deg", mPeriodicIO.measured_states[kBackRightModuleIdx].angle.getDegrees());
+            SmartDashboard.putNumber("D FL Deg", mPeriodicIO.measured_states[kFrontLeftModuleIdx].angle.getDegrees());
+            SmartDashboard.putNumber("D FR Deg", mPeriodicIO.measured_states[kFrontRightModuleIdx].angle.getDegrees());
+            SmartDashboard.putNumber("D BL Deg", mPeriodicIO.measured_states[kBackLeftModuleIdx].angle.getDegrees());
+            SmartDashboard.putNumber("D BR Deg", mPeriodicIO.measured_states[kBackRightModuleIdx].angle.getDegrees());
 
-            SmartDashboard.putString("FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
-            SmartDashboard.putString("FR State", mPeriodicIO.setpoint.mModuleStates[kFrontRightModuleIdx].toString());
-            SmartDashboard.putString("BL State", mPeriodicIO.setpoint.mModuleStates[kBackLeftModuleIdx].toString());
-            SmartDashboard.putString("BR State", mPeriodicIO.setpoint.mModuleStates[kBackRightModuleIdx].toString());
+            SmartDashboard.putString("D FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
+            SmartDashboard.putString("D FR State", mPeriodicIO.setpoint.mModuleStates[kFrontRightModuleIdx].toString());
+            SmartDashboard.putString("D BL State", mPeriodicIO.setpoint.mModuleStates[kBackLeftModuleIdx].toString());
+            SmartDashboard.putString("D BR State", mPeriodicIO.setpoint.mModuleStates[kBackRightModuleIdx].toString());
 
             // SmartDashboard.putString("MAC", Constants.getMACAddress());
 
@@ -501,30 +505,12 @@ public class Drive extends Subsystem {
             // mModules[kBackLeftModuleIdx].getSteerAngle().getDegrees());
             // SmartDashboard.putNumber("Back Right Azi Angle",
             // mModules[kBackRightModuleIdx].getSteerAngle().getDegrees());
+
+            Pose2d visionPose = new Pose2d(mVision.getRawPose());
+
+            double posError = visionPose.distance(new Pose2d(pose));
+
+            SmartDashboard.putNumber("D Pos-Err", posError);
         }
-
-        Rotation2d robot = getFieldRelativeGyroscopeRotation();
-        double cardinal = Double.MIN_VALUE;
-        double dist = Double.MIN_VALUE;
-        
-        cardinal = 90;
-
-        dist = robot.distance(Rotation2d.fromDegrees(cardinal));
-
-        dist = dist / Math.PI;
-
-
-        double minSrc = -1;
-          double maxSrc = 1;
-          double minDest = -.1;
-          double maxDest = .1;
-          dist = (((dist - minSrc) /(maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
-
-        //double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
-        
-        //double tmpRot = 180.0 / error;
-        SmartDashboard.putNumber("O-Change", dist);
-        SmartDashboard.putNumber("O-RobotRot", getFieldRelativeGyroscopeRotation().getDegrees());
-        SmartDashboard.putNumber("O-Desire", cardinal);          
     }
 }

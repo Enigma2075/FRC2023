@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -23,23 +25,27 @@ public class DriveDefaultCommand extends CommandBase {
   private final DoubleSupplier mThrottledSupplier;
   private final DoubleSupplier mStrafeSupplier;
   private final DoubleSupplier mRotationXSupplier;
-  private final DoubleSupplier mRotationYSupplier;
   private final BooleanSupplier mRequestCrabModeSupplier;
-  private final BooleanSupplier mRequestOrientTrigger;
+  private final BooleanSupplier mRequestOrientScoreTrigger;
+  private final BooleanSupplier mRequestOrientShelfTrigger;
+  private final BooleanSupplier mRequestOrientFeederTrigger;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier, DoubleSupplier rotationXSupplier, DoubleSupplier rotationYSupplier, Trigger requestCrabModeTrigger, Trigger requestOrientTrigger) {
+  public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier,
+      DoubleSupplier rotationXSupplier, Trigger requestCrabModeTrigger,
+      Trigger requestOrientScoreTrigger, Trigger requestOrientShelfTrigger, Trigger requestOrientFeederTrigger) {
     mDrive = drive;
     mThrottledSupplier = throttleSupplier;
     mStrafeSupplier = strafeSupplier;
     mRotationXSupplier = rotationXSupplier;
-    mRotationYSupplier = rotationYSupplier;
     mRequestCrabModeSupplier = requestCrabModeTrigger;
-    mRequestOrientTrigger = requestOrientTrigger;
+    mRequestOrientScoreTrigger = requestOrientScoreTrigger;
+    mRequestOrientShelfTrigger = requestOrientShelfTrigger;
+    mRequestOrientFeederTrigger = requestOrientFeederTrigger;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
@@ -47,103 +53,109 @@ public class DriveDefaultCommand extends CommandBase {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     boolean wantSmoothMode = false;
 
-    //Adjust inputs
-    double throttle = Util.handleDeadband(-mThrottledSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
-    double strafe = Util.handleDeadband(-mStrafeSupplier.getAsDouble(), Constants.DriverStation.kDriveJoystickThreshold);
+    // Adjust inputs
+    double throttle = Util.handleDeadband(-mThrottledSupplier.getAsDouble(),
+        Constants.DriverStation.kDriveJoystickThreshold);
+    double strafe = Util.handleDeadband(-mStrafeSupplier.getAsDouble(),
+        Constants.DriverStation.kDriveJoystickThreshold);
     double rot = Util.handleDeadband(-mRotationXSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
-    double rotY = Util.handleDeadband(-mRotationYSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
-    
+    // double rotY = Util.handleDeadband(-mRotationYSupplier.getAsDouble(),
+    // Constants.DriverStation.kJoystickThreshold);
+
     throttle = Math.signum(throttle) * throttle * throttle;
     strafe = Math.signum(strafe) * strafe * strafe;
     rot = Math.signum(rot) * rot * rot;
 
     SmartDashboard.putNumber("Rot", rot);
-    if (mRequestCrabModeSupplier.getAsBoolean() ) {//&&
-            //(RobotState.getInstance().getMeasuredVelocity().norm() < 0.25)) {
-        mDrive.orientModules(List.of(
-                Rotation2d.fromDegrees(45),
-                Rotation2d.fromDegrees(-45),
-                Rotation2d.fromDegrees(-45),
-                Rotation2d.fromDegrees(45)
-        ));
-    } 
-    else {
-      if(mRequestOrientTrigger.getAsBoolean()) {
-        if(rotY != 0 || rot != 0) {
-          Rotation2d robot = mDrive.getFieldRelativeGyroscopeRotation();
-          double cardinal = Double.MIN_VALUE;
-          double dist = Double.MIN_VALUE;
-          if((rot < rotY && Math.signum(rot) == -1 && Math.signum(rotY) == -1) || (Math.signum(rot) == -1 && (Math.signum(rotY) == 1 || Math.signum(rotY) == 0) && Math.abs(rot) > Math.abs(rotY))){
+    if (mRequestCrabModeSupplier.getAsBoolean()) {// &&
+      // (RobotState.getInstance().getMeasuredVelocity().norm() < 0.25)) {
+      mDrive.orientModules(List.of(
+          Rotation2d.fromDegrees(45),
+          Rotation2d.fromDegrees(-45),
+          Rotation2d.fromDegrees(-45),
+          Rotation2d.fromDegrees(45)));
+    } else {
+      if (mRequestOrientShelfTrigger.getAsBoolean() || mRequestOrientScoreTrigger.getAsBoolean()
+          || mRequestOrientFeederTrigger.getAsBoolean()) {
+        double requestedOrientation = 0;
+        if (mRequestOrientShelfTrigger.getAsBoolean()) {
+          // Reverse
+          requestedOrientation = 180;
+        } else if (mRequestOrientScoreTrigger.getAsBoolean()) {
+          // Forward
+          requestedOrientation = 0;
+        } else if (mRequestOrientFeederTrigger.getAsBoolean()) {
+          if (DriverStation.getAlliance() == Alliance.Red) {
             // Right
-            cardinal = -90;
-          }
-          else if(rotY < rot && Math.signum(rotY) == -1){
-            // Reverse
-            cardinal = 180;
-          }
-          else if(rot > rotY && Math.signum(rot) == 1){
+            requestedOrientation = -90;
+          } else {
             // Left
-            cardinal = 90;
+            requestedOrientation = 90;
           }
-          else if(rotY > rot && Math.signum(rotY) == 1){
-            // Forward
-            cardinal = 0;
-          }
+        }
 
-          cardinal = 90;
+        Rotation2d robotOrientation = mDrive.getFieldRelativeGyroscopeRotation();
+        double dist = Double.MIN_VALUE;
 
-          dist = robot.distance(Rotation2d.fromDegrees(cardinal));
+        dist = robotOrientation.distance(Rotation2d.fromDegrees(requestedOrientation));
+        if (Math.abs(Math.toDegrees(dist)) > 1.5) {
 
-          double percent = Math.PI / dist;
+          double percent = dist / Math.PI;
 
           double minSrc = -1;
           double maxSrc = 1;
-          double minDest = -.1;
-          double maxDest = .1;
-          percent = (((percent - minSrc) /(maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
+          double minDest = -1;
+          double maxDest = 1;
+          percent = (((percent - minSrc) / (maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
+          double withF = Math.abs(percent) + .08;
+          if (withF > 1) {
+            withF = 1;
+          }
+          percent = withF * Math.signum(percent);
 
-          //double error = cardinal - mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
-          
-          //double tmpRot = 180.0 / error;
+          // double error = cardinal -
+          // mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
+
+          // double tmpRot = 180.0 / error;
           SmartDashboard.putNumber("O-Change", percent);
           SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
-          SmartDashboard.putNumber("O-Desire", cardinal);  
-          SmartDashboard.putNumber("O-X", rot);  
-          SmartDashboard.putNumber("O-Y", rotY);
+          SmartDashboard.putNumber("O-Desire", requestedOrientation);
 
           rot = percent;
 
         }
       }
       mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-            throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-            strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-            rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
-            mDrive.getFieldRelativeGyroscopeRotation()));
+          throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+          strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+          rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
+          mDrive.getFieldRelativeGyroscopeRotation()));
     }
 
-    //TODO: Do we need smooth?
+    // TODO: Do we need smooth?
     // if (mControlBoard.getSmoothMode()) {
-    //     wantSmoothMode = true;
+    // wantSmoothMode = true;
     // }
 
     // if (wantSmoothMode) {
-    //   mDrive.setKinematicLimits(Constants.Drive.kSmoothKinematicLimits);
+    // mDrive.setKinematicLimits(Constants.Drive.kSmoothKinematicLimits);
     // } else {
-    //     mDrive.setKinematicLimits(Constants.Drive.kUncappedKinematicLimits);
+    // mDrive.setKinematicLimits(Constants.Drive.kUncappedKinematicLimits);
     // }
   }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+  }
 
   // Returns true when the command should end.
   @Override

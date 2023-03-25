@@ -63,7 +63,7 @@ public final class Constants {
     public static final int kShoulderRightId = 1;
     public static final int kShoulderLeftId = 2;
     public static final CanDeviceId kShoulderEncoderId = new CanDeviceId(5, Can.kCANivoreBusName);
-    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(257.607421875) : Rotation2d.fromDegrees(195.908203125);
+    public static final Rotation2d kShoulderOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(257.467421875) : Rotation2d.fromDegrees(195.908203125);
 
     public static final double kShoulderReduction = (1.0 / 7.0) * (1.0 / 5.0) * (24.0 / 68.0) * (18.0 / 44.0); //277.7;
 
@@ -88,7 +88,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(187.9) : Rotation2d.fromDegrees(283.0078125);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(189.75) : Rotation2d.fromDegrees(283.0078125);
 
     public static final double kElbowReduction = (1.0 / 10.0) * (1.0 / 3.0) * (18.0 / 44.0);
 
@@ -127,9 +127,11 @@ public final class Constants {
     // Pivot contants
     public static final int kPivotId = 1;
     public static final CanDeviceId kPivotEncoderId = new CanDeviceId(7, Can.kCANivoreBusName);
-    // This should be the raw abs encoder count when the intake is down at the hardstop.
-    // Make sure you are forcing the gear back to take out all slop
-    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(1.0546875) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
+    
+    // OLD - This should be the raw abs encoder count when the intake is down at the hardstop.
+    // OLD - Make sure you are forcing the gear back to take out all slop
+    // We want to be at ~-127 when the intake is up at the hardstop.
+    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(25) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
 
     public static final double kPivotReduction = (24.0 / 60.0); //277.7;
 
@@ -149,7 +151,7 @@ public final class Constants {
   }
 
   public static class Drive {
-    public static final boolean kDebug = false;
+    public static final boolean kDebug = true;
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
     // If you want to just use voltage set this to false

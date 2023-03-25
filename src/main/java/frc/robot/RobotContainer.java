@@ -84,16 +84,16 @@ public class RobotContainer {
     System.out.println("* Cancoders all inited: Took " + (Timer.getFPGATimestamp() - startInitTs) + " seconds");
 
     // Dirty swerve init hack step 2: Build all the rest of the subsystems
-    mDrive = Drive.getInstance();
-    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController::getRightY, mDriverController.x(), mDriverController.povRight()));
+    mVision = new Vision();
+    mDrive = new Drive(mVision);
+    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight(), mDriverController.povLeft(), mDriverController.y()));
 
     PathPlannerServer.startServer(5811);
     
     mRobotState = new RobotState();
     mIntake = new Intake(mRobotState);
     mArm = new Arm(mRobotState);
-    mVision = new Vision();
-
+    
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
     
@@ -104,7 +104,7 @@ public class RobotContainer {
     
     //mArm.setDefaultCommand(new ArmManualCommand(mArm, mOperatorController::getLeftY, mOperatorController::getRightY));
 
-    setSubsystems(mDrive, mIntake, mArm, mRobotState);
+    setSubsystems(mVision, mDrive, mIntake, mArm, mRobotState);
     
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Gap - Link", Autos.gap_Link(mDrive, mIntake, mArm, mRobotState));
@@ -112,7 +112,7 @@ public class RobotContainer {
     mAutoChooser.addOption("Gap - 4 Pieces", Autos.gap_4Pieces(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - Balance", Autos.bump_Balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump", Autos.bump(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("BumpExt", Autos.bump(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("BumpExt", Autos.bumpExt(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));

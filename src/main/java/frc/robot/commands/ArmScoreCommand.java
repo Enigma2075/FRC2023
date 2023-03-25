@@ -165,6 +165,6 @@ public class ArmScoreCommand extends CommandBase {
       return true;
     }
 
-    return mArm.isSequenceComplete() && mTimer != Double.MIN_VALUE && Timer.getFPGATimestamp() - mTimer > .5;
+    return mArm.isSequenceComplete() && mTimer != Double.MIN_VALUE && Timer.getFPGATimestamp() - mTimer > .25;
   }
 }
