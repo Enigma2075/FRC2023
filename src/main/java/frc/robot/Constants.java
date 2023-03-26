@@ -131,7 +131,7 @@ public final class Constants {
     // OLD - This should be the raw abs encoder count when the intake is down at the hardstop.
     // OLD - Make sure you are forcing the gear back to take out all slop
     // We want to be at ~-127 when the intake is up at the hardstop.
-    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(25) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
+    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(22) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
 
     public static final double kPivotReduction = (24.0 / 60.0); //277.7;
 
@@ -180,7 +180,7 @@ public final class Constants {
     //  The formula for calculating the theoretical maximum velocity is:
     //   <Motor free speed RPM> / 60 * <Drive reduction> * <Wheel diameter meters> * pi
     // TODO measure this
-    public static final double kMaxVelocityMetersPerSecond = 4.33 * .95;// Measured value of 4.33 at GVSU //6380 / 60 * kDriveReduction * kWheelDiameter * Math.PI * .8;//4.959668;
+    public static final double kMaxVelocityMetersPerSecond = 4.33 * 1.15 * .95;// Measured value of 4.33 at GVSU //6380 / 60 * kDriveReduction * kWheelDiameter * Math.PI * .8;//4.959668;
 
     public static final double kMaxVoltage = 12.0;
 
@@ -194,7 +194,7 @@ public final class Constants {
     public static final CanDeviceId kFrontRightDriveId = new CanDeviceId(4, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightSteerId = new CanDeviceId(3, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightEncoderId = new CanDeviceId(2, Can.kCANivoreBusName);
-    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(-169.36523437500006);
+    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(177.187);
 
     public static final CanDeviceId kBackRightDriveId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final CanDeviceId kBackRightSteerId = new CanDeviceId(5, Can.kCANivoreBusName);
@@ -206,14 +206,14 @@ public final class Constants {
     public static final CanDeviceId kBackLeftEncoderId = new CanDeviceId(4, Can.kCANivoreBusName);
     public static final Rotation2d kBackLeftSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-40.60546874999999) : Rotation2d.fromDegrees(-95.18554687499999);
 
-    public static final double kSteerKp = 0.75;
+    public static final double kSteerKp = 7; //.75;//1.5;
     public static final double kSteerKi = 0;
-    public static final double kSteerKd = 15;
+    public static final double kSteerKd = 0;//.03; //15;//.03;
 
-    public static final double kVelocityKp = 0.1;
+    public static final double kVelocityKp = .02; //0.02;
     public static final double kVelocityKi = 0.0;
-    public static final double kVelocityKd = 0.01;
-    public static final double kVelocityKf = 1023 / (kMaxVelocityMetersPerSecond / (Math.PI * kWheelDiameter * kDriveReduction / 2048.0 * 10));
+    public static final double kVelocityKd = 0; //0.0002;
+    public static final double kVelocityKf = 1 / (kMaxVelocityMetersPerSecond / (Math.PI * kWheelDiameter * kDriveReduction));
 
     /**
      * The maximum angular velocity of the robot in radians per second.

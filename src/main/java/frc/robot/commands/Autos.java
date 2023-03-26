@@ -109,23 +109,19 @@ public final class Autos {
   }
 
   
-  public static Command bumpExt(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+  public static Command bump_Link(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("ConeMode", new SetConeModeCommand(robotState, true));
-    eventMap.put("CubeMode", new SetCubeModeCommand(robotState, true));
-    eventMap.put("Intake", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
-    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
-    eventMap.put("ScoreMiddle", new ArmScoreCommand(arm));
+    eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
+    eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
     eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
     eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
     eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
-    eventMap.put("FirstDrop", new ArmMoveCommand(arm, -.5, ArmPosition.AUTO_DROP));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     eventMap.put("Crab", new DriveCrabCommand(drive));
     eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
 
 
-    return setupAuto("BumpExt", eventMap, drive,
+    return setupAuto("Bump - Link", eventMap, drive,
       kMedium1Constraints //start to bump
       //kSlowConstraints, //cross bump 1
       //kDefaultConstraints, //to cone and back

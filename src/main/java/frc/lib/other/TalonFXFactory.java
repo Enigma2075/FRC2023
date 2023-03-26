@@ -2,6 +2,7 @@ package frc.lib.other;
 
 import com.ctre.phoenixpro.configs.TalonFXConfiguration;
 import com.ctre.phoenixpro.controls.DutyCycleOut;
+import com.ctre.phoenixpro.controls.VoltageOut;
 import com.ctre.phoenixpro.hardware.TalonFX;
 import com.ctre.phoenixpro.signals.ForwardLimitSourceValue;
 import com.ctre.phoenixpro.signals.ForwardLimitTypeValue;
@@ -101,7 +102,7 @@ public class TalonFXFactory {
 
     public static TalonFX createTalon(CanDeviceId id, TalonFXConfiguration config) {
         TalonFX talon = new TalonFX(id.getDeviceNumber(), id.getBus());
-        var stopRequest = new DutyCycleOut(0, true, false);
+        var stopRequest = new VoltageOut(0, true, false);
         talon.setControl(stopRequest);
 
         var configurator = talon.getConfigurator();

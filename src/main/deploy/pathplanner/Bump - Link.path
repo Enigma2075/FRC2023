@@ -334,7 +334,7 @@
     {
       "position": 0.1,
       "names": [
-        "Intake"
+        "IntakeCube"
       ]
     },
     {
@@ -353,8 +353,7 @@
     {
       "position": 6.1,
       "names": [
-        "ConeMode",
-        "Intake"
+        "IntakeCone"
       ]
     }
   ]

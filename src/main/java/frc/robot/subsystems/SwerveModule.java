@@ -7,8 +7,12 @@ import com.ctre.phoenixpro.configs.TalonFXConfigurator;
 import com.ctre.phoenixpro.controls.CoastOut;
 import com.ctre.phoenixpro.controls.DutyCycleOut;
 import com.ctre.phoenixpro.controls.PositionDutyCycle;
+import com.ctre.phoenixpro.controls.PositionVoltage;
 import com.ctre.phoenixpro.controls.StaticBrake;
 import com.ctre.phoenixpro.controls.VelocityDutyCycle;
+import com.ctre.phoenixpro.controls.VelocityTorqueCurrentFOC;
+import com.ctre.phoenixpro.controls.VelocityVoltage;
+import com.ctre.phoenixpro.controls.DutyCycleOut;
 import com.ctre.phoenixpro.hardware.TalonFX;
 import com.ctre.phoenixpro.signals.InvertedValue;
 import com.ctre.phoenixpro.signals.NeutralModeValue;
@@ -34,9 +38,9 @@ public class SwerveModule {
     private Rotation2d mTalonOffset;
 
     private final double kDrivePositionCoefficient = Math.PI * Constants.Drive.kWheelDiameter * Constants.Drive.kDriveReduction / 1.0;
-    private final double kDriveVelocityCoefficient = kDrivePositionCoefficient * 10.0;
+    private final double kDriveVelocityCoefficient = kDrivePositionCoefficient;
 
-    private final double kSteerPositionCoefficient = 2.0 * Math.PI / 1.0 * Constants.Drive.kSteerReduction;
+    private final double kSteerPositionCoefficient = (2.0 * Math.PI) / 1.0 * Constants.Drive.kSteerReduction;
 
     public SwerveModule(CanDeviceId driveId, CanDeviceId steeringId,  CANCoder cancoder, Rotation2d encoderZero) {
         mDriveMotor = TalonFXFactory.createDefaultTalon(driveId);
@@ -146,6 +150,8 @@ public class SwerveModule {
         mSteeringConfiguration.Slot0.kD = Constants.Drive.kSteerKd;
         //mSteeringConfiguration.Slot0.kV = Constants.Drive.kSteerKf;
         //mSteeringConfiguration.Slot0.kS = Constants.Drive.kSteerKp;
+
+        mSteeringConfigurator.apply(mSteeringConfiguration);
         
         // No Equivelant
         // TalonUtil.checkErrorWithThrow(
@@ -298,7 +304,7 @@ public class SwerveModule {
 
     private void setSteerAngleUnclamped(double steerAngleRadians) {
         //System.out.println((steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient);
-        mSteeringMotor.setControl(new PositionDutyCycle((steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient, true, 0, 0, false));
+        mSteeringMotor.setControl(new PositionVoltage((steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient, true, 0, 0, false));
         //mSteeringMotor.set(TalonFXControlMode.Position, (steerAngleRadians + mTalonOffset.getRadians()) / kSteerPositionCoefficient);
     }
 

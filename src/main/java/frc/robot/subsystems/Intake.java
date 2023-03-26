@@ -456,7 +456,7 @@ public class Intake extends Subsystem {
       finalAngle = PivotPosition.DOWN.mAngle;
     }
     // The intake is trying to go beyond vertical and the arm isn't safe
-    else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -3 && armPos.x > intakePos.x) {
+    else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -25 && armPos.x > intakePos.x) {
       finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
     }
     else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -3 && armPos.x > intakePos.x) {
