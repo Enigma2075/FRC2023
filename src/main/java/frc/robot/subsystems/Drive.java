@@ -4,11 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.ctre.phoenix.sensors.Pigeon2;
-import com.ctre.phoenix.sensors.PigeonIMU_StatusFrame;
+import com.ctre.phoenixpro.hardware.Pigeon2;
 
+import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
+import edu.wpi.first.math.numbers.N1;
+import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.geometry.Pose2d;
 import frc.lib.geometry.Rotation2d;
@@ -43,8 +48,19 @@ public class Drive extends Subsystem {
     private DriveControlState mDriveControlState = DriveControlState.VELOCITY_CONTROL;
     private KinematicLimits mKinematicLimits = Constants.Drive.kUncappedKinematicLimits;
 
-    private SwerveDriveOdometry mOdometry;
+    private SwerveDrivePoseEstimator mPoseEstimator;
+    //private SwerveDriveOdometry mOdometry;
 
+    /**
+   * Trustworthiness of the internal model of how motors should be moving Measured in expected
+   * standard deviation (meters of position and degrees of rotation)
+   */
+  public Matrix<N3, N1> stateStdDevs = VecBuilder.fill(0.1, 0.1, 0.1);
+  /**
+   * Trustworthiness of the vision system Measured in expected standard deviation (meters of
+   * position and degrees of rotation)
+   */
+  public Matrix<N3, N1> visionMeasurementStdDevs = VecBuilder.fill(0.9, 0.9, 0.9);
     //private static Drive mInstance = null;
 
     //public static Drive getInstance() {
@@ -82,16 +98,19 @@ public class Drive extends Subsystem {
                 Cancoders.getInstance().getBackRight(),
                 Constants.Drive.kBackRightSteerOffset);
 
-        mYawOffset = mPigeon.getYaw();
-        mRollOffset = mPigeon.getRoll();
+        mYawOffset = mPigeon.getYaw().getValue();
+        mRollOffset = mPigeon.getRoll().getValue();
         readGyro();
         readModules();
         setSetpointFromMeasured();
 
-        mOdometry = new SwerveDriveOdometry(Constants.Drive.kKinematics.asWpiSwerveDriveKinematics(),
-                mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
-
-        mPigeon.setStatusFramePeriod(PigeonIMU_StatusFrame.CondStatus_6_SensorFusion, 5);
+        mPoseEstimator = new SwerveDrivePoseEstimator(
+            Constants.Drive.kKinematics.asWpiSwerveDriveKinematics(),
+            mPeriodicIO.heading.asWpiRotation2d(), 
+            getWpiModulePositions(), 
+            new edu.wpi.first.math.geometry.Pose2d(new edu.wpi.first.math.geometry.Translation2d(0, 0), edu.wpi.first.math.geometry.Rotation2d.fromDegrees(0)),
+            stateStdDevs,
+            visionMeasurementStdDevs);
 
         mSetpointGenerator = new SwerveSetpointGenerator(Constants.Drive.kKinematics);
 
@@ -114,6 +133,8 @@ public class Drive extends Subsystem {
 
         Rotation2d heading = new Rotation2d();
         Rotation2d roll = new Rotation2d();
+        Rotation2d pitch = new Rotation2d();
+        double pitchVel = 0;
 
         // outputs
         SwerveSetpoint setpoint = new SwerveSetpoint(new ChassisSpeeds(),
@@ -136,8 +157,8 @@ public class Drive extends Subsystem {
      * 'forwards' direction.
      */
     public synchronized void zeroGyroscope() {
-        mYawOffset = mPigeon.getYaw();
-        mRollOffset = mPigeon.getRoll();
+        mYawOffset = mPigeon.getYaw().getValue();
+        mRollOffset = mPigeon.getRoll().getValue();
         readGyro();
     }
 
@@ -150,8 +171,18 @@ public class Drive extends Subsystem {
     }
 
     protected synchronized void readGyro() {
-        mPeriodicIO.heading = Rotation2d.fromDegrees(mPigeon.getYaw() - mYawOffset);
-        mPeriodicIO.roll = Rotation2d.fromDegrees(mPigeon.getRoll() - mRollOffset);
+        mPeriodicIO.heading = Rotation2d.fromDegrees(mPigeon.getYaw().getValue() - mYawOffset);
+        mPeriodicIO.roll = Rotation2d.fromDegrees(mPigeon.getRoll().getValue() - mRollOffset);
+        mPeriodicIO.pitch = Rotation2d.fromDegrees(mPigeon.getRoll().getValue());
+        mPeriodicIO.pitchVel = mPigeon.getAccelerationX().getValue();
+    }
+
+    public double getPitchVel() {
+        return mPeriodicIO.pitchVel;
+    }
+
+    public Rotation2d getPitch() {
+        return mPeriodicIO.pitch;
     }
 
     public synchronized Rotation2d getRoll() {
@@ -159,7 +190,7 @@ public class Drive extends Subsystem {
     }
 
     public synchronized void resetRoll() {
-        mRollOffset = mPigeon.getRoll();
+        mRollOffset = mPigeon.getRoll().getValue();
     }
 
     public synchronized SwerveModuleState[] getModuleStates() {
@@ -179,7 +210,7 @@ public class Drive extends Subsystem {
     }
 
     public synchronized edu.wpi.first.math.geometry.Pose2d getWpiPose() {
-        return mOdometry.getPoseMeters();
+        return mPoseEstimator.getEstimatedPosition();
     }
 
     public synchronized edu.wpi.first.math.kinematics.SwerveModulePosition[] getWpiModulePositions() {
@@ -192,7 +223,7 @@ public class Drive extends Subsystem {
 
     public synchronized void resetWpiPose(edu.wpi.first.math.geometry.Pose2d pose) {
         SmartDashboard.putString("pose", pose.toString());
-        mOdometry.resetPosition(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions(), pose);
+        mPoseEstimator.resetPosition(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions(), pose);
     }
 
     public synchronized void setWpiModuleStates(
@@ -392,13 +423,23 @@ public class Drive extends Subsystem {
     public void periodic() {
         switch (mDriveControlState) {
             case PATH_FOLLOWING:
-                mOdometry.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
+                mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
+                var curPose = mPoseEstimator.getEstimatedPosition();
+                var visionPose = mVision.getBestPose(curPose);
+                if(visionPose != null) {
+                    System.out.println("Updated pose");
+
+                    var fixedPose = new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), curPose.getRotation());
+                    mPoseEstimator.addVisionMeasurement(fixedPose, mVision.getTimestamp());
+                    //resetWpiPose(new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), mOdometry.getPoseMeters().getRotation()));
+                }
+
                 // setKinematicLimits(Constants.kFastKinematicLimits);
                 // updatePathFollower();
                 break;
             case OPEN_LOOP:
             case VELOCITY_CONTROL:
-                mOdometry.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
+            mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
                 updateDesiredStates();
             default:
                 break;
@@ -449,7 +490,7 @@ public class Drive extends Subsystem {
     @Override
     public void outputTelemetry() {
         if (Constants.Drive.kDebug) {
-            edu.wpi.first.math.geometry.Pose2d pose = mOdometry.getPoseMeters();
+            edu.wpi.first.math.geometry.Pose2d pose = mPoseEstimator.getEstimatedPosition();
             SmartDashboard.putString("D Pos", String.format("X:%f, Y:%f, Rot:%f",
                     pose.getX(), pose.getY(), pose.getRotation().getDegrees()));
 
@@ -457,6 +498,7 @@ public class Drive extends Subsystem {
 
             SmartDashboard.putString("D Chassis Speeds", mPeriodicIO.des_chassis_speeds.toString());
             SmartDashboard.putString("D Gyro Rot", getFieldRelativeGyroscopeRotation().toString());
+            SmartDashboard.putNumber("D Bal Vel", mPigeon.getAngularVelocityX().getValue());
             // SmartDashboard.putString("Gyro Roll", getRoll().toString());
 
             SmartDashboard.putNumber("D FL Abs Deg", mPeriodicIO.moduleAbsSteerAngleDeg[kFrontLeftModuleIdx]);
@@ -505,12 +547,6 @@ public class Drive extends Subsystem {
             // mModules[kBackLeftModuleIdx].getSteerAngle().getDegrees());
             // SmartDashboard.putNumber("Back Right Azi Angle",
             // mModules[kBackRightModuleIdx].getSteerAngle().getDegrees());
-
-            Pose2d visionPose = new Pose2d(mVision.getRawPose());
-
-            double posError = visionPose.distance(new Pose2d(pose));
-
-            SmartDashboard.putNumber("D Pos-Err", posError);
         }
     }
 }

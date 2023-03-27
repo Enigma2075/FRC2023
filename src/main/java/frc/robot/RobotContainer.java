@@ -110,9 +110,10 @@ public class RobotContainer {
     mAutoChooser.setDefaultOption("Gap - Link", Autos.gap_Link(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Gap - 3 Pieces Balance", Autos.gap_3PiecesBalance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Gap - 4 Pieces", Autos.gap_4Pieces(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Bump - 2.5 Balance", Autos.bump_2_5_Balance(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Bump - 3 Pieces", Autos.bump_3Piece(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - Balance", Autos.bump_Balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump", Autos.bump(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("BumpExt", Autos.bump_Link(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Straight", Autos.straightTest(mDrive));
     mAutoChooser.addOption("Spline", Autos.splineTest(mDrive));
     mAutoChooser.addOption("Strafe", Autos.strafeTest(mDrive));

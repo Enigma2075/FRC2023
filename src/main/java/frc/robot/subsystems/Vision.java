@@ -9,30 +9,35 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.lib.other.LimelightHelpers;
 import frc.lib.other.Subsystem;
+import frc.lib.other.LimelightHelpers.LimelightResults;
 
 public class Vision extends Subsystem {
-  private final NetworkTableEntry blueEntry; 
-  private final NetworkTableEntry targetIdEntry;
-
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   public static class PeriodicIO {
+    LimelightHelpers.Results results = null;
     boolean hasValidTarget = false;
     Pose2d rawPose = new Pose2d();
-
-    Pose2d calcPose = new Pose2d();
   }
 
   public Vision() {
-    NetworkTable limelight = NetworkTableInstance.getDefault().getTable("limelight");
-    blueEntry = limelight.getEntry("botpose_wpiblue");
-    targetIdEntry = limelight.getEntry("tid");
   }
 
-  public Pose2d getRawPose() {
-    return mPeriodicIO.rawPose;
+  public Pose2d getBestPose(Pose2d currentPose) {
+    if(currentPose.getTranslation().getDistance(mPeriodicIO.rawPose.getTranslation()) < .33) {
+      return mPeriodicIO.rawPose;
+    }
+    return null;
+  }
+
+  public double getTimestamp() {
+    return Timer.getFPGATimestamp() - (mPeriodicIO.results.latency_capture / 1000.0) - (mPeriodicIO.results.latency_pipeline / 1000.0);
   }
 
   @Override
@@ -57,31 +62,19 @@ public class Vision extends Subsystem {
   
   @Override
   public synchronized void readPeriodicInputs() {
-    double tid = targetIdEntry.getDouble(Double.MIN_VALUE);
-
-    SmartDashboard.putNumber("tid", tid);
-
-    if(tid < 0) {
-      mPeriodicIO.hasValidTarget = false;
-      return;
-    }
+    mPeriodicIO.results = LimelightHelpers.getLatestResults("limelight-r").targetingResults;
     
-    mPeriodicIO.hasValidTarget = true;
-
-    double[] robotPosition = blueEntry.getDoubleArray(new double[6]);
-
-    double rawX = robotPosition[0]; //- 8.265;
-    double rawY = robotPosition[1]; //- 4;
-    double rawRot = robotPosition[5]; //- 180;
-
-    //double rawX = (double)Array.getDouble(botpose_wpired, 0);
-    //double rawY = (double)Array.getDouble(botpose_wpired, 1);
-    //double rawRotate = (double)Array.getDouble(botpose_wpired, 5);
-    //double calcX = rawX - 8.265;
-    //double calcY = rawY - 4;
-    //double calcRot = rawRotate - 180;
-
-    mPeriodicIO.rawPose = new Pose2d(rawX, rawY, Rotation2d.fromDegrees(rawRot));
+    if(!(mPeriodicIO.results.botpose[0] == 0 && mPeriodicIO.results.botpose[1] == 0) && mPeriodicIO.results.targets_Fiducials.length > 1) {
+      if(DriverStation.getAlliance() == Alliance.Blue) {
+        mPeriodicIO.rawPose = LimelightHelpers.toPose2D(mPeriodicIO.results.botpose_wpiblue);    
+      }
+      else {
+        mPeriodicIO.rawPose = LimelightHelpers.toPose2D(mPeriodicIO.results.botpose_wpired);
+      }
+    }
+    else {
+      mPeriodicIO.hasValidTarget = false;
+    }
   }
 
   @Override

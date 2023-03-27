@@ -32,6 +32,7 @@ public final class Autos {
   private static final PathConstraints kMedium1Constraints = new PathConstraints(2, 3);
   private static final PathConstraints kMedium2Constraints = new PathConstraints(4.33, 3.3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
+  private static final PathConstraints kBalanceConstraints = new PathConstraints(3, 1);
   private static final PathConstraints kFastConstraints = new PathConstraints(4, 3);
 
   public static Command straightTest(Drive drive) {
@@ -66,7 +67,7 @@ public final class Autos {
     eventMap.put("FirstDrop", new ArmMoveCommand(arm, -.5, ArmPosition.AUTO_DROP));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     eventMap.put("Crab", new DriveCrabCommand(drive));
-
+    
     return setupAuto("Bump - Balance", eventMap, drive,
       kDefaultConstraints, //start to bump
       kSlowConstraints, //cross bump 1
@@ -108,8 +109,37 @@ public final class Autos {
     );
   }
 
-  
-  public static Command bump_Link(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+  public static Command bump_3Piece(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
+    eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
+    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
+    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
+    eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
+    eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
+    eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
+    eventMap.put("Crab", new DriveCrabCommand(drive));
+    eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
+
+
+    return setupAuto("Bump - 3 piece", eventMap, drive,
+      kMedium1Constraints //start to bump
+      //kSlowConstraints, //cross bump 1
+      //kDefaultConstraints, //to cone and back
+      //kDefaultConstraints, //to cone and back
+      //kSlowConstraints, //cros bump 2
+      //kDefaultConstraints, //
+      //kDefaultConstraints,  //back to start/end
+      //kSlowConstraints, //cros bump 2
+      //kDefaultConstraints, //cros bump 2
+      //kDefaultConstraints,//grab 2nd
+      //kSlowConstraints,//cross bump 3?
+      //kDefaultConstraints,//crossed bump
+      //kDefaultConstraints//done
+    );
+  }
+
+  public static Command bump_2_5_Balance(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
     eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
@@ -119,10 +149,15 @@ public final class Autos {
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     eventMap.put("Crab", new DriveCrabCommand(drive));
     eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
+    eventMap.put("Balance", new DriveBalanceCommand(drive, true));
 
-
-    return setupAuto("Bump - Link", eventMap, drive,
-      kMedium1Constraints //start to bump
+    return setupAuto("Bump - 2 Balance", eventMap, drive,
+      kMedium1Constraints,
+      kMedium1Constraints,
+      kMedium1Constraints,
+      kMedium1Constraints,
+      kBalanceConstraints
+      //start to bump
       //kSlowConstraints, //cross bump 1
       //kDefaultConstraints, //to cone and back
       //kDefaultConstraints, //to cone and back
