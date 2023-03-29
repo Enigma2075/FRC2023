@@ -110,6 +110,7 @@ public class RobotContainer {
     mAutoChooser.setDefaultOption("Gap - Link", Autos.gap_Link(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Gap - 3 Pieces Balance", Autos.gap_3PiecesBalance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Gap - 4 Pieces", Autos.gap_4Pieces(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Balance", Autos.balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - 2.5 Balance", Autos.bump_2_5_Balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - 3 Pieces", Autos.bump_3Piece(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - Balance", Autos.bump_Balance(mDrive, mIntake, mArm, mRobotState));
@@ -209,6 +210,7 @@ public class RobotContainer {
   }
 
   public void teleopInit() {
+    stop();
   }
 
   public void outputTelemetry() {

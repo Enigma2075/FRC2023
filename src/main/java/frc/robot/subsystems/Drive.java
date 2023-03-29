@@ -43,6 +43,8 @@ public class Drive extends Subsystem {
     private double mYawOffset;
     private double mRollOffset;
 
+    private boolean mEnableVision = false;
+
     // private final DriveMotionPlanner mMotionPlanner;
     // private boolean mOverrideTrajectory = false;
     private DriveControlState mDriveControlState = DriveControlState.VELOCITY_CONTROL;
@@ -173,7 +175,7 @@ public class Drive extends Subsystem {
     protected synchronized void readGyro() {
         mPeriodicIO.heading = Rotation2d.fromDegrees(mPigeon.getYaw().getValue() - mYawOffset);
         mPeriodicIO.roll = Rotation2d.fromDegrees(mPigeon.getRoll().getValue() - mRollOffset);
-        mPeriodicIO.pitch = Rotation2d.fromDegrees(mPigeon.getRoll().getValue());
+        mPeriodicIO.pitch = Rotation2d.fromDegrees(mPigeon.getPitch().getValue());
         mPeriodicIO.pitchVel = mPigeon.getAccelerationX().getValue();
     }
 
@@ -228,12 +230,14 @@ public class Drive extends Subsystem {
 
     public synchronized void setWpiModuleStates(
             edu.wpi.first.math.kinematics.SwerveModuleState[] wpiSwerveModuleStates) {
-        SwerveModuleState[] moduleStates = new SwerveModuleState[mPeriodicIO.setpoint.mModuleStates.length];
-        for (int i = 0; i < mPeriodicIO.setpoint.mModuleStates.length; i++) {
-            moduleStates[i] = new SwerveModuleState(wpiSwerveModuleStates[i]);
-        }
+        if(mDriveControlState == DriveControlState.PATH_FOLLOWING) {
+            SwerveModuleState[] moduleStates = new SwerveModuleState[mPeriodicIO.setpoint.mModuleStates.length];
+            for (int i = 0; i < mPeriodicIO.setpoint.mModuleStates.length; i++) {
+                moduleStates[i] = new SwerveModuleState(wpiSwerveModuleStates[i]);
+            }
 
-        mPeriodicIO.setpoint.mModuleStates = moduleStates;
+            mPeriodicIO.setpoint.mModuleStates = moduleStates;
+        }
     }
 
     public synchronized void setVelocity(ChassisSpeeds chassisSpeeds) {
@@ -419,11 +423,16 @@ public class Drive extends Subsystem {
                 updated_chassis_speeds, Constants.Robot.kSecondsPerPeriodic);
     }
 
+    public void setVision(boolean vision) {
+        mEnableVision = vision;
+    }
+
     @Override
     public void periodic() {
         switch (mDriveControlState) {
             case PATH_FOLLOWING:
                 mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
+                if(mEnableVision) {
                 var curPose = mPoseEstimator.getEstimatedPosition();
                 var visionPose = mVision.getBestPose(curPose);
                 if(visionPose != null) {
@@ -433,13 +442,13 @@ public class Drive extends Subsystem {
                     mPoseEstimator.addVisionMeasurement(fixedPose, mVision.getTimestamp());
                     //resetWpiPose(new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), mOdometry.getPoseMeters().getRotation()));
                 }
+            }   
 
                 // setKinematicLimits(Constants.kFastKinematicLimits);
                 // updatePathFollower();
                 break;
             case OPEN_LOOP:
             case VELOCITY_CONTROL:
-            mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
                 updateDesiredStates();
             default:
                 break;

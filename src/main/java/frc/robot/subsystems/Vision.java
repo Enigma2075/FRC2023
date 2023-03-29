@@ -5,39 +5,55 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableEntry;
-import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.other.LimelightHelpers;
 import frc.lib.other.Subsystem;
-import frc.lib.other.LimelightHelpers.LimelightResults;
+import frc.robot.Constants;
 
 public class Vision extends Subsystem {
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   public static class PeriodicIO {
-    LimelightHelpers.Results results = null;
-    boolean hasValidTarget = false;
-    Pose2d rawPose = new Pose2d();
+    LimelightHelpers.Results resultsRight = null;
+    LimelightHelpers.Results resultsLeft = null;
+    Pose2d poseRight = new Pose2d();
+    Pose2d poseLeft = new Pose2d();
+    Pose2d bestPose = new Pose2d();
+    LimelightHelpers.Results bestPoseResults = null;
+    double bestPoseError = Double.MIN_VALUE;
   }
 
   public Vision() {
   }
 
   public Pose2d getBestPose(Pose2d currentPose) {
-    if(currentPose.getTranslation().getDistance(mPeriodicIO.rawPose.getTranslation()) < .33) {
-      return mPeriodicIO.rawPose;
+    var rightError = currentPose.getTranslation().getDistance(mPeriodicIO.poseRight.getTranslation());
+    var leftError = currentPose.getTranslation().getDistance(mPeriodicIO.poseLeft.getTranslation());
+
+    mPeriodicIO.bestPose = mPeriodicIO.poseLeft;
+    mPeriodicIO.bestPoseError = leftError;
+    mPeriodicIO.bestPoseResults = mPeriodicIO.resultsLeft;
+    if(Math.abs(rightError) < Math.abs(leftError)) {
+      mPeriodicIO.bestPose = mPeriodicIO.poseRight;
+      mPeriodicIO.bestPoseError = rightError;
+      mPeriodicIO.bestPoseResults = mPeriodicIO.resultsRight;
     }
+
+    if(mPeriodicIO.bestPose.getX() == 0 && mPeriodicIO.bestPose.getY() == 0) {
+      return null;
+    }
+    else if(mPeriodicIO.bestPoseError < .33) {
+      return mPeriodicIO.bestPose;
+    }
+    
     return null;
   }
 
   public double getTimestamp() {
-    return Timer.getFPGATimestamp() - (mPeriodicIO.results.latency_capture / 1000.0) - (mPeriodicIO.results.latency_pipeline / 1000.0);
+    return Timer.getFPGATimestamp() - (mPeriodicIO.bestPoseResults.latency_capture / 1000.0) - (mPeriodicIO.bestPoseResults.latency_pipeline / 1000.0);
   }
 
   @Override
@@ -62,18 +78,32 @@ public class Vision extends Subsystem {
   
   @Override
   public synchronized void readPeriodicInputs() {
-    mPeriodicIO.results = LimelightHelpers.getLatestResults("limelight-r").targetingResults;
-    
-    if(!(mPeriodicIO.results.botpose[0] == 0 && mPeriodicIO.results.botpose[1] == 0) && mPeriodicIO.results.targets_Fiducials.length > 1) {
+    if(Constants.Robot.kPracticeBot) {
+      return;
+    }
+
+    mPeriodicIO.resultsLeft = getResults("limelight-r");
+    mPeriodicIO.resultsRight = getResults("limelight-l");
+
+    mPeriodicIO.poseLeft = getVisionPose2d(mPeriodicIO.resultsLeft);
+    mPeriodicIO.poseRight = getVisionPose2d(mPeriodicIO.resultsRight);
+  }
+
+  public LimelightHelpers.Results getResults(String limelightName) {
+    return LimelightHelpers.getLatestResults(limelightName).targetingResults;
+  }
+
+  public Pose2d getVisionPose2d(LimelightHelpers.Results results) {
+    if(!(results.botpose[0] == 0 && results.botpose[1] == 0) && results.targets_Fiducials.length > 1) {
       if(DriverStation.getAlliance() == Alliance.Blue) {
-        mPeriodicIO.rawPose = LimelightHelpers.toPose2D(mPeriodicIO.results.botpose_wpiblue);    
+        return LimelightHelpers.toPose2D(results.botpose_wpiblue);
       }
       else {
-        mPeriodicIO.rawPose = LimelightHelpers.toPose2D(mPeriodicIO.results.botpose_wpired);
+        return LimelightHelpers.toPose2D(results.botpose_wpired);
       }
     }
     else {
-      mPeriodicIO.hasValidTarget = false;
+      return new Pose2d();
     }
   }
 
@@ -91,7 +121,6 @@ public class Vision extends Subsystem {
   @Override
   public void outputTelemetry() {
     SmartDashboard.putString("V Raw", String.format("X:%f, Y:%f, Rot:%f",
-    mPeriodicIO.rawPose.getX(), mPeriodicIO.rawPose.getY(), mPeriodicIO.rawPose.getRotation().getDegrees()));
-    SmartDashboard.putBoolean("V Has-Target", mPeriodicIO.hasValidTarget);
+    mPeriodicIO.bestPose.getX(), mPeriodicIO.bestPose.getY(), mPeriodicIO.bestPose.getRotation().getDegrees()));
   }
 }

@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4.33, 3.6);
   private static final PathConstraints kMedium1Constraints = new PathConstraints(2, 3);
+  private static final PathConstraints kBump1Constraints = new PathConstraints(2.5, 3);
   private static final PathConstraints kMedium2Constraints = new PathConstraints(4.33, 3.3);
   private static final PathConstraints kSlowConstraints = new PathConstraints(1, 4);
   private static final PathConstraints kBalanceConstraints = new PathConstraints(3, 1);
@@ -122,8 +123,8 @@ public final class Autos {
     eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
 
 
-    return setupAuto("Bump - 3 piece", eventMap, drive,
-      kMedium1Constraints //start to bump
+    return setupAuto("Bump - 3 Piece", eventMap, drive,
+      kBump1Constraints //start to bump
       //kSlowConstraints, //cross bump 1
       //kDefaultConstraints, //to cone and back
       //kDefaultConstraints, //to cone and back
@@ -139,18 +140,27 @@ public final class Autos {
     );
   }
 
+  public static Command balance(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+    HashMap<String, Command> eventMap = new HashMap<>();
+    eventMap.put("Balance", new DriveBalanceCommand(drive, false));
+
+    return setupAuto("Balance", eventMap, drive,
+      kDefaultConstraints
+    );
+  }
+
   public static Command bump_2_5_Balance(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
     eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
     eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
     eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
-    eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
+    eventMap.put("ScoreHigh", new DriveVisionCommand(drive, true).alongWith(new ArmScoreCommand(arm)));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     eventMap.put("Crab", new DriveCrabCommand(drive));
     eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
     eventMap.put("Balance", new DriveBalanceCommand(drive, true));
-
+    
     return setupAuto("Bump - 2 Balance", eventMap, drive,
       kMedium1Constraints,
       kMedium1Constraints,

@@ -28,20 +28,20 @@
     },
     {
       "anchorPoint": {
-        "x": 2.8,
+        "x": 3.5,
         "y": 0.95
       },
       "prevControl": {
-        "x": 2.1178693880487067,
+        "x": 2.8178693880487056,
         "y": 0.95
       },
       "nextControl": {
-        "x": 3.539185796494911,
+        "x": 3.628883816407014,
         "y": 0.95
       },
       "holonomicAngle": 0,
       "isReversal": false,
-      "velOverride": 1.0,
+      "velOverride": null,
       "isLocked": false,
       "isStopPoint": false,
       "stopEvent": {
@@ -66,7 +66,7 @@
       },
       "holonomicAngle": 0,
       "isReversal": false,
-      "velOverride": 1.0,
+      "velOverride": null,
       "isLocked": true,
       "isStopPoint": false,
       "stopEvent": {
@@ -78,15 +78,15 @@
     },
     {
       "anchorPoint": {
-        "x": 6.55,
+        "x": 6.9,
         "y": 0.95
       },
       "prevControl": {
-        "x": 5.4731010024709175,
+        "x": 5.823101002470918,
         "y": 0.95
       },
       "nextControl": {
-        "x": 5.4731010024709175,
+        "x": 5.823101002470918,
         "y": 0.95
       },
       "holonomicAngle": 0,
@@ -230,16 +230,16 @@
     },
     {
       "anchorPoint": {
-        "x": 6.509196014112427,
+        "x": 7.2,
         "y": 2.1727370130917154
       },
       "prevControl": {
-        "x": 5.871160684629063,
-        "y": 2.1293180086360186
+        "x": 5.533045790117095,
+        "y": 2.1816033426538866
       },
       "nextControl": {
-        "x": 5.871160684629063,
-        "y": 2.1293180086360186
+        "x": 5.533045790117095,
+        "y": 2.1816033426538866
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -339,21 +339,21 @@
       ]
     },
     {
-      "position": 3.1,
+      "position": 3.3,
       "names": [
         "IntakeUp",
         "High"
       ]
     },
     {
-      "position": 9.1,
+      "position": 9.3,
       "names": [
         "IntakeUp",
         "Middle"
       ]
     },
     {
-      "position": 6.1,
+      "position": 6.327272727272872,
       "names": [
         "IntakeCube"
       ]

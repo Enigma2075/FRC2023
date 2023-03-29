@@ -26,7 +26,7 @@ public class DriveBalanceCommand extends CommandBase {
   private final Drive mDrive;
   private final boolean mIsReverse;
 
-  private final double mInitialTarget = 9;
+  private final double mInitialTarget = 23;
 
   private boolean initialTargetHit = false;
   private boolean initialDropHit = false;
@@ -48,7 +48,6 @@ public class DriveBalanceCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    mDrive.setControlState(DriveControlState.VELOCITY_CONTROL);
     initialTargetHit = false;
     initialDropHit = false;
     initialDropDelay = Timer.getFPGATimestamp();
@@ -57,69 +56,68 @@ public class DriveBalanceCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(mDrive.getPitch().getDegrees() > mInitialTarget && Timer.getFPGATimestamp() - initialDropDelay > 3) {
+    if (Math.abs(mDrive.getPitch().getDegrees()) > mInitialTarget) {
       initialTargetHit = true;
     }
 
-      double throttle = 0;
-      double strafe = 0;
-      double rot = 0;
-      double requestedOrientation = 0;
-    
-      if(!initialTargetHit) {
-        if(mIsReverse) {
-          throttle = -.2;
-         }
-         else {
-          throttle = .2;
-         }
+    double throttle = 0;
+    double strafe = 0;
+    double rot = 0;
+    double requestedOrientation = 0;
+
+    System.out.println(mDrive.getPitch().getDegrees());
+
+    if (!initialTargetHit) {
+      if (mIsReverse) {
+        throttle = -.3;
+      } else {
+        throttle = .3;
       }
-      else if(Math.abs(mDrive.getPitch().getDegrees()) > .5) {
-       if(mIsReverse) {
-        throttle = -.2;
-       }
-       else {
-        throttle = .2;
-       }
+    } else if ((mDrive.getPitch().getDegrees() < -14 && !mIsReverse) || (mDrive.getPitch().getDegrees() > 14 && mIsReverse)) {
+      if (mIsReverse) {
+        throttle = -.3;
+      } else {
+        throttle = .3;
       }
-
-      Rotation2d robotOrientation = mDrive.getFieldRelativeGyroscopeRotation();
-      double dist = Double.MIN_VALUE;
-
-      dist = robotOrientation.distance(Rotation2d.fromDegrees(requestedOrientation));
-      if (Math.abs(Math.toDegrees(dist)) > 1.5) {
-
-        double percent = dist / Math.PI;
-
-        double minSrc = -1;
-        double maxSrc = 1;
-        double minDest = -1;
-        double maxDest = 1;
-        percent = (((percent - minSrc) / (maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
-        double withF = Math.abs(percent) + .08;
-        if (withF > 1) {
-          withF = 1;
-        }
-        percent = withF * Math.signum(percent);
-
-        // double error = cardinal -
-        // mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
-
-        // double tmpRot = 180.0 / error;
-        SmartDashboard.putNumber("O-Change", percent);
-        SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
-        SmartDashboard.putNumber("O-Desire", requestedOrientation);
-
-        rot = percent;
-
-        mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
-          throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-          strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
-          rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
-          mDrive.getFieldRelativeGyroscopeRotation()));
-      
+    } else {
+      throttle = 0;
     }
-  }
+
+    Rotation2d robotOrientation = mDrive.getFieldRelativeGyroscopeRotation();
+    double dist = Double.MIN_VALUE;
+
+    dist = robotOrientation.distance(Rotation2d.fromDegrees(requestedOrientation));
+    if (Math.abs(Math.toDegrees(dist)) > 1.5) {
+      double percent = dist / Math.PI;
+
+      double minSrc = -1;
+      double maxSrc = 1;
+      double minDest = -1;
+      double maxDest = 1;
+      percent = (((percent - minSrc) / (maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
+      double withF = Math.abs(percent) + .08;
+      if (withF > 1) {
+        withF = 1;
+      }
+      percent = withF * Math.signum(percent);
+
+      // double error = cardinal -
+      // mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
+
+      // double tmpRot = 180.0 / error;
+      SmartDashboard.putNumber("O-Change", percent);
+      SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
+      SmartDashboard.putNumber("O-Desire", requestedOrientation);
+
+      rot = percent;
+    }
+
+    mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
+      throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+      strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
+      rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
+      mDrive.getFieldRelativeGyroscopeRotation()));
+}
 
   // Called once the command ends or is interrupted.
   @Override
