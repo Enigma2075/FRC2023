@@ -26,12 +26,16 @@ public class DriveBalanceCommand extends CommandBase {
   private final Drive mDrive;
   private final boolean mIsReverse;
 
-  private final double mInitialTarget = 23;
+  private final double mTarget1Fwd = -20;
+  private final double mTarget1Rev = 13;
+  private boolean mTarget1Hit = false;
+  private final double mDropTarget1 = 14;
+  private boolean mDropTarget1Hit = false;
+  private final double mTarget2 = 23;
+  private boolean mTarget2Hit = false;
 
-  private boolean initialTargetHit = false;
-  private boolean initialDropHit = false;
-  private double initialDropDelay = 0;
-
+  private double mTimer = Double.MIN_VALUE;
+  
   /**
    * Creates a new ExampleCommand.
    *
@@ -48,17 +52,33 @@ public class DriveBalanceCommand extends CommandBase {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    initialTargetHit = false;
-    initialDropHit = false;
-    initialDropDelay = Timer.getFPGATimestamp();
+    mTarget1Hit = false;
+    mTarget2Hit = false;
+    mDropTarget1Hit = false;
+    mTimer = Double.MIN_VALUE;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if (Math.abs(mDrive.getPitch().getDegrees()) > mInitialTarget) {
-      initialTargetHit = true;
-    }
+    // if(mIsReverse) {
+    //   if (Math.abs(mDrive.getPitch().getDegrees()) > mTarget1 && !mTarget1Hit) {
+    //     mTarget1Hit = true;
+    //   }
+    //   if(mTarget1Hit && Math.abs(mDrive.getPitch().getDegrees()) < mDropTarget1) {
+    //     mDropTarget1Hit = true;
+    //   }
+    //   else if(Math.abs(mDrive.getPitch().getDegrees()) > mTarget2 && mTarget1Hit && mDropTarget1Hit) {
+    //     mTarget2Hit = true;
+    //   }
+    // }
+    // else {
+      if (((mDrive.getPitch().getDegrees() < mTarget1Fwd && !mIsReverse) || (mDrive.getPitch().getDegrees() > mTarget1Rev && mIsReverse)) && !mTarget1Hit) {
+        mTarget1Hit = true;
+        mTarget2Hit = true;
+        mTimer = Timer.getFPGATimestamp();
+      }
+    //}
 
     double throttle = 0;
     double strafe = 0;
@@ -67,13 +87,14 @@ public class DriveBalanceCommand extends CommandBase {
 
     System.out.println(mDrive.getPitch().getDegrees());
 
-    if (!initialTargetHit) {
+    if (!mTarget1Hit || !mTarget2Hit) {
       if (mIsReverse) {
         throttle = -.3;
       } else {
         throttle = .3;
       }
-    } else if ((mDrive.getPitch().getDegrees() < -14 && !mIsReverse) || (mDrive.getPitch().getDegrees() > 14 && mIsReverse)) {
+    //} else if ((mDrive.getPitch().getDegrees() < -14 && !mIsReverse) || (mDrive.getPitch().getDegrees() > 18 && mIsReverse)) {
+    } else if (Timer.getFPGATimestamp() - mTimer < 2) {
       if (mIsReverse) {
         throttle = -.3;
       } else {
@@ -82,6 +103,8 @@ public class DriveBalanceCommand extends CommandBase {
     } else {
       throttle = 0;
     }
+
+    System.out.println(throttle);
 
     Rotation2d robotOrientation = mDrive.getFieldRelativeGyroscopeRotation();
     double dist = Double.MIN_VALUE;
@@ -105,13 +128,14 @@ public class DriveBalanceCommand extends CommandBase {
       // mDrive.getFieldRelativeGyroscopeRotation().getDegrees();
 
       // double tmpRot = 180.0 / error;
-      SmartDashboard.putNumber("O-Change", percent);
-      SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
-      SmartDashboard.putNumber("O-Desire", requestedOrientation);
+      // SmartDashboard.putNumber("O-Change", percent);
+      // SmartDashboard.putNumber("O-RobotRot", mDrive.getFieldRelativeGyroscopeRotation().getDegrees());
+      // SmartDashboard.putNumber("O-Desire", requestedOrientation);
 
       rot = percent;
     }
 
+    System.out.println("Run");
     mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
       throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
       strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,

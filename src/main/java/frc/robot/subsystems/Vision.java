@@ -16,6 +16,11 @@ import frc.robot.Constants;
 public class Vision extends Subsystem {
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
+  public class VisionResult {
+    public Pose2d pose;
+    public double latency;
+  }
+
   public static class PeriodicIO {
     LimelightHelpers.Results resultsRight = null;
     LimelightHelpers.Results resultsLeft = null;
@@ -29,7 +34,7 @@ public class Vision extends Subsystem {
   public Vision() {
   }
 
-  public Pose2d getBestPose(Pose2d currentPose) {
+  public synchronized VisionResult getBestPose(Pose2d currentPose) {
     var rightError = currentPose.getTranslation().getDistance(mPeriodicIO.poseRight.getTranslation());
     var leftError = currentPose.getTranslation().getDistance(mPeriodicIO.poseLeft.getTranslation());
 
@@ -45,15 +50,15 @@ public class Vision extends Subsystem {
     if(mPeriodicIO.bestPose.getX() == 0 && mPeriodicIO.bestPose.getY() == 0) {
       return null;
     }
-    else if(mPeriodicIO.bestPoseError < .33) {
-      return mPeriodicIO.bestPose;
+    else if(mPeriodicIO.bestPoseError < .7) {
+      var out = new VisionResult();
+      out.pose = mPeriodicIO.bestPose;
+      out.latency = Timer.getFPGATimestamp() - (mPeriodicIO.bestPoseResults.latency_capture / 1000.0) - (mPeriodicIO.bestPoseResults.latency_pipeline / 1000.0);
+
+      return out;
     }
     
     return null;
-  }
-
-  public double getTimestamp() {
-    return Timer.getFPGATimestamp() - (mPeriodicIO.bestPoseResults.latency_capture / 1000.0) - (mPeriodicIO.bestPoseResults.latency_pipeline / 1000.0);
   }
 
   @Override
@@ -64,6 +69,21 @@ public class Vision extends Subsystem {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
     
+  }
+
+  public void startThread() {
+    try{
+      new Thread(() -> {
+        while(true){
+          readPeriodicInputs();
+          outputTelemetry();
+          try {
+            Thread.sleep(10);
+          }
+          catch(InterruptedException e){}
+        }
+      }).start();
+    }catch(Exception e) {}
   }
 
   /** 
@@ -82,11 +102,14 @@ public class Vision extends Subsystem {
       return;
     }
 
-    mPeriodicIO.resultsLeft = getResults("limelight-r");
-    mPeriodicIO.resultsRight = getResults("limelight-l");
+    mPeriodicIO.resultsLeft = getResults("limelight-l");
+    mPeriodicIO.resultsRight = getResults("limelight-r");
 
     mPeriodicIO.poseLeft = getVisionPose2d(mPeriodicIO.resultsLeft);
     mPeriodicIO.poseRight = getVisionPose2d(mPeriodicIO.resultsRight);
+
+    //System.out.println(mPeriodicIO.poseRight.getX());
+    //System.out.println(mPeriodicIO.poseLeft.getX());
   }
 
   public LimelightHelpers.Results getResults(String limelightName) {
@@ -121,6 +144,6 @@ public class Vision extends Subsystem {
   @Override
   public void outputTelemetry() {
     SmartDashboard.putString("V Raw", String.format("X:%f, Y:%f, Rot:%f",
-    mPeriodicIO.bestPose.getX(), mPeriodicIO.bestPose.getY(), mPeriodicIO.bestPose.getRotation().getDegrees()));
+    mPeriodicIO.poseRight.getX(), mPeriodicIO.poseRight.getY(), mPeriodicIO.poseRight.getRotation().getDegrees()));
   }
 }

@@ -29,6 +29,7 @@ public class DriveDefaultCommand extends CommandBase {
   private final BooleanSupplier mRequestOrientScoreTrigger;
   private final BooleanSupplier mRequestOrientShelfTrigger;
   private final BooleanSupplier mRequestOrientFeederTrigger;
+  private final BooleanSupplier mRequestSlowTrigger;
 
   /**
    * Creates a new ExampleCommand.
@@ -37,7 +38,8 @@ public class DriveDefaultCommand extends CommandBase {
    */
   public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier,
       DoubleSupplier rotationXSupplier, Trigger requestCrabModeTrigger,
-      Trigger requestOrientScoreTrigger, Trigger requestOrientShelfTrigger, Trigger requestOrientFeederTrigger) {
+      Trigger requestOrientScoreTrigger, Trigger requestOrientShelfTrigger, Trigger requestOrientFeederTrigger,
+      Trigger requestSlowTrigger) {
     mDrive = drive;
     mThrottledSupplier = throttleSupplier;
     mStrafeSupplier = strafeSupplier;
@@ -46,6 +48,7 @@ public class DriveDefaultCommand extends CommandBase {
     mRequestOrientScoreTrigger = requestOrientScoreTrigger;
     mRequestOrientShelfTrigger = requestOrientShelfTrigger;
     mRequestOrientFeederTrigger = requestOrientFeederTrigger;
+    mRequestSlowTrigger = requestSlowTrigger;
 
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(drive);
@@ -69,6 +72,11 @@ public class DriveDefaultCommand extends CommandBase {
     double rot = Util.handleDeadband(-mRotationXSupplier.getAsDouble(), Constants.DriverStation.kJoystickThreshold);
     // double rotY = Util.handleDeadband(-mRotationYSupplier.getAsDouble(),
     // Constants.DriverStation.kJoystickThreshold);
+
+    if(mRequestSlowTrigger.getAsBoolean()) {
+      throttle = throttle * .5;
+      strafe = strafe *.5;
+    }
 
     throttle = Math.signum(throttle) * throttle * throttle;
     strafe = Math.signum(strafe) * strafe * strafe;

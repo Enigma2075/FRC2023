@@ -90,6 +90,7 @@ public class Intake extends Subsystem {
     double pivotTarget;
     Rotation2d pivotAngle;
     double pivotAbs;
+    boolean pivotForce = false;
 
     // Intake
     IntakeMode intakeMode = IntakeMode.STOP;
@@ -174,6 +175,11 @@ public class Intake extends Subsystem {
   }
 
   public void setPivotPosition(PivotPosition position) {
+    setPivotPosition(position, false);
+  }
+
+  public void setPivotPosition(PivotPosition position, boolean force) {
+    mPeriodicIO.pivotForce = true;
     mPeriodicIO.pivotPosition = position;
     mPeriodicIO.pivotTarget = position.mAngle;
   }
@@ -254,9 +260,13 @@ public class Intake extends Subsystem {
   }
 
   public CommandBase setPivot(PivotPosition pivot) {
+    return setPivot(pivot, false);
+  }
+  
+  public CommandBase setPivot(PivotPosition pivot, boolean force) {
     return runOnce(
       () -> {
-        setPivotPosition(pivot);
+        setPivotPosition(pivot, force);
       }
     );
   }
@@ -452,15 +462,17 @@ public class Intake extends Subsystem {
     //  }
     //}
     // The intake is past vertical and the arm is close to vertical
-    if(intakePos.x < -25 && armPos.x < -20 && armPos.y < 16) {
-      finalAngle = PivotPosition.DOWN.mAngle;
-    }
-    // The intake is trying to go beyond vertical and the arm isn't safe
-    else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -25 && armPos.x > intakePos.x) {
-      finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
-    }
-    else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -3 && armPos.x > intakePos.x) {
-      finalAngle = PivotPosition.UP.mAngle;
+    if(!mPeriodicIO.pivotForce) {
+      if(intakePos.x < -25 && armPos.x < -20 && armPos.y < 16) {
+        finalAngle = PivotPosition.DOWN.mAngle;
+      }
+      // The intake is trying to go beyond vertical and the arm isn't safe
+      else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -25 && armPos.x > intakePos.x) {
+        finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
+      }
+      else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -6 && armPos.x > intakePos.x) {
+        finalAngle = PivotPosition.UP.mAngle;
+      }
     }
 
     pivotMotor.set(ControlMode.MotionMagic, calcPivotPosFromAngle(finalAngle), DemandType.ArbitraryFeedForward,

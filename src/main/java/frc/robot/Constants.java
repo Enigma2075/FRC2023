@@ -88,7 +88,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(189.75) : Rotation2d.fromDegrees(283.0078125);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(189.75) : Rotation2d.fromDegrees(285.0078125);
 
     public static final double kElbowReduction = (1.0 / 10.0) * (1.0 / 3.0) * (18.0 / 44.0);
 
@@ -131,7 +131,7 @@ public final class Constants {
     // OLD - This should be the raw abs encoder count when the intake is down at the hardstop.
     // OLD - Make sure you are forcing the gear back to take out all slop
     // We want to be at ~-127 when the intake is up at the hardstop.
-    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(22) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(185.419921);
+    public static final edu.wpi.first.math.geometry.Rotation2d kPivotOffset = Robot.kPracticeBot ? edu.wpi.first.math.geometry.Rotation2d.fromDegrees(22) : edu.wpi.first.math.geometry.Rotation2d.fromDegrees(180.419921);
 
     public static final double kPivotReduction = (24.0 / 60.0); //277.7;
 
@@ -151,7 +151,7 @@ public final class Constants {
   }
 
   public static class Drive {
-    public static final boolean kDebug = false;
+    public static final boolean kDebug = true;
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
     // If you want to just use voltage set this to false

@@ -56,12 +56,12 @@
         "y": 4.4
       },
       "prevControl": {
-        "x": 2.929873357974924,
-        "y": 4.772488501121581
+        "x": 3.2597226224540945,
+        "y": 4.4731881109779925
       },
       "nextControl": {
-        "x": 2.929873357974924,
-        "y": 4.772488501121581
+        "x": 3.2597226224540945,
+        "y": 4.4731881109779925
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -129,62 +129,12 @@
     },
     {
       "anchorPoint": {
-        "x": 5.0,
-        "y": 4.57
+        "x": 5.247826909544678,
+        "y": 3.221273685637378
       },
       "prevControl": {
-        "x": 5.346099945575774,
-        "y": 4.429542961348944
-      },
-      "nextControl": {
-        "x": 4.757227213569471,
-        "y": 4.6685239873134625
-      },
-      "holonomicAngle": 0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 2.65,
-        "y": 4.598207161016092
-      },
-      "prevControl": {
-        "x": 3.416116139289508,
-        "y": 4.979108896167411
-      },
-      "nextControl": {
-        "x": 2.2344725223114525,
-        "y": 4.391612978831911
-      },
-      "holonomicAngle": 0,
-      "isReversal": false,
-      "velOverride": null,
-      "isLocked": false,
-      "isStopPoint": false,
-      "stopEvent": {
-        "names": [],
-        "executionBehavior": "parallel",
-        "waitBehavior": "none",
-        "waitTime": 0
-      }
-    },
-    {
-      "anchorPoint": {
-        "x": 1.87,
-        "y": 3.85
-      },
-      "prevControl": {
-        "x": 2.7085354575528435,
-        "y": 3.809399556120161
+        "x": 5.651196277587453,
+        "y": 3.0337921483780597
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -194,11 +144,11 @@
       "isStopPoint": false,
       "stopEvent": {
         "names": [
-          "ScoreHigh"
+          "Balance"
         ],
-        "executionBehavior": "sequential",
-        "waitBehavior": "none",
-        "waitTime": 0
+        "executionBehavior": "parallel",
+        "waitBehavior": "before",
+        "waitTime": 0.01
       }
     }
   ],

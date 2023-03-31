@@ -438,8 +438,8 @@ public class Drive extends Subsystem {
                 if(visionPose != null) {
                     System.out.println("Updated pose");
 
-                    var fixedPose = new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), curPose.getRotation());
-                    mPoseEstimator.addVisionMeasurement(fixedPose, mVision.getTimestamp());
+                    var fixedPose = new edu.wpi.first.math.geometry.Pose2d(visionPose.pose.getX(), visionPose.pose.getY(), curPose.getRotation());
+                    mPoseEstimator.addVisionMeasurement(fixedPose, visionPose.latency);
                     //resetWpiPose(new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), mOdometry.getPoseMeters().getRotation()));
                 }
             }   

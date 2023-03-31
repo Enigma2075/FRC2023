@@ -43,8 +43,8 @@ public class Arm extends Subsystem {
     HANDOFF_CONE3(21, 43),
     HANDOFF_CONE4(0, 50),
     HANDOFF_CUBE(35, 47, 36, 42),
-    //INTAKE_CONE(1.70, 46.22),
-    //GRAB_CONE(18.32, 46.22),
+    // INTAKE_CONE(1.70, 46.22),
+    // GRAB_CONE(18.32, 46.22),
     START(24, -5),
     DEFAULT(0, 0),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
@@ -53,8 +53,8 @@ public class Arm extends Subsystem {
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
     MEDIUM_CUBE(20, -55),
-    //MEDIUM_AUTO_START(0, -70),
-    //HAND_OFF(0, 50),
+    // MEDIUM_AUTO_START(0, -70),
+    // HAND_OFF(0, 50),
     SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
     SCORE_OFFSET_CONE_HIGH(Double.MIN_VALUE, 15, true),
     HOLD(24, -5),
@@ -80,16 +80,16 @@ public class Arm extends Subsystem {
       this(shoulderAngle, elbowAngle, compShoulderAngle, compElbowAngle, false);
     }
 
-    private ArmPosition(double shoulderAngle, double elbowAngle, double compShoulderAngle, double compElbowAngle, boolean isOffset) {
-      if(!Constants.Robot.kPracticeBot) {
+    private ArmPosition(double shoulderAngle, double elbowAngle, double compShoulderAngle, double compElbowAngle,
+        boolean isOffset) {
+      if (!Constants.Robot.kPracticeBot) {
         this.mIsOffset = isOffset;
         this.mShoulderAngle = compShoulderAngle;
-        this.mElbowAngle = compElbowAngle;      
-      }
-      else {
+        this.mElbowAngle = compElbowAngle;
+      } else {
         this.mIsOffset = isOffset;
         this.mShoulderAngle = shoulderAngle;
-        this.mElbowAngle = elbowAngle;  
+        this.mElbowAngle = elbowAngle;
       }
     }
   }
@@ -136,7 +136,7 @@ public class Arm extends Subsystem {
 
     Point armPosition;
     Point armTargetPosition;
-    
+
     // Shoulder
     double shoulderTarget = 0;
     double shoulderTargetCalc = 0;
@@ -166,7 +166,7 @@ public class Arm extends Subsystem {
     double handCurrent;
     boolean handHasGamePeice = false;
     boolean handHasGamePeiceLast = false;
-    //double handCurrentTime = Double.MIN_VALUE;
+    // double handCurrentTime = Double.MIN_VALUE;
   }
 
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
@@ -192,7 +192,7 @@ public class Arm extends Subsystem {
 
     mShoulderLeftMotor.setOpenLoopRampRate(0);
     mShoulderRightMotor.setOpenLoopRampRate(0);
-  
+
     mShoulderLeftMotor.setSmartCurrentLimit(40);
     mShoulderRightMotor.setSmartCurrentLimit(40);
 
@@ -209,7 +209,7 @@ public class Arm extends Subsystem {
     mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
     mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
     mShoulderLeftMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
-  
+
     mShoulderEncoder = mShoulderLeftMotor.getEncoder();
 
     mShoulderPidController = mShoulderLeftMotor.getPIDController();
@@ -236,7 +236,7 @@ public class Arm extends Subsystem {
 
     mElbowMotor.setOpenLoopRampRate(0);
     mElbowMotor.setSmartCurrentLimit(40);
-    
+
     mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus0, 10);
     mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 200);
     mElbowMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 10);
@@ -327,14 +327,13 @@ public class Arm extends Subsystem {
   }
 
   private boolean readHandHasGamePeice() {
-    if(mTimeOfFlight.isRangeValid()) {
-      if(mRobotState.isConeMode()) {
+    if (mTimeOfFlight.isRangeValid()) {
+      if (mRobotState.isConeMode()) {
         mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 50;
-      }
-      else {
+      } else {
         mPeriodicIO.handHasGamePeiceLast = mTimeOfFlight.getRange() < 100;
       }
-    } 
+    }
     mRobotState.setHasGamePiece(mPeriodicIO.handHasGamePeiceLast);
     return mPeriodicIO.handHasGamePeiceLast;
   }
@@ -428,22 +427,23 @@ public class Arm extends Subsystem {
   public CommandBase handCommand() {
     return handCommand(true);
   }
-  
+
   public CommandBase handCommand(boolean end) {
     return runEnd(
         () -> {
           mPeriodicIO.handTarget = .9;
         },
         () -> {
-          if(end) {
+          if (end) {
             mPeriodicIO.handTarget = 0;
           }
         });
   }
 
   public boolean atHold() {
-    if(atPosition()) {
-      if(mPeriodicIO.elbowTarget == ArmPosition.HOLD.mElbowAngle && mPeriodicIO.shoulderTarget == ArmPosition.HOLD.mShoulderAngle) {
+    if (atPosition()) {
+      if (mPeriodicIO.elbowTarget == ArmPosition.HOLD.mElbowAngle
+          && mPeriodicIO.shoulderTarget == ArmPosition.HOLD.mShoulderAngle) {
         return true;
       }
     }
@@ -451,8 +451,9 @@ public class Arm extends Subsystem {
   }
 
   public boolean atDefault() {
-    if(atPosition()) {
-      if(mPeriodicIO.elbowTarget == ArmPosition.DEFAULT.mElbowAngle && mPeriodicIO.shoulderTarget == ArmPosition.DEFAULT.mShoulderAngle) {
+    if (atPosition()) {
+      if (mPeriodicIO.elbowTarget == ArmPosition.DEFAULT.mElbowAngle
+          && mPeriodicIO.shoulderTarget == ArmPosition.DEFAULT.mShoulderAngle) {
         return true;
       }
     }
@@ -476,20 +477,19 @@ public class Arm extends Subsystem {
   }
 
   public boolean isSequenceComplete(boolean wait) {
-    if(wait) {
+    if (wait) {
       return mPeriodicIO.sequenceIndex >= mPeriodicIO.sequence.length && atPosition();
-    }
-    else {
+    } else {
       return mPeriodicIO.sequenceIndex >= mPeriodicIO.sequence.length;
     }
   }
 
   public void setPosition(ArmPosition position) {
-    setPositions(new ArmPosition[] {position});
+    setPositions(new ArmPosition[] { position });
   }
 
   public void setPosition(ArmMotion motion) {
-    setPositions(new ArmMotion[] {motion});
+    setPositions(new ArmMotion[] { motion });
   }
 
   public void setPositions(ArmPosition... positions) {
@@ -524,11 +524,11 @@ public class Arm extends Subsystem {
 
   public void writeElbowPosition() {
     int index = mPeriodicIO.sequenceIndex;
-    if(index > 0) {
+    if (index > 0) {
       index--;
     }
-    
-    if(!mPeriodicIO.sequence[index].checkElbowCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
+
+    if (!mPeriodicIO.sequence[index].checkElbowCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
       return;
     }
 
@@ -555,28 +555,28 @@ public class Arm extends Subsystem {
   }
 
   public void writeShoulderPosition(boolean force) {
-    if(force) {
+    if (force) {
       mPeriodicIO.shoulderTargetCalc = calcShoulderPosFromAngle(mPeriodicIO.shoulderTarget);
       mShoulderPidController.setReference(mPeriodicIO.shoulderTargetCalc, ControlType.kSmartMotion, 0,
-      calcShoulderArbFF(), ArbFFUnits.kPercentOut);
+          calcShoulderArbFF(), ArbFFUnits.kPercentOut);
       return;
     }
 
     int index = mPeriodicIO.sequenceIndex;
-    if(index > 0) {
+    if (index > 0) {
       index--;
     }
 
-    if(!mPeriodicIO.sequence[index].checkShoulderCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
+    if (!mPeriodicIO.sequence[index].checkShoulderCondition(mPeriodicIO.shoulderDeg, mPeriodicIO.elbowDeg)) {
       return;
     }
-    
+
     if (mPeriodicIO.targetPosition.mShoulderAngle != Double.MIN_VALUE) {
       mPeriodicIO.shoulderTargetCalc = calcShoulderPosFromAngle(mPeriodicIO.shoulderTarget);
     }
 
     double finalTarget = mPeriodicIO.shoulderTargetCalc;
-    
+
     Point intakePos = mIntake.getIntakePosition();
     Point intakeTargetPos = mIntake.getIntakeTargetPosition();
 
@@ -584,20 +584,20 @@ public class Arm extends Subsystem {
     Point armTargetPos = getArmTargetPosition();
 
     // Intake is up and is staying up so we are good to do anything
-    if(intakePos.x > -7 && intakeTargetPos.x > -7) {
+    if (intakePos.x > -7 && intakeTargetPos.x > -7) {
 
     }
     // The intake is at the up right position so we are Okay...
     // TODO: need to add more logic to protect this position.
-    else if(intakePos.x < -20 && intakePos.x > -25 && intakeTargetPos.x < -20 && intakeTargetPos.x > -25) {
+    else if (intakePos.x < -20 && intakePos.x > -25 && intakeTargetPos.x < -20 && intakeTargetPos.x > -25) {
 
     }
-    // Intake is up and wants to go down and we want to move the arm out 
+    // Intake is up and wants to go down and we want to move the arm out
     else if (intakeTargetPos.x < -7
-      && armTargetPos.x < intakePos.x && armTargetPos.y < intakePos.y && armTargetPos.x < 0) {
+        && armTargetPos.x < intakePos.x && armTargetPos.y < intakePos.y && armTargetPos.x < 0) {
       finalTarget = 0;
     }
-    
+
     mShoulderPidController.setReference(finalTarget, ControlType.kSmartMotion, 0,
         calcShoulderArbFF(), ArbFFUnits.kPercentOut);
   }
@@ -605,32 +605,35 @@ public class Arm extends Subsystem {
   public void writeHandOutput() {
     if (mPeriodicIO.handTarget > 0) {
       if (mPeriodicIO.handHasGamePeice) {
-        if(mRobotState.isConeMode()) {
+        // if((atDefault() || atHold())) {
+        if (mRobotState.isConeMode()) {
           mHandMotor.set(.04);
+        } else {
+          mHandMotor.set(.02);
         }
-        else {
-          mHandMotor.set(.02);  
-        }
-      } else { 
-      //if (mPeriodicIO.handCurrent > 10) {
-        //if(mPeriodicIO.handCurrentTime == Double.MIN_VALUE) {
-        //  mPeriodicIO.handCurrentTime = Timer.getFPGATimestamp();
-        //}
-        //if(Timer.getFPGATimestamp() - mPeriodicIO.handCurrentTime > 1) {
-        //  mPeriodicIO.handHasGamePeice = true;
-        //  mHandMotor.set(.02);
-        //}
-        //else {
-        //  mHandMotor.set(mPeriodicIO.handTarget);
-        //}
-      //}
-      //else {
-      //  mPeriodicIO.handCurrentTime = Double.MIN_VALUE;
+        // }
+        // else {
+        // mHandMotor.set(mPeriodicIO.handTarget * .8);
+        // }
+      } else {
+        // if (mPeriodicIO.handCurrent > 10) {
+        // if(mPeriodicIO.handCurrentTime == Double.MIN_VALUE) {
+        // mPeriodicIO.handCurrentTime = Timer.getFPGATimestamp();
+        // }
+        // if(Timer.getFPGATimestamp() - mPeriodicIO.handCurrentTime > 1) {
+        // mPeriodicIO.handHasGamePeice = true;
+        // mHandMotor.set(.02);
+        // }
+        // else {
+        // mHandMotor.set(mPeriodicIO.handTarget);
+        // }
+        // }
+        // else {
+        // mPeriodicIO.handCurrentTime = Double.MIN_VALUE;
         mHandMotor.set(mPeriodicIO.handTarget);
       }
+
     } else {
-      //mPeriodicIO.handHasGamePeice = false;
-      //mPeriodicIO.handCurrentTime = Double.MIN_VALUE;
       mHandMotor.set(mPeriodicIO.handTarget);
     }
   }
@@ -668,7 +671,7 @@ public class Arm extends Subsystem {
     }
 
     // Hand
-    if(Constants.Arm.kElbowDebug || Constants.Arm.kShoulderDebug) {
+    if (Constants.Arm.kElbowDebug || Constants.Arm.kShoulderDebug) {
       mPeriodicIO.handCurrent = mHandMotor.getOutputCurrent();
     }
 
@@ -677,41 +680,39 @@ public class Arm extends Subsystem {
   }
 
   private void updatePositionSequence() {
-    if(isSequenceComplete()) {
+    if (isSequenceComplete()) {
       return;
     }
 
     ArmMotion motion;
-    if(mPeriodicIO.sequenceIndex < mPeriodicIO.sequence.length) {
+    if (mPeriodicIO.sequenceIndex < mPeriodicIO.sequence.length) {
       motion = mPeriodicIO.sequence[mPeriodicIO.sequenceIndex];
-    } 
-    else {
+    } else {
       motion = mPeriodicIO.sequence[mPeriodicIO.sequenceIndex - 1];
     }
 
-    if(motion.getPosition() == mPeriodicIO.targetPosition) {
+    if (motion.getPosition() == mPeriodicIO.targetPosition) {
       return;
     }
 
-    if(atPosition()) {
+    if (atPosition()) {
       ArmPosition position = mPeriodicIO.targetPosition = motion.getPosition();
       mPeriodicIO.sequenceIndex++;
 
-      if(position.mIsOffset) {
-        if(position.mElbowAngle != Double.MIN_VALUE) {
+      if (position.mIsOffset) {
+        if (position.mElbowAngle != Double.MIN_VALUE) {
           mPeriodicIO.elbowTarget += position.mElbowAngle;
         }
-        if(position.mShoulderAngle != Double.MIN_VALUE) {
+        if (position.mShoulderAngle != Double.MIN_VALUE) {
           mPeriodicIO.shoulderTarget += position.mShoulderAngle;
-        }  
-      }
-      else {
-        if(position.mElbowAngle != Double.MIN_VALUE) {
+        }
+      } else {
+        if (position.mElbowAngle != Double.MIN_VALUE) {
           mPeriodicIO.elbowTarget = position.mElbowAngle;
         }
-        if(position.mShoulderAngle != Double.MIN_VALUE) {
+        if (position.mShoulderAngle != Double.MIN_VALUE) {
           mPeriodicIO.shoulderTarget = position.mShoulderAngle;
-        }  
+        }
       }
     }
   }
@@ -798,7 +799,6 @@ public class Arm extends Subsystem {
 
       SmartDashboard.putNumber("H Current", mPeriodicIO.handCurrent);
       SmartDashboard.putNumber("H ToF", mTimeOfFlight.getRange());
-
 
       Point pos = getArmPosition();
       SmartDashboard.putString("A Pos", String.format("X:%f, Y:%f", pos.x, pos.y));
