@@ -57,6 +57,7 @@ public class Arm extends Subsystem {
     // HAND_OFF(0, 50),
     SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
     SCORE_OFFSET_CONE_HIGH(Double.MIN_VALUE, 15, true),
+    SCORE_OFFSET_CONE_HIGH_AUTO(Double.MIN_VALUE, 18, true),
     HOLD(24, -5),
     SHELF(15, -66),
     AUTO_DROP(0, -10),

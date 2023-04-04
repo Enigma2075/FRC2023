@@ -29,6 +29,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public final class Autos {
   private static final PathConstraints kDefaultConstraints = new PathConstraints(4.33, 3.6);
+  private static final PathConstraints kSlowAccConstraints = new PathConstraints(4.33, 2.5);
   private static final PathConstraints kMedium1Constraints = new PathConstraints(2, 3);
   private static final PathConstraints kBump1Constraints = new PathConstraints(2.8, 3);
   private static final PathConstraints kMedium2Constraints = new PathConstraints(4.33, 3.3);
@@ -204,14 +205,15 @@ public final class Autos {
     HashMap<String, Command> eventMap = new HashMap<>();
     eventMap.put("HighWait", new DriveVisionCommand(drive, true).alongWith(new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9).andThen(new ArmScoreCommand(arm, true))));
     eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
-    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
+    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, false));
     eventMap.put("Score", new ArmScoreCommand(arm, true));
-    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
+    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, false));
     //eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     
     return setupAuto("Gap - 3 Piece", eventMap, drive,
-      kDefaultConstraints
+    kSlowAccConstraints,
+    kDefaultConstraints
     );
   }
 
