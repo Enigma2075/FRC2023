@@ -83,7 +83,12 @@ public class ArmScoreCommand extends CommandBase {
           mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_MID);
           break;
         case HIGH:
-          mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_HIGH);
+          if(mIsAuto) {
+            mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_HIGH_AUTO);
+          }
+          else {
+            mArm.setPosition(ArmPosition.SCORE_OFFSET_CONE_HIGH);
+          }
           break;
       }
     } else {

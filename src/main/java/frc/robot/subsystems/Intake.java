@@ -179,7 +179,7 @@ public class Intake extends Subsystem {
   }
 
   public void setPivotPosition(PivotPosition position, boolean force) {
-    mPeriodicIO.pivotForce = true;
+    mPeriodicIO.pivotForce = force;
     mPeriodicIO.pivotPosition = position;
     mPeriodicIO.pivotTarget = position.mAngle;
   }
