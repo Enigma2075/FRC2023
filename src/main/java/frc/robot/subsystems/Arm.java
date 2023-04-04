@@ -46,9 +46,9 @@ public class Arm extends Subsystem {
     // INTAKE_CONE(1.70, 46.22),
     // GRAB_CONE(18.32, 46.22),
     START(24, -5),
-    DEFAULT(0, 0),
+    DEFAULT(0, -2),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
-    DEFAULT_ELBOW(Double.MIN_VALUE, 0),
+    DEFAULT_ELBOW(Double.MIN_VALUE, -2),
     HIGH_CONE(-24, -140, -27, -144),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
@@ -429,9 +429,13 @@ public class Arm extends Subsystem {
   }
 
   public CommandBase handCommand(boolean end) {
+    return handCommand(end, .9);
+  }
+
+  public CommandBase handCommand(boolean end, double power) {
     return runEnd(
         () -> {
-          mPeriodicIO.handTarget = .9;
+          mPeriodicIO.handTarget = power;
         },
         () -> {
           if (end) {
@@ -594,7 +598,7 @@ public class Arm extends Subsystem {
     }
     // Intake is up and wants to go down and we want to move the arm out
     else if (intakeTargetPos.x < -7
-        && armTargetPos.x < intakePos.x && armTargetPos.y < intakePos.y && armTargetPos.x < 0) {
+        && armTargetPos.x < intakePos.x && armTargetPos.y < intakePos.y && armTargetPos.x < 0 && intakePos.x > armPos.x -5) {
       finalTarget = 0;
     }
 
@@ -691,11 +695,30 @@ public class Arm extends Subsystem {
       motion = mPeriodicIO.sequence[mPeriodicIO.sequenceIndex - 1];
     }
 
-    if (motion.getPosition() == mPeriodicIO.targetPosition) {
-      return;
-    }
+    // if (motion.getPosition() == mPeriodicIO.targetPosition ) {
+    //   if((mPeriodicIO.targetPosition.mElbowAngle != mPeriodicIO.elbowTarget && mPeriodicIO.targetPosition.mElbowAngle != Double.MIN_VALUE)
+    //     || (mPeriodicIO.targetPosition.mShoulderAngle != mPeriodicIO.shoulderTarget && mPeriodicIO.targetPosition.mShoulderAngle != Double.MIN_VALUE)) {
+    //       if (mPeriodicIO.targetPosition.mIsOffset) {
+    //         if (mPeriodicIO.targetPosition.mElbowAngle != Double.MIN_VALUE) {
+    //           mPeriodicIO.elbowTarget += mPeriodicIO.targetPosition.mElbowAngle;
+    //         }
+    //         if (mPeriodicIO.targetPosition.mShoulderAngle != Double.MIN_VALUE) {
+    //           mPeriodicIO.shoulderTarget += mPeriodicIO.targetPosition.mShoulderAngle;
+    //         }
+    //       } else {
+    //         if (mPeriodicIO.targetPosition.mElbowAngle != Double.MIN_VALUE) {
+    //           mPeriodicIO.elbowTarget = mPeriodicIO.targetPosition.mElbowAngle;
+    //         }
+    //         if (mPeriodicIO.targetPosition.mShoulderAngle != Double.MIN_VALUE) {
+    //           mPeriodicIO.shoulderTarget = mPeriodicIO.targetPosition.mShoulderAngle;
+    //         }
+    //       }
+    //   }
 
-    if (atPosition()) {
+    //   return;
+    // }
+
+    if (atPosition() && motion.getPosition() != mPeriodicIO.targetPosition) {
       ArmPosition position = mPeriodicIO.targetPosition = motion.getPosition();
       mPeriodicIO.sequenceIndex++;
 
@@ -748,9 +771,9 @@ public class Arm extends Subsystem {
 
   @Override
   public void stop() {
-    mElbowMotor.set(0);
-    mShoulderRightMotor.set(0);
-    mShoulderLeftMotor.set(0);
+    //mElbowMotor.set(0);
+    //mShoulderRightMotor.set(0);
+    //mShoulderLeftMotor.set(0);
   }
 
   @Override

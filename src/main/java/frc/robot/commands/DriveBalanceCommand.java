@@ -94,11 +94,11 @@ public class DriveBalanceCommand extends CommandBase {
         throttle = .3;
       }
     //} else if ((mDrive.getPitch().getDegrees() < -14 && !mIsReverse) || (mDrive.getPitch().getDegrees() > 18 && mIsReverse)) {
-    } else if (Timer.getFPGATimestamp() - mTimer < 2) {
+    } else if (Timer.getFPGATimestamp() - mTimer < 1.85) {
       if (mIsReverse) {
-        throttle = -.3;
+        throttle = -.2;
       } else {
-        throttle = .3;
+        throttle = .2;
       }
     } else {
       throttle = 0;

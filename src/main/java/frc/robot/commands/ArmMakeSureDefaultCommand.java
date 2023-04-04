@@ -35,6 +35,8 @@ public class ArmMakeSureDefaultCommand extends CommandBase {
    */
   public ArmMakeSureDefaultCommand(Arm arm) {
     mArm = arm;
+
+    addRequirements(mArm);
   }
 
   // Called when the command is initially scheduled.

@@ -231,15 +231,15 @@
     {
       "anchorPoint": {
         "x": 7.2,
-        "y": 2.22
+        "y": 2.15
       },
       "prevControl": {
         "x": 4.878545093730869,
-        "y": 2.2402288469718266
+        "y": 2.1702288469718263
       },
       "nextControl": {
         "x": 4.878545093730869,
-        "y": 2.2402288469718266
+        "y": 2.1702288469718263
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -341,21 +341,27 @@
     {
       "position": 3.3,
       "names": [
-        "IntakeUp",
-        "High"
+        "High",
+        "IntakeUp"
       ]
     },
     {
       "position": 9.3,
       "names": [
-        "IntakeUp",
-        "Middle"
+        "Middle",
+        "IntakeUp"
       ]
     },
     {
-      "position": 6.327272727272872,
+      "position": 6.1,
       "names": [
         "IntakeCube"
+      ]
+    },
+    {
+      "position": 11.9,
+      "names": [
+        "ScoreHigh"
       ]
     }
   ]

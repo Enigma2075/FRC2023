@@ -470,7 +470,7 @@ public class Intake extends Subsystem {
       else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -25 && armPos.x > intakePos.x) {
         finalAngle = PivotPosition.HANDOFF_CONE.mAngle;
       }
-      else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -6 && armPos.x > intakePos.x) {
+      else if(intakePos.x > -9 && intakeTargetPos.x < -9 && armPos.x < -6 && armPos.x < intakePos.x) {
         finalAngle = PivotPosition.UP.mAngle;
       }
     }

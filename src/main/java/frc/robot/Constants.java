@@ -56,8 +56,8 @@ public final class Constants {
     public static final Mode kShoulderMode = Mode.MOTION_MAGIC;
     public static final Mode kElbowMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kShoulderDebug = false;
-    public static final boolean kElbowDebug = false;
+    public static final boolean kShoulderDebug = true;
+    public static final boolean kElbowDebug = true;
 
     // Shoulder contants
     public static final int kShoulderRightId = 1;
@@ -88,7 +88,7 @@ public final class Constants {
     // Elbow Constants
     public static final int kElbowId = 3;
     public static final CanDeviceId kElbowEncoderId = new CanDeviceId(6, Can.kCANivoreBusName);
-    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(189.75) : Rotation2d.fromDegrees(285.0078125);
+    public static final Rotation2d kElbowOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(189.75) : Rotation2d.fromDegrees(283.0078125);
 
     public static final double kElbowReduction = (1.0 / 10.0) * (1.0 / 3.0) * (18.0 / 44.0);
 
@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final Mode kPivotMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kDebug = false;
+    public static final boolean kDebug = true;
 
     // Intake contants
     public static final int kIntakeId = 5;
@@ -194,7 +194,7 @@ public final class Constants {
     public static final CanDeviceId kFrontRightDriveId = new CanDeviceId(4, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightSteerId = new CanDeviceId(3, Can.kCANivoreBusName);
     public static final CanDeviceId kFrontRightEncoderId = new CanDeviceId(2, Can.kCANivoreBusName);
-    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(177.187);
+    public static final Rotation2d kFrontRightSteerOffset = Robot.kPracticeBot ? Rotation2d.fromDegrees(-72.50976562499994) : Rotation2d.fromDegrees(175.605);
 
     public static final CanDeviceId kBackRightDriveId = new CanDeviceId(6, Can.kCANivoreBusName);
     public static final CanDeviceId kBackRightSteerId = new CanDeviceId(5, Can.kCANivoreBusName);

@@ -43,7 +43,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.Command.InterruptionBehavior;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
@@ -110,7 +109,7 @@ public class RobotContainer {
     mAutoChooser = new SendableChooser<>();
     mAutoChooser.setDefaultOption("Gap - Link", Autos.gap_Link(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Gap - 2.5 Balance", Autos.gap_2_5PiecesBalance(mDrive, mIntake, mArm, mRobotState));
-    mAutoChooser.addOption("Gap - 4 Pieces", Autos.gap_4Pieces(mDrive, mIntake, mArm, mRobotState));
+    mAutoChooser.addOption("Gap - 3 Pieces", Autos.gap_3Pieces(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Balance", Autos.balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - 2.5 Balance", Autos.bump_2_5_Balance(mDrive, mIntake, mArm, mRobotState));
     mAutoChooser.addOption("Bump - 3 Pieces", Autos.bump_3Piece(mDrive, mIntake, mArm, mRobotState));
@@ -142,7 +141,7 @@ public class RobotContainer {
     mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
 
     // FLOOR INTAKE
-    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith(mIntake.intakeCommand()))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith()))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
     // OUTTAKE
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     

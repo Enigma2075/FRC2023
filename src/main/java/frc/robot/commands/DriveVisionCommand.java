@@ -34,7 +34,7 @@ public class DriveVisionCommand extends CommandBase {
 
     mEnableVision = enableVision;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(drive);
+    //addRequirements(drive);
   }
 
   // Called when the command is initially scheduled.

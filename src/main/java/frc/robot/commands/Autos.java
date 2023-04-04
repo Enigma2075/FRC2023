@@ -116,6 +116,7 @@ public final class Autos {
     eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
     eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
     eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
+    eventMap.put("StartScore", arm.handCommand(false, -.5));
     eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
     eventMap.put("ScoreHigh", new DriveVisionCommand(drive, true).alongWith(new ArmScoreCommand(arm)));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
@@ -199,20 +200,17 @@ public final class Autos {
     );
   }
 
-  public static Command gap_4Pieces(Drive drive, Intake intake, Arm arm, RobotState robotState) {
+  public static Command gap_3Pieces(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("ConeMode", new SetConeModeCommand(robotState, true));
-    eventMap.put("CubeMode", new SetCubeModeCommand(robotState, true));
-    eventMap.put("Intake", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
+    eventMap.put("HighWait", new DriveVisionCommand(drive, true).alongWith(new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9).andThen(new ArmScoreCommand(arm, true))));
+    eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
     eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true));
-    eventMap.put("ScoreMiddle", new ArmScoreCommand(arm));
+    eventMap.put("Score", new ArmScoreCommand(arm, true));
     eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true));
-    eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
-    eventMap.put("FirstDrop", new ArmMoveCommand(arm, -.5, ArmPosition.AUTO_DROP));
+    //eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
-    //eventMap.put("Crab", new DriveCrabCommand(drive));
     
-    return setupAuto("Gap - 4 Piece", eventMap, drive,
+    return setupAuto("Gap - 3 Piece", eventMap, drive,
       kDefaultConstraints
     );
   }

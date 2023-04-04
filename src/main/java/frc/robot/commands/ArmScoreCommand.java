@@ -24,9 +24,19 @@ import frc.robot.subsystems.Arm.ScoreMode;
 /** An example command that uses an example subsystem. */
 public class ArmScoreCommand extends CommandBase {
   protected final Arm mArm;
+  protected final boolean mIsAuto;
 
   protected ScoreMode mMode;
   protected double mTimer;
+
+  
+  public ArmScoreCommand(Arm arm, boolean isAuto) {
+    mArm = arm;
+    mIsAuto = isAuto;
+
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(arm);
+  }
 
   /**
    * Creates a new ExampleCommand.
@@ -34,6 +44,7 @@ public class ArmScoreCommand extends CommandBase {
    * @param subsystem The subsystem used by this command.
    */
   public ArmScoreCommand(Arm arm) {
+    mIsAuto = false;
     mArm = arm;
 
     // Use addRequirements() here to declare subsystem dependencies.
@@ -154,14 +165,19 @@ public class ArmScoreCommand extends CommandBase {
         }));
       }
     }
-
-    mArm.setHandOutput(0);
+    if(mIsAuto) {
+      mArm.setHandOutput(0);
+    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
     if (mMode == null) {
+      return true;
+    }
+
+    if(mArm.isSequenceComplete() && mIsAuto) {
       return true;
     }
 
