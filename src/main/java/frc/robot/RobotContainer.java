@@ -12,6 +12,7 @@ import frc.robot.commands.ArmManualCommand;
 import frc.robot.commands.ArmMoveAfterIntakeCommand;
 import frc.robot.commands.ArmMoveCommand;
 import frc.robot.commands.ArmMoveMotionCommand;
+import frc.robot.commands.ArmRezeroCommand;
 import frc.robot.commands.ArmScoreCommand;
 import frc.robot.commands.Autos;
 import frc.robot.commands.DriveDefaultCommand;
@@ -165,6 +166,9 @@ public class RobotContainer {
 
     // FORCE DOWN
     mOperatorController.povDown().onTrue(mIntake.setPivot(PivotPosition.DOWN, true)).onFalse(mIntake.setPivot(PivotPosition.UP));
+  
+    // REZERO ARM
+    mOperatorController.povUp().onTrue(new ArmRezeroCommand(mArm));
   }
 
   private final Command mIntakeConeStart() {

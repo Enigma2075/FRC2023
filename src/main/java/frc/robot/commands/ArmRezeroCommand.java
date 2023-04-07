@@ -18,33 +18,24 @@ import frc.robot.Constants;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.ArmMotion;
 import frc.robot.subsystems.Drive;
-import frc.robot.subsystems.RobotState;
 import frc.robot.subsystems.Arm.ArmPosition;
 import frc.robot.subsystems.Arm.ScoreMode;
 
 /** An example command that uses an example subsystem. */
-public class ArmMakeSureDefaultCommand extends CommandBase {
+public class ArmRezeroCommand extends CommandBase {
   protected final Arm mArm;
-
-  protected ScoreMode mMode;
   
-  /**
-   * Creates a new ExampleCommand.
-   *
-   * @param subsystem The subsystem used by this command.
-   */
-  public ArmMakeSureDefaultCommand(Arm arm) {
+  public ArmRezeroCommand(Arm arm) {
     mArm = arm;
 
-    addRequirements(mArm);
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(arm);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {   
-    if(!mArm.atDefault() && !mArm.goingToDefault()) {
-      mArm.setPosition(ArmPosition.DEFAULT);
-    }
+  public void initialize() {
+    mArm.rezeroMotors();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -60,6 +51,6 @@ public class ArmMakeSureDefaultCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return mArm.isSequenceComplete() || mArm.atDefault();
+    return true;
   }
 }

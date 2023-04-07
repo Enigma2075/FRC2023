@@ -433,16 +433,16 @@ public class Drive extends Subsystem {
             case PATH_FOLLOWING:
                 mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
                 if(mEnableVision) {
-                var curPose = mPoseEstimator.getEstimatedPosition();
-                var visionPose = mVision.getBestPose(curPose);
-                if(visionPose != null) {
-                    System.out.println("Updated pose");
+                    var curPose = mPoseEstimator.getEstimatedPosition();
+                    var visionPose = mVision.getBestPose(curPose);
+                    if(visionPose != null) {
+                        System.out.println("Updated pose");
 
-                    var fixedPose = new edu.wpi.first.math.geometry.Pose2d(visionPose.pose.getX(), visionPose.pose.getY(), curPose.getRotation());
-                    mPoseEstimator.addVisionMeasurement(fixedPose, visionPose.latency);
-                    //resetWpiPose(new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), mOdometry.getPoseMeters().getRotation()));
-                }
-            }   
+                        var fixedPose = new edu.wpi.first.math.geometry.Pose2d(visionPose.pose.getX(), visionPose.pose.getY(), curPose.getRotation());
+                        mPoseEstimator.addVisionMeasurement(fixedPose, visionPose.latency);
+                        //resetWpiPose(new edu.wpi.first.math.geometry.Pose2d(visionPose.getX(), visionPose.getY(), mOdometry.getPoseMeters().getRotation()));
+                    }
+                }   
 
                 // setKinematicLimits(Constants.kFastKinematicLimits);
                 // updatePathFollower();

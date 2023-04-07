@@ -203,11 +203,13 @@ public final class Autos {
 
   public static Command gap_3Pieces(Drive drive, Intake intake, Arm arm, RobotState robotState) {
     HashMap<String, Command> eventMap = new HashMap<>();
-    eventMap.put("HighWait", new DriveVisionCommand(drive, true).alongWith(new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9).andThen(new ArmScoreCommand(arm, true))));
+    eventMap.put("HighWait", new DriveVisionCommand(drive, false).alongWith(new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9).andThen(new ArmScoreCommand(arm, true))));
     eventMap.put("IntakeCube", new SetCubeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, ArmPosition.HANDOFF_CUBE))));
-    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, false));
+    eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, false, true));
     eventMap.put("Score", new ArmScoreCommand(arm, true));
-    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, false));
+    eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, false, true));
+    eventMap.put("StartScore", arm.handCommand(false, -.7));
+    eventMap.put("Default", new ArmMakeSureDefaultCommand(arm).andThen(new SetConeModeCommand(robotState, true)));
     //eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     

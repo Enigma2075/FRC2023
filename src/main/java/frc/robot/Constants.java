@@ -56,8 +56,8 @@ public final class Constants {
     public static final Mode kShoulderMode = Mode.MOTION_MAGIC;
     public static final Mode kElbowMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kShoulderDebug = true;
-    public static final boolean kElbowDebug = true;
+    public static final boolean kShoulderDebug = false;
+    public static final boolean kElbowDebug = false;
 
     // Shoulder contants
     public static final int kShoulderRightId = 1;
@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final Mode kPivotMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kDebug = true;
+    public static final boolean kDebug = false;
 
     // Intake contants
     public static final int kIntakeId = 5;
@@ -151,7 +151,7 @@ public final class Constants {
   }
 
   public static class Drive {
-    public static final boolean kDebug = true;
+    public static final boolean kDebug = false;
     public static final double kCancoderBootAllowanceSeconds = 10.0;
 
     // If you want to just use voltage set this to false

@@ -52,7 +52,9 @@ public class Arm extends Subsystem {
     HIGH_CONE(-24, -140, -27, -144),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
+    HIGH_CUBE_AUTO(0, -98),
     MEDIUM_CUBE(20, -55),
+    MEDIUM_CUBE_AUTO(18, -60),
     // MEDIUM_AUTO_START(0, -70),
     // HAND_OFF(0, 50),
     SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
@@ -455,10 +457,17 @@ public class Arm extends Subsystem {
     return false;
   }
 
-  public boolean atDefault() {
-    if (atPosition()) {
+  public boolean goingToDefault() {
       if (mPeriodicIO.elbowTarget == ArmPosition.DEFAULT.mElbowAngle
           && mPeriodicIO.shoulderTarget == ArmPosition.DEFAULT.mShoulderAngle) {
+        return true;
+      }
+    return false;
+  }
+
+  public boolean atDefault() {
+    if (atPosition()) {
+      if (goingToDefault()) {
         return true;
       }
     }

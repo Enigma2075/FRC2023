@@ -34,7 +34,7 @@ public class Intake extends Subsystem {
     HANDOFF_CONE(-71.5, -68),
     HANDOFF_CUBE(0),
     FEEDER(-68),
-    DOWN(6),
+    DOWN(8),
     UP(-125);
 
     public final double mAngle;

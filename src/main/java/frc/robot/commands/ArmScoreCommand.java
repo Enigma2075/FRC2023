@@ -28,12 +28,11 @@ public class ArmScoreCommand extends CommandBase {
 
   protected ScoreMode mMode;
   protected double mTimer;
-
   
   public ArmScoreCommand(Arm arm, boolean isAuto) {
     mArm = arm;
     mIsAuto = isAuto;
-
+    
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -46,7 +45,7 @@ public class ArmScoreCommand extends CommandBase {
   public ArmScoreCommand(Arm arm) {
     mIsAuto = false;
     mArm = arm;
-
+    
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -108,9 +107,9 @@ public class ArmScoreCommand extends CommandBase {
       return;
     }
 
-    if (mArm.atPosition() && mTimer == Double.MIN_VALUE) {
+    if (mArm.atPosition() && (mTimer == Double.MIN_VALUE || mIsAuto)) {
       mTimer = Timer.getFPGATimestamp();
-    
+      
       if (mArm.isConeMode()) {
         switch (mMode) {
           case LOW:
@@ -153,9 +152,16 @@ public class ArmScoreCommand extends CommandBase {
 
     if (mArm.isConeMode()) {
       double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 5;
+      if(mIsAuto) {
+        mArm.setPositions(new ArmMotion(ArmPosition.DEFAULT, (s, e) -> {
+          return s > shoulderCondition;
+        }));  
+      }
+      else {
       mArm.setPositions(new ArmMotion(ArmPosition.HOLD, (s, e) -> {
         return s > shoulderCondition;
       }), new ArmMotion(ArmPosition.DEFAULT));
+      }
     } 
     else {
       double shoulderCondition = mArm.getShoulderAngle().getDegrees() + 2;
@@ -170,7 +176,8 @@ public class ArmScoreCommand extends CommandBase {
         }));
       }
     }
-    if(mIsAuto) {
+
+    if(!mIsAuto) {
       mArm.setHandOutput(0);
     }
   }
@@ -182,7 +189,7 @@ public class ArmScoreCommand extends CommandBase {
       return true;
     }
 
-    if(mArm.isSequenceComplete() && mIsAuto) {
+    if(mTimer != Double.MIN_VALUE && mIsAuto) {
       return true;
     }
 
