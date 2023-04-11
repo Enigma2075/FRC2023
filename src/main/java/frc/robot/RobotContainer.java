@@ -162,7 +162,7 @@ public class RobotContainer {
     mOperatorController.a().whileTrue(mArm.handCommand());
     
     // DEFAULT
-    mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
+    mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, true, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
 
     // FORCE DOWN
     mOperatorController.povDown().onTrue(mIntake.setPivot(PivotPosition.DOWN, true)).onFalse(mIntake.setPivot(PivotPosition.UP));

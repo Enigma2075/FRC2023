@@ -54,13 +54,16 @@ public class ArmScoreCommand extends CommandBase {
   @Override
   public void initialize() {
     mTimer = Double.MIN_VALUE;
+    mMode = null;
     switch (mArm.getTargetPosition()) {
       case HIGH_CONE:
       case HIGH_CUBE:
+      case HIGH_CUBE_AUTO:
         mMode = ScoreMode.HIGH;
         break;
       case MEDIUM_CONE:
       case MEDIUM_CUBE:
+      case MEDIUM_CUBE_AUTO:
         mMode = ScoreMode.MIDDLE;
         break;
       case HOLD:

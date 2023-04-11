@@ -25,6 +25,7 @@ public class ArmMoveCommand extends CommandBase {
   protected final Arm mArm;
   protected final double mHandOutput;
   protected final ArmPosition[] mPositions;
+  protected final boolean mForce;
 
   //protected boolean mAtPos = false;
   protected CommandMode mMode = CommandMode.NORMAL;
@@ -39,7 +40,7 @@ public class ArmMoveCommand extends CommandBase {
     mHandOutput = handOutput;
     mMode = mode;
     mPositions = positions;
-  
+    mForce = false;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -49,7 +50,7 @@ public class ArmMoveCommand extends CommandBase {
     mHandOutput = handOutput;
     mMode = CommandMode.NORMAL;
     mPositions = positions;
-  
+    mForce = false;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -59,7 +60,7 @@ public class ArmMoveCommand extends CommandBase {
     mHandOutput = Double.MIN_VALUE;
     mMode = mode;
     mPositions = positions;
-  
+    mForce = false;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -69,7 +70,17 @@ public class ArmMoveCommand extends CommandBase {
     mHandOutput = Double.MIN_VALUE;
     mMode = CommandMode.NORMAL;
     mPositions = positions;
+    mForce = false;
+    // Use addRequirements() here to declare subsystem dependencies.
+    addRequirements(arm);
+  }
   
+  public ArmMoveCommand(Arm arm, boolean force, ArmPosition... positions) {
+    mArm = arm;
+    mHandOutput = Double.MIN_VALUE;
+    mMode = CommandMode.NORMAL;
+    mPositions = positions;
+    mForce = force;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(arm);
   }
@@ -80,7 +91,7 @@ public class ArmMoveCommand extends CommandBase {
     if(mHandOutput != Double.MIN_VALUE) {
       mArm.setHandOutput(mHandOutput);
     }
-    mArm.setPositions(mPositions);
+    mArm.setPositions(mForce, mPositions);
   }
 
   // Called every time the scheduler runs while the command is scheduled.

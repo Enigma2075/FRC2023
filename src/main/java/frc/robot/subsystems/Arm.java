@@ -140,6 +140,8 @@ public class Arm extends Subsystem {
     Point armPosition;
     Point armTargetPosition;
 
+    boolean force = false;
+
     // Shoulder
     double shoulderTarget = 0;
     double shoulderTargetCalc = 0;
@@ -507,6 +509,11 @@ public class Arm extends Subsystem {
   }
 
   public void setPositions(ArmPosition... positions) {
+    setPositions(false, positions);
+  }
+
+  public void setPositions(boolean force, ArmPosition... positions) {
+    mPeriodicIO.force = force;
     ArrayList<ArmMotion> motions = new ArrayList<ArmMotion>();
 
     for (ArmPosition position : positions) {
@@ -520,6 +527,7 @@ public class Arm extends Subsystem {
   }
 
   public void setPositions(ArmMotion... motions) {
+    mPeriodicIO.force = false;
     mPeriodicIO.sequence = motions;
     mPeriodicIO.sequenceIndex = 0;
     updatePositionSequence();
@@ -565,11 +573,7 @@ public class Arm extends Subsystem {
   }
 
   public void writeShoulderPosition() {
-    writeShoulderPosition(false);
-  }
-
-  public void writeShoulderPosition(boolean force) {
-    if (force) {
+    if (mPeriodicIO.force) {
       mPeriodicIO.shoulderTargetCalc = calcShoulderPosFromAngle(mPeriodicIO.shoulderTarget);
       mShoulderPidController.setReference(mPeriodicIO.shoulderTargetCalc, ControlType.kSmartMotion, 0,
           calcShoulderArbFF(), ArbFFUnits.kPercentOut);
