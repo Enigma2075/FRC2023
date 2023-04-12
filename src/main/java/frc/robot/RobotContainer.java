@@ -165,7 +165,7 @@ public class RobotContainer {
     mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, true, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
 
     // FORCE DOWN
-    mOperatorController.povDown().onTrue(mIntake.setPivot(PivotPosition.DOWN, true)).onFalse(mIntake.setPivot(PivotPosition.UP));
+    mOperatorController.povDown().onTrue(mIntake.setPivot(PivotPosition.DOWN_CUBE, true)).onFalse(mIntake.setPivot(PivotPosition.UP));
   
     // REZERO ARM
     mOperatorController.povUp().onTrue(new ArmRezeroCommand(mArm));

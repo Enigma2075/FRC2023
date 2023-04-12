@@ -34,7 +34,8 @@ public class Intake extends Subsystem {
     HANDOFF_CONE(-71.5, -68),
     HANDOFF_CUBE(0),
     FEEDER(-68),
-    DOWN(8),
+    DOWN_CONE(10),
+    DOWN_CUBE(0),
     UP(-125);
 
     public final double mAngle;
@@ -287,11 +288,12 @@ public class Intake extends Subsystem {
 
   public CommandBase intakeCommand(boolean runOnce) {
    Runnable runnable = () -> {
-          setPivotPosition(PivotPosition.DOWN);
           if(mRobotState.isCubeMode()) {
+            setPivotPosition(PivotPosition.DOWN_CUBE);
             setIntake(IntakeMode.CUBE_IN);
             }
           else {
+            setPivotPosition(PivotPosition.DOWN_CONE);
             setIntake(IntakeMode.CONE_IN);
           }
         };
@@ -464,7 +466,7 @@ public class Intake extends Subsystem {
     // The intake is past vertical and the arm is close to vertical
     if(!mPeriodicIO.pivotForce) {
       if(intakePos.x < -25 && armPos.x < -20 && armPos.y < 16) {
-        finalAngle = PivotPosition.DOWN.mAngle;
+        finalAngle = PivotPosition.DOWN_CONE.mAngle;
       }
       // The intake is trying to go beyond vertical and the arm isn't safe
       else if(intakePos.x < -20 && intakeTargetPos.x > -25 && armPos.x < -25 && armPos.x > intakePos.x) {

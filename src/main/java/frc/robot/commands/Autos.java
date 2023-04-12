@@ -125,7 +125,7 @@ public final class Autos {
     eventMap.put("Handoff", new ArmMoveAfterIntakeCommand(arm, intake));
 
 
-    return setupAuto("Bump - 3 Piece", eventMap, drive,
+    return setupAuto("Bump - 3 Piece Path 2", eventMap, drive,
       kBump1Constraints //start to bump
       //kSlowConstraints, //cross bump 1
       //kDefaultConstraints, //to cone and back
