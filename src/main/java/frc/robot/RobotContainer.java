@@ -84,16 +84,15 @@ public class RobotContainer {
     System.out.println("* Cancoders all inited: Took " + (Timer.getFPGATimestamp() - startInitTs) + " seconds");
 
     // Dirty swerve init hack step 2: Build all the rest of the subsystems
-    mVision = new Vision();
-    mVision.startThread();
-    mDrive = new Drive(mVision);
-    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight(), mDriverController.povLeft(), mDriverController.y(), mDriverController.rightBumper()));
-
-    PathPlannerServer.startServer(5811);
-    
     mRobotState = new RobotState();
     mIntake = new Intake(mRobotState);
     mArm = new Arm(mRobotState);
+    mVision = new Vision(mArm, mRobotState);
+    mVision.startThread();
+    mDrive = new Drive(mVision, mRobotState);
+    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight(), mDriverController.povLeft(), mDriverController.y(), mDriverController.rightBumper()));
+
+    PathPlannerServer.startServer(5811);
     
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
