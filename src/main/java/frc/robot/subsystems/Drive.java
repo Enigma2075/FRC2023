@@ -506,7 +506,12 @@ public class Drive extends Subsystem {
             SmartDashboard.putString("D FL State", mPeriodicIO.setpoint.mModuleStates[kFrontLeftModuleIdx].toString());
 
             SmartDashboard.putString("D Chassis Speeds", mPeriodicIO.des_chassis_speeds.toString());
+            SmartDashboard.putNumber("D x spd", mPeriodicIO.des_chassis_speeds.vxMetersPerSecond);
+            SmartDashboard.putNumber("D y spd", mPeriodicIO.des_chassis_speeds.vyMetersPerSecond);
             SmartDashboard.putString("D Gyro Rot", getFieldRelativeGyroscopeRotation().toString());
+            // Neg is front up.
+            SmartDashboard.putNumber("D Bal", getPitch().getDegrees());
+            // Neg is front up. Pos is back up.
             SmartDashboard.putNumber("D Bal Vel", mPigeon.getAngularVelocityX().getValue());
             // SmartDashboard.putString("Gyro Roll", getRoll().toString());
 

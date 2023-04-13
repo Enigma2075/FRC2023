@@ -61,6 +61,38 @@ public class DriveBalanceCommand extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    double throttle = 0;
+    double strafe = 0;
+    double rot = 0;
+    double requestedOrientation = 0;
+
+    double pitch = mDrive.getPitch().getDegrees();
+    double direction = Math.signum(pitch);
+
+    if(Math.abs(pitch) < 3) {
+      direction = 0;
+    }
+    
+    System.out.println(pitch);
+
+    if(mIsReverse) {
+      direction *= -1;      
+    }
+
+    if(!mTarget1Hit) {
+      if(mDrive.getPitchVel() > 20 * direction) {
+        mTarget1Hit = true;
+      }
+      throttle = .2 * direction;
+    }
+    else {
+      throttle = .1 * direction;
+    }
+
+    if(throttle == 0) {
+
+    }
+
     // if(mIsReverse) {
     //   if (Math.abs(mDrive.getPitch().getDegrees()) > mTarget1 && !mTarget1Hit) {
     //     mTarget1Hit = true;
@@ -73,36 +105,31 @@ public class DriveBalanceCommand extends CommandBase {
     //   }
     // }
     // else {
-      if (((mDrive.getPitch().getDegrees() < mTarget1Fwd && !mIsReverse) || (mDrive.getPitch().getDegrees() > mTarget1Rev && mIsReverse)) && !mTarget1Hit) {
-        mTarget1Hit = true;
-        mTarget2Hit = true;
-        mTimer = Timer.getFPGATimestamp();
-      }
+//      if (((mDrive.getPitch().getDegrees() < mTarget1Fwd && !mIsReverse) || (mDrive.getPitch().getDegrees() > mTarget1Rev && mIsReverse)) && !mTarget1Hit) {
+//        mTarget1Hit = true;
+//        mTarget2Hit = true;
+//        mTimer = Timer.getFPGATimestamp();
+//      }
     //}
 
-    double throttle = 0;
-    double strafe = 0;
-    double rot = 0;
-    double requestedOrientation = 0;
-
-    System.out.println(mDrive.getPitch().getDegrees());
-
-    if (!mTarget1Hit || !mTarget2Hit) {
-      if (mIsReverse) {
-        throttle = -.3;
-      } else {
-        throttle = .3;
-      }
+//    if (!mTarget1Hit || !mTarget2Hit) {
+//      if (mIsReverse) {
+//        throttle = -.3;
+//      } else {
+//        throttle = .3;
+//      }
     //} else if ((mDrive.getPitch().getDegrees() < -14 && !mIsReverse) || (mDrive.getPitch().getDegrees() > 18 && mIsReverse)) {
-    } else if (Timer.getFPGATimestamp() - mTimer < 1.85) {
-      if (mIsReverse) {
-        throttle = -.2;
-      } else {
-        throttle = .2;
-      }
-    } else {
-      throttle = 0;
-    }
+//    } else if (Timer.getFPGATimestamp() - mTimer < 1.85) {
+//      if (mIsReverse) {
+//        throttle = -.2;
+//      } else {
+//        throttle = .2;
+//      }
+//    } else {
+//      throttle = 0;
+//    }
+
+
 
     System.out.println(throttle);
 
@@ -136,17 +163,30 @@ public class DriveBalanceCommand extends CommandBase {
     }
 
     System.out.println("Run");
+    if(throttle == 0) {
+      mDrive.orientModules(List.of(
+          Rotation2d.fromDegrees(45),
+          Rotation2d.fromDegrees(-45),
+          Rotation2d.fromDegrees(-45),
+          Rotation2d.fromDegrees(45)));
+    }
+    else {
     mDrive.setVelocity(ChassisSpeeds.fromFieldRelativeSpeeds(
       throttle * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
       strafe * Constants.Drive.kMaxVelocityMetersPerSecond * Constants.Drive.kScaleTranslationInputs,
       rot * Constants.Drive.kMaxAngularVelocityRadiansPerSecond * Constants.Drive.kScaleRotationInputs,
       mDrive.getFieldRelativeGyroscopeRotation()));
-}
+    }
+  }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    mDrive.stop();
+    mDrive.orientModules(List.of(
+      Rotation2d.fromDegrees(45),
+      Rotation2d.fromDegrees(-45),
+      Rotation2d.fromDegrees(-45),
+      Rotation2d.fromDegrees(45)));
   }
 
   // Returns true when the command should end.
