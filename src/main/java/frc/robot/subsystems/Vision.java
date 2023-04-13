@@ -12,8 +12,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.other.LimelightHelpers;
 import frc.lib.other.Subsystem;
 import frc.robot.Constants;
+import frc.robot.subsystems.Arm.ArmPosition;
 
 public class Vision extends Subsystem {
+  private final RobotState mRobotState;
+  private final Arm mArm;
+
   private final PeriodicIO mPeriodicIO = new PeriodicIO();
 
   public class VisionResult {
@@ -24,19 +28,24 @@ public class Vision extends Subsystem {
   public static class PeriodicIO {
     LimelightHelpers.Results resultsRight = null;
     LimelightHelpers.Results resultsLeft = null;
+    LimelightHelpers.Results resultsTop = null;
     Pose2d poseRight = new Pose2d();
     Pose2d poseLeft = new Pose2d();
+    Pose2d poseTop = new Pose2d();
     Pose2d bestPose = new Pose2d();
     LimelightHelpers.Results bestPoseResults = null;
     double bestPoseError = Double.MIN_VALUE;
   }
 
-  public Vision() {
+  public Vision(Arm arm, RobotState robotState) {
+    mRobotState = robotState;
+    mArm = arm;
   }
 
   public synchronized VisionResult getBestPose(Pose2d currentPose) {
     var rightError = currentPose.getTranslation().getDistance(mPeriodicIO.poseRight.getTranslation());
     var leftError = currentPose.getTranslation().getDistance(mPeriodicIO.poseLeft.getTranslation());
+    var topError = currentPose.getTranslation().getDistance(mPeriodicIO.poseTop.getTranslation());
 
     mPeriodicIO.bestPose = mPeriodicIO.poseLeft;
     mPeriodicIO.bestPoseError = leftError;
@@ -45,6 +54,14 @@ public class Vision extends Subsystem {
       mPeriodicIO.bestPose = mPeriodicIO.poseRight;
       mPeriodicIO.bestPoseError = rightError;
       mPeriodicIO.bestPoseResults = mPeriodicIO.resultsRight;
+    }
+    
+    if(mArm.atPosition() && ArmPosition.HANDOFF_CUBE == mArm.getTargetPosition()) {
+      if(Math.abs(topError) < Math.abs(mPeriodicIO.bestPoseError) ) {
+        mPeriodicIO.bestPose = mPeriodicIO.poseTop;
+        mPeriodicIO.bestPoseError = topError;
+        mPeriodicIO.bestPoseResults = mPeriodicIO.resultsTop;
+      }
     }
 
     if(mPeriodicIO.bestPose.getX() == 0 && mPeriodicIO.bestPose.getY() == 0) {
@@ -86,24 +103,17 @@ public class Vision extends Subsystem {
     }catch(Exception e) {}
   }
 
-  /** 
-   step 1: get tx?, ty?, and rx from limelight 
-   tx - 8.265 = 0 in pathplanner
-   ty - 4 = 0 in pathplanner
-   rx - 180 should be ok????
-   that should just set the stuff from limelight to be good in pathplanner
-   tx, calculated x, ty, calculated y, rx, calculated rotation go in shuffleboard?
-   should all be good then but idk
-  **/
   
   @Override
   public synchronized void readPeriodicInputs() {
-    if(Constants.Robot.kPracticeBot) {
+    if(Constants.Robot.kPracticeBot || !mRobotState.isVisionEnabled()) {
       return;
     }
 
     mPeriodicIO.resultsLeft = getResults("limelight-l");
     mPeriodicIO.resultsRight = getResults("limelight-r");
+    
+    mPeriodicIO.resultsTop = getResults("limelight-t");
 
     mPeriodicIO.poseLeft = getVisionPose2d(mPeriodicIO.resultsLeft);
     mPeriodicIO.poseRight = getVisionPose2d(mPeriodicIO.resultsRight);

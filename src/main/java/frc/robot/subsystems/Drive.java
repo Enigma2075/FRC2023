@@ -26,9 +26,11 @@ import frc.lib.swerve.SwerveSetpoint;
 import frc.lib.swerve.SwerveSetpointGenerator;
 import frc.lib.swerve.SwerveSetpointGenerator.KinematicLimits;
 import frc.robot.Constants;
+import frc.robot.Robot;
 
 public class Drive extends Subsystem {
     private final Vision mVision;
+    private final RobotState mRobotState;
 
     private final Pigeon2 mPigeon = new Pigeon2(Constants.Drive.kPigeonIMUId, Constants.Can.kCANivoreBusName);
 
@@ -42,8 +44,6 @@ public class Drive extends Subsystem {
 
     private double mYawOffset;
     private double mRollOffset;
-
-    private boolean mEnableVision = false;
 
     // private final DriveMotionPlanner mMotionPlanner;
     // private boolean mOverrideTrajectory = false;
@@ -72,8 +72,9 @@ public class Drive extends Subsystem {
     //    return mInstance;
     //}
 
-    public Drive(Vision vision) {
+    public Drive(Vision vision, RobotState robotState) {
         mVision = vision;
+        mRobotState = robotState;
         mModules = new SwerveModule[4];
 
         mModules[kFrontLeftModuleIdx] = new SwerveModule(
@@ -424,7 +425,7 @@ public class Drive extends Subsystem {
     }
 
     public void setVision(boolean vision) {
-        mEnableVision = vision;
+        mRobotState.setVisionEnabled(vision);
     }
 
     @Override
@@ -432,7 +433,7 @@ public class Drive extends Subsystem {
         switch (mDriveControlState) {
             case PATH_FOLLOWING:
                 mPoseEstimator.update(mPeriodicIO.heading.asWpiRotation2d(), getWpiModulePositions());
-                if(mEnableVision) {
+                if(mRobotState.isVisionEnabled()) {
                     var curPose = mPoseEstimator.getEstimatedPosition();
                     var visionPose = mVision.getBestPose(curPose);
                     if(visionPose != null) {

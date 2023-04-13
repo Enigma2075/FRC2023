@@ -20,6 +20,8 @@ public class RobotState extends Subsystem {
     private double mBlinkTimer = 0;
     private boolean mLedsOn = true;
 
+    private boolean mEnableVision = false;
+
     private final CANifier Leds;
 
     private GamePieceMode mGamePieceMode = GamePieceMode.CONE;
@@ -36,6 +38,14 @@ public class RobotState extends Subsystem {
 
     public boolean isConeMode() {
         return mGamePieceMode == GamePieceMode.CONE;
+    }
+
+    public boolean isVisionEnabled() {
+        return mEnableVision;
+    }
+
+    public void setVisionEnabled(boolean enableVision) {
+        mEnableVision = enableVision;
     }
 
     public void setConeMode() {
