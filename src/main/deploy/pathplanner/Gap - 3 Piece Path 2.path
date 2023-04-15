@@ -212,10 +212,9 @@
       ]
     },
     {
-      "position": 2.02,
+      "position": 2.1,
       "names": [
-        "High",
-        "IntakeUp"
+        "High"
       ]
     },
     {
@@ -225,10 +224,9 @@
       ]
     },
     {
-      "position": 5.13,
+      "position": 5.1,
       "names": [
-        "Middle",
-        "IntakeUp"
+        "Middle"
       ]
     },
     {
@@ -247,6 +245,18 @@
       "position": 6.5927272727276005,
       "names": [
         "Default"
+      ]
+    },
+    {
+      "position": 2.1,
+      "names": [
+        "IntakeUp"
+      ]
+    },
+    {
+      "position": 5.1,
+      "names": [
+        "IntakeUp"
       ]
     }
   ]

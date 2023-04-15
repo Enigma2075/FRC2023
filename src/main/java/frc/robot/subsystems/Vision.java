@@ -45,7 +45,7 @@ public class Vision extends Subsystem {
   public synchronized VisionResult getBestPose(Pose2d currentPose) {
     var rightError = currentPose.getTranslation().getDistance(mPeriodicIO.poseRight.getTranslation());
     var leftError = currentPose.getTranslation().getDistance(mPeriodicIO.poseLeft.getTranslation());
-    var topError = currentPose.getTranslation().getDistance(mPeriodicIO.poseTop.getTranslation());
+    //var topError = currentPose.getTranslation().getDistance(mPeriodicIO.poseTop.getTranslation());
 
     mPeriodicIO.bestPose = mPeriodicIO.poseLeft;
     mPeriodicIO.bestPoseError = leftError;
@@ -56,13 +56,13 @@ public class Vision extends Subsystem {
       mPeriodicIO.bestPoseResults = mPeriodicIO.resultsRight;
     }
     
-    if(mArm.atPosition() && ArmPosition.HANDOFF_CUBE == mArm.getTargetPosition()) {
-      if(Math.abs(topError) < Math.abs(mPeriodicIO.bestPoseError) ) {
-        mPeriodicIO.bestPose = mPeriodicIO.poseTop;
-        mPeriodicIO.bestPoseError = topError;
-        mPeriodicIO.bestPoseResults = mPeriodicIO.resultsTop;
-      }
-    }
+    //if(mArm.atPosition() && ArmPosition.HANDOFF_CUBE == mArm.getTargetPosition()) {
+    //  if(Math.abs(topError) < Math.abs(mPeriodicIO.bestPoseError) ) {
+    //    mPeriodicIO.bestPose = mPeriodicIO.poseTop;
+    //    mPeriodicIO.bestPoseError = topError;
+    //    mPeriodicIO.bestPoseResults = mPeriodicIO.resultsTop;
+    //  }
+    //}
 
     if(mPeriodicIO.bestPose.getX() == 0 && mPeriodicIO.bestPose.getY() == 0) {
       return null;
@@ -106,14 +106,14 @@ public class Vision extends Subsystem {
   
   @Override
   public synchronized void readPeriodicInputs() {
-    if(Constants.Robot.kPracticeBot || !mRobotState.isVisionEnabled()) {
+    if(Constants.Robot.kPracticeBot) { // || !mRobotState.isVisionEnabled()) {
       return;
     }
 
     mPeriodicIO.resultsLeft = getResults("limelight-l");
     mPeriodicIO.resultsRight = getResults("limelight-r");
     
-    mPeriodicIO.resultsTop = getResults("limelight-t");
+    //mPeriodicIO.resultsTop = getResults("limelight-t");
 
     mPeriodicIO.poseLeft = getVisionPose2d(mPeriodicIO.resultsLeft);
     mPeriodicIO.poseRight = getVisionPose2d(mPeriodicIO.resultsRight);

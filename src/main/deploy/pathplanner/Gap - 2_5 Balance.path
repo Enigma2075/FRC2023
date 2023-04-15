@@ -27,15 +27,15 @@
     },
     {
       "anchorPoint": {
-        "x": 6.65,
+        "x": 6.75,
         "y": 4.65
       },
       "prevControl": {
-        "x": 4.4485332597011125,
+        "x": 4.548533259701112,
         "y": 4.65
       },
       "nextControl": {
-        "x": 4.4485332597011125,
+        "x": 4.548533259701112,
         "y": 4.65
       },
       "holonomicAngle": 0.0,
@@ -53,15 +53,15 @@
     {
       "anchorPoint": {
         "x": 1.86,
-        "y": 4.4
+        "y": 4.5
       },
       "prevControl": {
         "x": 3.2597226224540945,
-        "y": 4.4731881109779925
+        "y": 4.573188110977992
       },
       "nextControl": {
         "x": 3.2597226224540945,
-        "y": 4.4731881109779925
+        "y": 4.573188110977992
       },
       "holonomicAngle": 0,
       "isReversal": true,
@@ -105,15 +105,15 @@
     {
       "anchorPoint": {
         "x": 6.8,
-        "y": 3.7
+        "y": 3.75
       },
       "prevControl": {
         "x": 5.755382347653462,
-        "y": 4.404603503351681
+        "y": 4.454603503351681
       },
       "nextControl": {
         "x": 5.755382347653462,
-        "y": 4.404603503351681
+        "y": 4.454603503351681
       },
       "holonomicAngle": -40.0,
       "isReversal": true,
@@ -133,8 +133,35 @@
         "y": 3.221273685637378
       },
       "prevControl": {
-        "x": 5.651196277587453,
-        "y": 3.0337921483780597
+        "x": 5.617931423369444,
+        "y": 2.9745373430875226
+      },
+      "nextControl": {
+        "x": 5.213739357315712,
+        "y": 3.24399872045669
+      },
+      "holonomicAngle": 0,
+      "isReversal": false,
+      "velOverride": null,
+      "isLocked": false,
+      "isStopPoint": false,
+      "stopEvent": {
+        "names": [
+          "Balance"
+        ],
+        "executionBehavior": "parallel",
+        "waitBehavior": "before",
+        "waitTime": 0.01
+      }
+    },
+    {
+      "anchorPoint": {
+        "x": 4.111575168579112,
+        "y": 3.2269549443422068
+      },
+      "prevControl": {
+        "x": 4.611525934603961,
+        "y": 3.1985486508180676
       },
       "nextControl": null,
       "holonomicAngle": 0,
@@ -163,10 +190,9 @@
       ]
     },
     {
-      "position": 1.02,
+      "position": 1.1,
       "names": [
-        "High",
-        "IntakeUp"
+        "High"
       ]
     },
     {
@@ -179,6 +205,12 @@
       "position": 2.3,
       "names": [
         "IntakeCone"
+      ]
+    },
+    {
+      "position": 1.15,
+      "names": [
+        "IntakeUp"
       ]
     }
   ]

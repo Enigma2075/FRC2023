@@ -341,15 +341,13 @@
     {
       "position": 3.3,
       "names": [
-        "High",
-        "IntakeUp"
+        "High"
       ]
     },
     {
       "position": 9.3,
       "names": [
-        "Middle",
-        "IntakeUp"
+        "Middle"
       ]
     },
     {
@@ -362,6 +360,18 @@
       "position": 11.9,
       "names": [
         "ScoreHigh"
+      ]
+    },
+    {
+      "position": 9.3,
+      "names": [
+        "IntakeUp"
+      ]
+    },
+    {
+      "position": 3.3,
+      "names": [
+        "IntakeUp"
       ]
     }
   ]

@@ -151,7 +151,7 @@ public class RobotContainer {
     // SHELF
     new Trigger(mOperatorController.rightTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).debounce(.5).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice)).debounce(.5);
     // FEEDER
-    new Trigger(mOperatorController.leftTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1).alongWith(mIntake.intakeFeederCommand())).debounce(.5).onFalse(mIntakeConeEnd()).debounce(.5);
+    new Trigger(mOperatorController.leftTrigger(.7)).onTrue(new ConditionalCommand(mIntakeCubeFeederStart(), mIntakeConeFeederStart(), mRobotState::isCubeMode)).debounce(.5).onFalse(new ConditionalCommand(mIntakeCubeFeederEnd(), mIntakeConeEnd(), mRobotState::isCubeMode) ).debounce(.5);
 
     // MIDDLE
     mOperatorController.b().onTrue(mArm.moveToScore(ScoreMode.MIDDLE));
@@ -179,11 +179,27 @@ public class RobotContainer {
   }
 
   private final Command mIntakeCubeStart() {
-    return new ArmMoveMotionCommand(mArm, .7, new ArmMotion(ArmPosition.HANDOFF_CUBE, (s, e) -> {return s > 3;}));
+    return new ArmMoveMotionCommand(mArm, .8, new ArmMotion(ArmPosition.HANDOFF_CUBE, (s, e) -> {return s > 3;}));
   }
 
   private final Command mIntakeCubeEnd() {
     return mIntake.setPivot(PivotPosition.UP).alongWith(new ArmMoveCommand(mArm, ArmPosition.DEFAULT));
+  }
+
+  private final Command mIntakeConeFeederStart() {
+    return new ArmMoveCommand(mArm, .9, ArmPosition.HANDOFF_CONE1).alongWith(mIntake.intakeFeederCommand());
+  }
+
+  private final Command mIntakeCubeFeederStart() {
+    return new ArmMoveMotionCommand(mArm, .8, new ArmMotion(ArmPosition.FEEDER_CUBE));
+  }
+
+  private final Command mIntakeFeederConeEnd() {
+    return new ArmMoveAfterIntakeCommand(mArm, mIntake);
+  }
+
+  private final Command mIntakeCubeFeederEnd() {
+    return new ArmMoveCommand(mArm, ArmPosition.DEFAULT);
   }
 
   /**

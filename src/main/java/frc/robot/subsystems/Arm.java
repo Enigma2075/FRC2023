@@ -42,17 +42,17 @@ public class Arm extends Subsystem {
     HANDOFF_CONE2(5, 55, 5, 55),
     HANDOFF_CONE3(21, 43),
     HANDOFF_CONE4(0, 50),
-    HANDOFF_CUBE(35, 47, 36, 42),
+    HANDOFF_CUBE(35, 47, 36, 40),
     // INTAKE_CONE(1.70, 46.22),
     // GRAB_CONE(18.32, 46.22),
     START(24, -5),
     DEFAULT(0, -2),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
     DEFAULT_ELBOW(Double.MIN_VALUE, -2),
-    HIGH_CONE(-24, -140, -27, -144),
+    HIGH_CONE(-24, -140, -29, -146),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
-    HIGH_CUBE_AUTO(0, -98),
+    HIGH_CUBE_AUTO(0, -95),
     MEDIUM_CUBE(20, -55),
     MEDIUM_CUBE_AUTO(18, -60),
     // MEDIUM_AUTO_START(0, -70),
@@ -63,6 +63,7 @@ public class Arm extends Subsystem {
     HOLD(24, -5),
     SHELF(15, -66),
     AUTO_DROP(0, -10),
+    FEEDER_CUBE(0, 55),
     LOW(24, -25);
 
     public final double mShoulderAngle;

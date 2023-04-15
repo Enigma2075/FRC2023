@@ -54,7 +54,7 @@ public class ArmMoveAfterIntakeCommand extends ArmMoveCommand {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    if(!initialized && mIntake.getIntakePosition().x > -23) {
+    if(!initialized && Math.abs(mIntake.getPivotAngle().getDegrees() - PivotPosition.HANDOFF_CONE.mAngle) < 2) {//mIntake.getIntakePosition().x > -23) {
       mIntake.setIntake(IntakeMode.CONE_HANDOFF);
       super.initialize();
       initialized = true;

@@ -92,7 +92,7 @@ public class ArmMoveToScoreCommand extends CommandBase {
           break;
           case MIDDLE:
           if(mAuto) {  
-          mArm.setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE_AUTO, null, (s, e) -> {return e < -10;}));
+          mArm.setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE_AUTO));
           }
           else {
             mArm.setPosition(new ArmMotion(ArmPosition.MEDIUM_CUBE, null, (s, e) -> {return e < -10;}));
@@ -100,7 +100,7 @@ public class ArmMoveToScoreCommand extends CommandBase {
           break;
           case HIGH:
           if(mAuto) {  
-            mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CUBE_AUTO, null, (s, e) -> {return e < -10;}));
+            mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CUBE_AUTO));
           }
           else {
             mArm.setPosition(new ArmMotion(ArmPosition.HIGH_CUBE, null, (s, e) -> {return e < -10;}));  
