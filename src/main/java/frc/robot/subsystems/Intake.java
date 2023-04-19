@@ -33,7 +33,7 @@ public class Intake extends Subsystem {
   public enum PivotPosition {
     HANDOFF_CONE(-71.5, -68),
     HANDOFF_CUBE(0),
-    FEEDER(-71),
+    FEEDER(-68),
     DOWN_CONE(10),
     DOWN_CUBE(0),
     UP(-125);

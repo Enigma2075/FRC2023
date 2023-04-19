@@ -117,7 +117,8 @@ public final class Autos {
     eventMap.put("IntakeCone", new SetConeModeCommand(robotState, true).andThen(intake.intakeCommand(true).alongWith(new ArmMoveCommand(arm, .9, CommandMode.WAIT, ArmPosition.HANDOFF_CONE1))));
     eventMap.put("High", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, true));
     eventMap.put("Middle", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.MIDDLE, true, true));
-    eventMap.put("StartScore", arm.handCommand(false, -.5));
+    eventMap.put("StartScore", arm.handCommand(false, -.7));
+    eventMap.put("Score", new ArmScoreCommand(arm, true));
     eventMap.put("HighWait", new ArmMoveToScoreCommand(arm, robotState, ScoreMode.HIGH, true, .9));
     eventMap.put("ScoreHigh", new DriveVisionCommand(drive, true).alongWith(new ArmScoreCommand(arm)));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
@@ -195,8 +196,13 @@ public final class Autos {
     eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     eventMap.put("Balance", new DriveBalanceCommand(drive, true));
-    
-    return setupAuto("Gap - 2_5 Balance", eventMap, drive,
+
+    String pathName = "Gap - 2_5 Balance";
+    if(DriverStation.getAlliance() == Alliance.Red) {
+      pathName += " Red";
+    }
+
+    return setupAuto(pathName, eventMap, drive,
       kDefaultConstraints
     );
   }
@@ -213,7 +219,13 @@ public final class Autos {
     //eventMap.put("ScoreHigh", new ArmScoreCommand(arm));
     eventMap.put("IntakeUp", intake.setPivot(PivotPosition.UP));
     
-    return setupAuto("Gap - 3 Piece Path 2", eventMap, drive,
+    
+    String pathName = "Gap - 3 Piece Path 2";
+    if(DriverStation.getAlliance() == Alliance.Red) {
+      pathName += " Red";
+    }
+
+    return setupAuto(pathName, eventMap, drive,
     kSlowAccConstraints,
     kDefaultConstraints
     );

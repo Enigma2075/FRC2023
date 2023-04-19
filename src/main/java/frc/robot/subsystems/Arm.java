@@ -49,7 +49,7 @@ public class Arm extends Subsystem {
     DEFAULT(0, -2),
     DEFAULT_SHOULDER(0, Double.MIN_VALUE),
     DEFAULT_ELBOW(Double.MIN_VALUE, -2),
-    HIGH_CONE(-24, -140, -29, -146),
+    HIGH_CONE(-29, -146, -29, -146),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
     HIGH_CUBE_AUTO(0, -95),

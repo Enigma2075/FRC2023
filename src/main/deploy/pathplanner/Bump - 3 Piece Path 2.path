@@ -79,20 +79,20 @@
     {
       "anchorPoint": {
         "x": 7.2,
-        "y": 2.15
+        "y": 2.1
       },
       "prevControl": {
-        "x": 5.799906234650966,
-        "y": 2.1622184331848753
+        "x": 5.355391769948858,
+        "y": 2.1
       },
       "nextControl": {
-        "x": 5.799906234650966,
-        "y": 2.1622184331848753
+        "x": 5.355391769948858,
+        "y": 2.1
       },
       "holonomicAngle": 0,
       "isReversal": true,
       "velOverride": null,
-      "isLocked": true,
+      "isLocked": false,
       "isStopPoint": true,
       "stopEvent": {
         "names": [],
@@ -171,7 +171,7 @@
       "isStopPoint": true,
       "stopEvent": {
         "names": [
-          "ScoreHigh"
+          "ScoreHIgh"
         ],
         "executionBehavior": "sequential",
         "waitBehavior": "none",
@@ -230,15 +230,15 @@
     },
     {
       "anchorPoint": {
-        "x": 6.9,
+        "x": 7.0,
         "y": 0.85
       },
       "prevControl": {
-        "x": 6.381811609777068,
+        "x": 6.4818116097770675,
         "y": 0.8382383110920074
       },
       "nextControl": {
-        "x": 6.381811609777068,
+        "x": 6.4818116097770675,
         "y": 0.8382383110920074
       },
       "holonomicAngle": 0,
@@ -351,7 +351,7 @@
       ]
     },
     {
-      "position": 6.1,
+      "position": 7.5,
       "names": [
         "IntakeCube"
       ]
@@ -372,6 +372,18 @@
       "position": 3.3,
       "names": [
         "IntakeUp"
+      ]
+    },
+    {
+      "position": 5.99,
+      "names": [
+        "StartScore"
+      ]
+    },
+    {
+      "position": 11.99,
+      "names": [
+        "StartScore"
       ]
     }
   ]

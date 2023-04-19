@@ -80,10 +80,10 @@ public class DriveBalanceCommand extends CommandBase {
     }
 
     if(!mTarget1Hit) {
-      if(mDrive.getPitchVel() > 20 * direction) {
+      if(mDrive.getPitchVel() > 15 * direction) {
         mTarget1Hit = true;
       }
-      throttle = .2 * direction;
+      throttle = .3 * direction;
     }
     else {
       throttle = .1 * direction;
