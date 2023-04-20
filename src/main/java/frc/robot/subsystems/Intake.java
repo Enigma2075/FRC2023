@@ -34,8 +34,8 @@ public class Intake extends Subsystem {
     HANDOFF_CONE(-71.5, -68),
     HANDOFF_CUBE(0),
     FEEDER(-68),
-    DOWN_CONE(10),
-    DOWN_CUBE(0),
+    DOWN_CONE(8),
+    DOWN_CUBE(10),
     UP(-125);
 
     public final double mAngle;
@@ -56,9 +56,9 @@ public class Intake extends Subsystem {
 
   public enum IntakeMode {
     CONE_IN(.9),
-    CONE_HANDOFF(-.02),
+    CONE_HANDOFF(-.03),
     CONE_OUT(-.9),
-    CUBE_IN(-.5),
+    CUBE_IN(-.7),
     CUBE_OUT(.9),
     CONE_HOLD(.02),
     CUBE_HOLD(.04),
@@ -161,7 +161,7 @@ public class Intake extends Subsystem {
 
     intakeMotor.setInverted(true);
     //intakeMotor.setOpenLoopRampRate(1);
-    intakeMotor.setSmartCurrentLimit(50);
+    intakeMotor.setSmartCurrentLimit(55);
 
     intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10);
     intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);

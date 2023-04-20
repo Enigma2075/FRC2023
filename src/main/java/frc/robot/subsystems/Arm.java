@@ -52,7 +52,7 @@ public class Arm extends Subsystem {
     HIGH_CONE(-29, -146, -29, -146),
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
-    HIGH_CUBE_AUTO(0, -95),
+    HIGH_CUBE_AUTO(-8, -100),
     MEDIUM_CUBE(20, -55),
     MEDIUM_CUBE_AUTO(18, -60),
     // MEDIUM_AUTO_START(0, -70),
@@ -278,7 +278,7 @@ public class Arm extends Subsystem {
     mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus3, 200);
     mHandMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus4, 200);
 
-    // Zero the motors
+    // Zero the motor
     rezeroMotors();
 
     // We configure the should limits after it is zero so we have accurate values.
