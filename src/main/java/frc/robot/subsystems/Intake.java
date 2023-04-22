@@ -161,7 +161,7 @@ public class Intake extends Subsystem {
 
     intakeMotor.setInverted(true);
     //intakeMotor.setOpenLoopRampRate(1);
-    intakeMotor.setSmartCurrentLimit(55);
+    intakeMotor.setSmartCurrentLimit(60);
 
     intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus1, 10);
     intakeMotor.setPeriodicFramePeriod(PeriodicFrame.kStatus2, 500);

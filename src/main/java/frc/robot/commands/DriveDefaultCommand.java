@@ -123,7 +123,7 @@ public class DriveDefaultCommand extends CommandBase {
           double minDest = -1;
           double maxDest = 1;
           percent = (((percent - minSrc) / (maxSrc - minSrc)) * (maxDest - minDest)) + minDest;
-          double withF = Math.abs(percent) + .08;
+          double withF = Math.abs(percent) + .075;
           if (withF > 1) {
             withF = 1;
           }

@@ -119,7 +119,7 @@ public final class Constants {
 
     public static final Mode kPivotMode = Mode.MOTION_MAGIC;
 
-    public static final boolean kDebug = true;
+    public static final boolean kDebug = false;
 
     // Intake contants
     public static final int kIntakeId = 5;

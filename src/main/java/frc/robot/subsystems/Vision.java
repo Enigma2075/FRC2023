@@ -127,12 +127,20 @@ public class Vision extends Subsystem {
   }
 
   public Pose2d getVisionPose2d(LimelightHelpers.Results results) {
-    if(!(results.botpose[0] == 0 && results.botpose[1] == 0) && results.targets_Fiducials.length > 1) {
+    if(!(results.botpose[0] == 0 && results.botpose[1] == 0)) {
       if(DriverStation.getAlliance() == Alliance.Blue) {
-        return LimelightHelpers.toPose2D(results.botpose_wpiblue);
+        var blue = LimelightHelpers.toPose2D(results.botpose_wpiblue);
+        if(results.targets_Fiducials.length > 1 ) { // || blue.getX() < 2.5) {
+          return blue;
+        }
+        return new Pose2d();
       }
       else {
-        return LimelightHelpers.toPose2D(results.botpose_wpired);
+        var red = LimelightHelpers.toPose2D(results.botpose_wpired);
+        if(results.targets_Fiducials.length > 1) { // || red.getX() < 2.5) {
+          return red;
+        }
+        return new Pose2d();
       }
     }
     else {

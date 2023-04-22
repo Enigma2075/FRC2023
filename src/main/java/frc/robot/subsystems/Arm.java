@@ -54,7 +54,7 @@ public class Arm extends Subsystem {
     HIGH_CUBE(-7, -95),
     HIGH_CUBE_AUTO(-8, -100),
     MEDIUM_CUBE(20, -55),
-    MEDIUM_CUBE_AUTO(18, -60),
+    MEDIUM_CUBE_AUTO(10, -65),
     // MEDIUM_AUTO_START(0, -70),
     // HAND_OFF(0, 50),
     SCORE_OFFSET_CONE_MID(Double.MIN_VALUE, 25, true),
