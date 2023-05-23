@@ -15,9 +15,11 @@ import frc.robot.commands.ArmMoveMotionCommand;
 import frc.robot.commands.ArmRezeroCommand;
 import frc.robot.commands.ArmScoreCommand;
 import frc.robot.commands.Autos;
+import frc.robot.commands.ChangeDriveSlowCommand;
 import frc.robot.commands.DriveDefaultCommand;
 import frc.robot.commands.SetConeModeCommand;
 import frc.robot.commands.SetCubeModeCommand;
+import frc.robot.commands.SwapRobotModeCommand;
 import frc.robot.commands.ArmMoveCommand.CommandMode;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.ArmMotion;
@@ -90,7 +92,7 @@ public class RobotContainer {
     mVision = new Vision(mArm, mRobotState);
     mVision.startThread();
     mDrive = new Drive(mVision, mRobotState);
-    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight(), mDriverController.povLeft(), mDriverController.y(), mDriverController.rightBumper()));
+    mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mRobotState, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight().and(mRobotState::isNormalMode), mDriverController.povLeft().and(mRobotState::isNormalMode), mDriverController.y().and(mRobotState::isNormalMode), mDriverController.rightBumper().or(mRobotState::isDemoMode)));
 
     PathPlannerServer.startServer(5811);
     
@@ -136,9 +138,9 @@ public class RobotContainer {
    */
   private void configureBindings() {
     // CONE MODE
-    mDriverController.b().or(mOperatorController.rightBumper()).whileTrue(new SetConeModeCommand(mRobotState));
+    mDriverController.b().or(mOperatorController.rightBumper()).and(mRobotState::isNormalMode).whileTrue(new SetConeModeCommand(mRobotState));
     // CUBE MODE
-    mDriverController.a().or(mOperatorController.leftBumper()).whileTrue(new SetCubeModeCommand(mRobotState));
+    mDriverController.a().or(mOperatorController.leftBumper()).and(mRobotState::isNormalMode).whileTrue(new SetCubeModeCommand(mRobotState));
 
     // FLOOR INTAKE
     new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith()))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
@@ -151,7 +153,7 @@ public class RobotContainer {
     // SHELF
     new Trigger(mOperatorController.rightTrigger(.7)).onTrue(new ArmMoveCommand(mArm, .9, ArmPosition.SHELF)).debounce(.5).onFalse(new ConditionalCommand(new ArmMoveCommand(mArm, ArmPosition.HOLD), new ArmMoveCommand(mArm, ArmPosition.DEFAULT), mArm::handHasGamePeice)).debounce(.5);
     // FEEDER
-    new Trigger(mOperatorController.leftTrigger(.7)).onTrue(new ConditionalCommand(mIntakeCubeFeederStart(), mIntakeConeFeederStart(), mRobotState::isCubeMode)).debounce(.5).onFalse(new ConditionalCommand(mIntakeCubeFeederEnd(), mIntakeConeEnd(), mRobotState::isCubeMode) ).debounce(.5);
+    new Trigger(mOperatorController.leftTrigger(.7)).and(mRobotState::isNormalMode).onTrue(new ConditionalCommand(mIntakeCubeFeederStart(), mIntakeConeFeederStart(), mRobotState::isCubeMode)).debounce(.5).onFalse(new ConditionalCommand(mIntakeCubeFeederEnd(), mIntakeConeEnd(), mRobotState::isCubeMode) ).debounce(.5);
 
     // MIDDLE
     mOperatorController.b().onTrue(mArm.moveToScore(ScoreMode.MIDDLE));
@@ -159,15 +161,19 @@ public class RobotContainer {
     mOperatorController.y().onTrue(mArm.moveToScore(ScoreMode.HIGH));
     // HAND
     mOperatorController.a().whileTrue(mArm.handCommand());
+
+    mOperatorController.start().onTrue(new SwapRobotModeCommand(mRobotState)).debounce(.5);
+    mOperatorController.povRight().and(mRobotState::isNormalMode).onTrue(new ChangeDriveSlowCommand(mRobotState, true)).debounce(.5);
+    mOperatorController.povLeft().and(mRobotState::isNormalMode).onTrue(new ChangeDriveSlowCommand(mRobotState, false)).debounce(.5);
     
     // DEFAULT
     mOperatorController.x().whileTrue(new ArmMoveCommand(mArm, true, ArmPosition.DEFAULT_SHOULDER, ArmPosition.DEFAULT_ELBOW));
 
     // FORCE DOWN
-    mOperatorController.povDown().onTrue(mIntake.setPivot(PivotPosition.DOWN_CUBE, true)).onFalse(mIntake.setPivot(PivotPosition.UP));
+    mOperatorController.povDown().and(mRobotState::isNormalMode).onTrue(mIntake.setPivot(PivotPosition.DOWN_CUBE, true)).onFalse(mIntake.setPivot(PivotPosition.UP));
   
     // REZERO ARM
-    mOperatorController.povUp().onTrue(new ArmRezeroCommand(mArm));
+    mOperatorController.povUp().and(mRobotState::isNormalMode).onTrue(new ArmRezeroCommand(mArm));
   }
 
   private final Command mIntakeConeStart() {

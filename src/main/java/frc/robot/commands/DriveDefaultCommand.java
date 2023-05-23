@@ -18,6 +18,7 @@ import frc.lib.swerve.ChassisSpeeds;
 import frc.lib.util.Util;
 import frc.robot.Constants;
 import frc.robot.subsystems.Drive;
+import frc.robot.subsystems.RobotState;
 
 /** An example command that uses an example subsystem. */
 public class DriveDefaultCommand extends CommandBase {
@@ -30,17 +31,19 @@ public class DriveDefaultCommand extends CommandBase {
   private final BooleanSupplier mRequestOrientShelfTrigger;
   private final BooleanSupplier mRequestOrientFeederTrigger;
   private final BooleanSupplier mRequestSlowTrigger;
+  private final RobotState mRobotState;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public DriveDefaultCommand(Drive drive, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier,
+  public DriveDefaultCommand(Drive drive, RobotState robotState, DoubleSupplier throttleSupplier, DoubleSupplier strafeSupplier,
       DoubleSupplier rotationXSupplier, Trigger requestCrabModeTrigger,
       Trigger requestOrientScoreTrigger, Trigger requestOrientShelfTrigger, Trigger requestOrientFeederTrigger,
       Trigger requestSlowTrigger) {
     mDrive = drive;
+    mRobotState = robotState;
     mThrottledSupplier = throttleSupplier;
     mStrafeSupplier = strafeSupplier;
     mRotationXSupplier = rotationXSupplier;
@@ -74,8 +77,9 @@ public class DriveDefaultCommand extends CommandBase {
     // Constants.DriverStation.kJoystickThreshold);
 
     if(mRequestSlowTrigger.getAsBoolean()) {
-      throttle = throttle * .5;
-      strafe = strafe *.5;
+      throttle = throttle * mRobotState.getDriveSlowPercent();
+      strafe = strafe * mRobotState.getDriveSlowPercent();
+      rot = rot * mRobotState.getDriveSlowPercent();
     }
 
     throttle = Math.signum(throttle) * throttle * throttle;

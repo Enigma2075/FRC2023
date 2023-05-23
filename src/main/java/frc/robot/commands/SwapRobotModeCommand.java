@@ -5,27 +5,33 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.Vision;
+import frc.robot.subsystems.RobotState.RobotMode;
+import frc.robot.subsystems.RobotState;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 
 /** An example command that uses an example subsystem. */
-public class ExampleCommand extends CommandBase {
-  @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  private final Vision m_subsystem;
+public class SwapRobotModeCommand extends CommandBase {
+  private final RobotState mRobotState;
 
   /**
    * Creates a new ExampleCommand.
    *
    * @param subsystem The subsystem used by this command.
    */
-  public ExampleCommand(Vision subsystem) {
-    m_subsystem = subsystem;
-    // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(subsystem);
+  public SwapRobotModeCommand(RobotState robotState) {
+    this.mRobotState = robotState;
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    if(mRobotState.getRobotMode() == RobotMode.NORMAL) {
+      mRobotState.setRobotMode(RobotMode.DEMO);
+    }
+    else {
+      mRobotState.setRobotMode(RobotMode.NORMAL);
+    }
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -38,6 +44,6 @@ public class ExampleCommand extends CommandBase {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return true;
   }
 }

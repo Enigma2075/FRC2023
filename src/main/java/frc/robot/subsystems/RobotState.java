@@ -9,12 +9,18 @@ import frc.lib.other.Subsystem;
 // Conatiner to hold the Cancoders so we can initialize them
 // earlier than everything else and DI them to the swerve modules
 public class RobotState extends Subsystem {
+    public enum RobotMode {
+        NORMAL, DEMO
+    }
+
     public enum GamePieceMode {
         CONE, CUBE, UNKNOWN
     }
 
     private final double mBlinkOffDuration = .25;
     private final double mBlinkOnDuration = .25;
+
+    private double mDriveSlowPercent = .5;
 
     private boolean mHasGamePiece;
     private double mBlinkTimer = 0;
@@ -25,6 +31,8 @@ public class RobotState extends Subsystem {
     private final CANifier Leds;
 
     private GamePieceMode mGamePieceMode = GamePieceMode.CONE;
+
+    private RobotMode mRobotMode = RobotMode.NORMAL;
 
     public RobotState() {
         Leds = new CANifier(1);
@@ -44,6 +52,10 @@ public class RobotState extends Subsystem {
         return mEnableVision;
     }
 
+    public double getDriveSlowPercent() {
+        return mDriveSlowPercent;
+    }
+
     public void setVisionEnabled(boolean enableVision) {
         mEnableVision = enableVision;
     }
@@ -58,6 +70,10 @@ public class RobotState extends Subsystem {
 
     public void setCubeMode() {
         setCubeMode(false);
+    }
+
+    public void setDriveSlowPercent(double percent) {
+        mDriveSlowPercent = percent;
     }
 
     public void setCubeMode(boolean force) {
@@ -76,6 +92,22 @@ public class RobotState extends Subsystem {
         if (mHasGamePiece == false || force) {
             mGamePieceMode = mode;
         }
+    }
+
+    public void setRobotMode(RobotMode mode) {
+        mRobotMode = mode;
+    }
+
+    public RobotMode getRobotMode() {
+        return mRobotMode;
+    }
+
+    public boolean isDemoMode() {
+        return mRobotMode == RobotMode.DEMO;
+    }
+
+    public boolean isNormalMode() {
+        return mRobotMode == RobotMode.NORMAL;
     }
 
     @Override
@@ -128,5 +160,7 @@ public class RobotState extends Subsystem {
     @Override
     public void outputTelemetry() {
         SmartDashboard.putString("Game Piece Mode", mGamePieceMode.name());
+        SmartDashboard.putString("Robot Mode", mRobotMode.name());
+        SmartDashboard.putNumber("Slow Percent", mDriveSlowPercent);
     }
 }
