@@ -28,10 +28,10 @@ public class ChangeDriveSlowCommand extends CommandBase {
   @Override
   public void initialize() {
     if(mIncrease) {
-      mRobotState.setDriveSlowPercent(mRobotState.getDriveSlowPercent() + .10);
+      mRobotState.setDriveSlowPercent(mRobotState.getDriveSlowPercent() + .05);
     }
     else {
-      mRobotState.setDriveSlowPercent(mRobotState.getDriveSlowPercent() - .10);  
+      mRobotState.setDriveSlowPercent(mRobotState.getDriveSlowPercent() - .05);  
     }
   }
 
