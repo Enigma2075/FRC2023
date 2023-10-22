@@ -53,7 +53,7 @@ public class Arm extends Subsystem {
     MEDIUM_CONE(-10, -92),
     HIGH_CUBE(-7, -95),
     HIGH_CUBE_AUTO(-8, -100),
-    MEDIUM_CUBE(20, -55),
+    MEDIUM_CUBE(15, -60),
     MEDIUM_CUBE_AUTO(10, -65),
     // MEDIUM_AUTO_START(0, -70),
     // HAND_OFF(0, 50),

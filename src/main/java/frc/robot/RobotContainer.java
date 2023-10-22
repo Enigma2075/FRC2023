@@ -92,6 +92,7 @@ public class RobotContainer {
     mVision = new Vision(mArm, mRobotState);
     mVision.startThread();
     mDrive = new Drive(mVision, mRobotState);
+    // DriverLeftY
     mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mRobotState, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight().and(mRobotState::isNormalMode), mDriverController.povLeft().and(mRobotState::isNormalMode), mDriverController.y().and(mRobotState::isNormalMode), mDriverController.rightBumper().or(mRobotState::isDemoMode)));
 
     PathPlannerServer.startServer(5811);
@@ -143,7 +144,7 @@ public class RobotContainer {
     mDriverController.a().or(mOperatorController.leftBumper()).and(mRobotState::isNormalMode).whileTrue(new SetCubeModeCommand(mRobotState));
 
     // FLOOR INTAKE
-    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode).alongWith()))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
+    new Trigger(mDriverController.rightTrigger(.7)).onTrue(new ArmMakeSureDefaultCommand(mArm).andThen(mIntake.intakeCommand().alongWith(new ConditionalCommand(mIntakeCubeStart(), mIntakeConeStart(), mRobotState::isCubeMode)))).debounce(.125).onFalse(new ConditionalCommand(mIntakeCubeEnd(), mIntakeConeEnd(), mRobotState::isCubeMode)).debounce(.125);
     // OUTTAKE
     new Trigger(mDriverController.leftTrigger(.7)).whileTrue(mIntake.outtakeCommand());
     
