@@ -38,8 +38,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import com.pathplanner.lib.server.PathPlannerServer;
-
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -94,8 +92,6 @@ public class RobotContainer {
     mDrive = new Drive(mVision, mRobotState);
     // DriverLeftY
     mDrive.setDefaultCommand(new DriveDefaultCommand(mDrive, mRobotState, mDriverController::getLeftY, mDriverController::getLeftX, mDriverController::getRightX, mDriverController.x(), mDriverController.povRight().and(mRobotState::isNormalMode), mDriverController.povLeft().and(mRobotState::isNormalMode), mDriverController.y().and(mRobotState::isNormalMode), mDriverController.rightBumper().or(mRobotState::isDemoMode)));
-
-    PathPlannerServer.startServer(5811);
     
     mArm.setIntake(mIntake);
     mIntake.setArm(mArm);
